@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>GoOutSafe</title>
+
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootswatch/4.5.2/cosmo/bootstrap.min.css"
+          integrity="sha384-5QFXyVb+lrCzdN228VS3HmzpiE7ZVwLQtkt+0d9W43LQMzz4HBnnqvVxKg6O+04d" crossorigin="anonymous">
+    <!-- Custom styles for this template -->
+    <link href="{{ url_for('static',filename='styles/login.css') }}" rel="stylesheet">
+  </head>
+
+  <body>
+  <!-- Navigation -->
+      <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+          <a class="navbar-brand" href="/">GoOutSafe</a>
+      </nav>
+  <div class="container-fluid text-center">
+
+    <form class="form-signin"  action="" method="POST">
+      <img class="mb-4" src="{{ url_for('static',filename='images/logo.png') }}" alt=""  height="72">
+      <h1 class="h3 mb-3 font-weight-normal">Create an Account<br>as {{ type }}</h1>
+      {{ form.hidden_tag() }}
+      <dl>
+       {% for field in form.display %}
+       <dt>{{ form[field].label(class_="sr-only") }}</dt>
+       <dd>{{ form[field](class_="form-control", placeholder=form[field].label.text) }}</dd>
+         {% if form[field].errors %}
+            {% for e in form[field].errors %}
+             <p class="help-block">{{ e }}</p>
+            {% endfor %}
+         {% endif %}
+       {% endfor %}
+       {% if message %}
+          <div class="alert alert-danger" role="alert">
+              {{ message }}
+          </div>
+      {% endif  %}
+      </dl>
+    <button class="btn btn-lg btn-primary btn-block" type="submit">Create {{ type }} Account</button>
+    <p class="mt-5 mb-3 text-muted">Do you have an account? <a href="/login">Login</a></p>
+    {% if type == "customer" %}
+        <p class="mt-5 mb-3 text-muted">Are you a Restaurant operator?<br><a href="/user/create_operator">Signup as Operator</a></p>
+    {% else %}
+        <p class="mt-5 mb-3 text-muted">Are you a Customer?<br><a href="/user/create_user">Signup as Customer</a></p>
+    {% endif %}
+  </form>
+  </div>
+ </body>
+</html>
+

@@ -1,0 +1,30 @@
+{% include 'header.html' %}
+  <!-- Page Content -->
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-12 text-center">
+          <h1 class="mt-5 mb-5">Covid-19 positive</h1>
+          <table id="allrestaurants" class="display" style="width:100%">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Phone</th>
+              </tr>
+            </thead>
+            <tbody>
+                {% for i in n %}
+                    <tr>
+                        <td>{{ i+1 }}</td>
+                        <td>{{ users[i].firstname }} {{ users[i].lastname }}</td>
+                        <td>{{ users[i].email }}</td>
+                        <td>{{ users[i].phone }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+          </table>
+      </div>
+    </div>
+  </div>
+{% include 'footer.html' %}

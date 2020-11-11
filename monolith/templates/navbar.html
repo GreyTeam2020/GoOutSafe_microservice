@@ -1,0 +1,55 @@
+ <nav class="navbar navbar-expand-md navbar-dark bg-dark">
+
+    <div class="mx-auto order-0">
+        <a class="navbar-brand mx-auto" href="/">
+            <img src="{{ url_for('static',filename='images/logo.png') }}" height="25px"/>&nbsp;GoOutSafe
+        </a>
+        {% if current_user.is_authenticated %}
+            <span class="text-white ml-3">Hi {{ current_user.firstname }}</span>
+        {% endif %}
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target=".dual-collapse2">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+    </div>
+
+    <div class="navbar-collapse collapse order-3 dual-collapse2">
+        <ul class="navbar-nav mr-auto ml-auto">
+            <li class="nav-item">
+                <div class="justify-content-md-center">
+                    {% if session["ROLE"] != "HEALTH" and session["ROLE"] != "OPERATOR" %}
+                    <div class="form-inline my-2 my-lg-0 my-lg-0">
+                        <input class="form-control mr-sm-2" id="searchbar" type="text" placeholder="Search..." aria-label="Search" style="width: 600px;">
+                        <button class="btn btn-secondary my-2 my-sm-0" id="searchSubmit"><i class="material-icons">search</i></button>
+                    </div>
+                    {% endif %}
+                </div>
+            </li>
+        </ul>
+        <ul class="nav navbar-nav navbar-right">
+            {% if session['ROLE'] == 'CUSTOMER' %}
+                {% include 'navbar/customer.html' %}
+            {% elif session['ROLE'] == 'OPERATOR' %}
+                {% include 'navbar/operator.html' %}
+            {% elif session['ROLE'] == 'ADMIN' %}
+                {% include 'navbar/admin.html' %}
+            {% elif session['ROLE'] == 'HEALTH' %}
+                {% include 'navbar/health.html' %}
+            {% else %}
+                {% include 'navbar/anonymous.html' %}
+            {% endif %}
+
+            {% if current_user.is_authenticated %}
+                <li class="nav-item">
+                    <a class="nav-link" href="/logout"><button class="btn btn-outline-light btn-sm aligner">Logout</button></a>
+                </li>
+            {% else %}
+                <li class="nav-item">
+                    <a class="nav-link" href="/login"><button class="btn btn-primary text-light">Sign In</button></a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/user/create_user"><button class="btn btn-outline-light">Sign Up</button></a>
+                </li>
+            {% endif %}
+        </ul>
+    </div>
+</nav>

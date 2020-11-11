@@ -1,0 +1,11 @@
+/venv/
+.idea/
+**/__pycache__
+**/gooutsafe.db
+.coverage
+
+gooutsafe.egg-info/
+
+logger.txt
+
+logger2.txt

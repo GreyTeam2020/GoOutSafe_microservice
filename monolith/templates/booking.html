@@ -1,0 +1,23 @@
+{% include "header.html" %}
+  <!-- Page Content -->
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-12 text-center">
+        {% if success %}
+          <div class="alert alert-success" role="alert">
+            <b>Booking added successfully!</b><br>
+            Your booking for <i>{{ restaurant_name }}</i> in table <i> {{ table_name }} </i> has been sent.
+          </div>
+        {% else %}
+            <div class="alert alert-danger" role="alert">
+                <b>Error</b><br>
+                Cannot place your booking.<br>
+                Error: <i>{{ error }}</i>
+            </div>
+        {% endif %}
+        <a href="/"><button class="btn btn-primary">Return to Home</button></a>
+      </div>
+    </div>
+  </div>
+
+{% include "footer.html" %}

@@ -1,0 +1,106 @@
+{% include 'header.html' %}
+  <!-- Page Content -->
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-lg-5 text-center">
+          <h1 class="mt-5 mb-5">My Restaurant Data</h1>
+          {% if message %}
+              <div class="alert alert-success" role="alert">
+                <b>Success</b><br>
+                {{ message }}
+              </div>
+          {%  elif error%}
+              <div class="alert alert-danger" role="alert">
+                <b>Error</b><br>
+                {{ error }}
+              </div>
+          {% endif %}
+          <form action="" method="POST">
+              {{ form.hidden_tag() }}
+              <dl>
+               {% for field in form.display %}
+                   {% if form[field].name in only %}
+                       <dt>{{ form[field].label(class_="") }}</dt>
+                       <dd>{{ form[field](class_="form-control", placeholder=form[field].label.text) }}</dd>
+                         {% if form[field].errors %}
+                            {% for e in form[field].errors %}
+                             <p class="help-block">{{ e }}</p>
+                            {% endfor %}
+                         {% endif %}
+                   {% endif %}
+               {% endfor %}
+               {% if error %}
+                  <div class="alert alert-danger" role="alert">
+                      {{ error }}
+                  </div>
+              {% endif  %}
+              </dl>
+            <button class="btn btn-lg btn-success btn-block" type="submit">Update restaurant</button>
+          </form>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-lg-12 text-center">
+          <h1 class="mt-5 mb-5">My Restaurant Tables</h1>
+          <button class="btn btn-success" data-toggle="modal" data-target="#newTable">Add Table</button>
+          <table id="mytables" class="display" style="width:100%">
+            <thead>
+              <tr>
+                  <th>#</th>
+                  <th>Name</th>
+                  <th># of Seats</th>
+                  <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+                {% for table in tables %}
+                    <tr>
+                        <td>{{ table.id }}</td>
+                        <td>{{ table.name }}</td>
+                        <td>{{ table.max_seats }}</td>
+                        <td><a href="/restaurant/tables?id={{ table.id }}"><button class="btn btn-danger">Delete</button></a></td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+          </table>
+      </div>
+    </div>
+  </div>
+
+    <div class="modal" tabindex="-1" role="dialog" id="newTable">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">New Table</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <form id="addTableForm" class="form-signin"  action="/restaurant/tables" method="POST">
+              <dl>
+               {% for field in form2.display %}
+                   <dt>{{ form2[field].label(class_="sr-only") }}</dt>
+                   <dd>{{ form2[field](class_="form-control", placeholder=form2[field].label.text) }}</dd>
+                     {% if form2[field].errors %}
+                        {% for e in form2[field].errors %}
+                         <p class="help-block">{{ e }}</p>
+                        {% endfor %}
+                     {% endif %}
+               {% endfor %}
+               {% if error %}
+                  <div class="alert alert-danger" role="alert">
+                      {{ error }}
+                  </div>
+              {% endif  %}
+              </dl>
+          </form>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-primary" id="submitTable">Add Table</button>
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
+{% include 'footer.html' %}

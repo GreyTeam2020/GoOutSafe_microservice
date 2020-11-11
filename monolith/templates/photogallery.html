@@ -1,0 +1,50 @@
+{% include 'header.html' %}
+  <!-- Page Content -->
+  <input id="id_id" name="id" type="hidden" value="{{_test}}">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-lg-4 text-center">
+          <h1 class="mt-5 mb-5">My Restaurant Photos</h1>
+          <h3>Add a new Photo</h3>
+          <form action="" method="POST">
+              {{ form.hidden_tag() }}
+              <dl>
+               {% for field in form.display %}
+                   <dt>{{ form[field].label(class_="") }}</dt>
+                   <dd>{{ form[field](class_="form-control", placeholder=form[field].label.text) }}</dd>
+                     {% if form[field].errors %}
+                        {% for e in form[field].errors %}
+                         <p class="help-block">{{ e }}</p>
+                        {% endfor %}
+                     {% endif %}
+               {% endfor %}
+               {% if message %}
+                  <div class="alert alert-danger" role="alert">
+                      {{ message }}
+                  </div>
+              {% endif  %}
+              </dl>
+            <button class="btn btn-lg btn-primary btn-block" type="submit">Add Photo</button>
+          </form>
+      </div>
+    </div>
+    <div class="row mt-5 justify-content-center">
+        <div class="col-lg-12 text-center">
+            <h3>Uploaded Photos</h3>
+                <div class="row lead d-flex justify-content-center">
+                  {% if photos|length == 0 %}
+                      <h2><b>No Photos Found</b></h2>
+                  {% endif %}
+                  {% for photo in photos %}
+                    <div class="card text-white bg-light m-1" style="max-width: 20rem;">
+                      <div class="card-body">
+                        <img src="{{ photo.url }}" class="card-img-top" alt="photo"/>
+                        <p class="card-text text-dark mt-3">{{ photo.caption }}</p>
+                      </div>
+                    </div>
+                  {% endfor %}
+                </div>
+          </div>
+        </div>
+    </div>
+{% include 'footer.html' %}

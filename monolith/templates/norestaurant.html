@@ -1,0 +1,18 @@
+{% include 'header.html' %}
+  <!-- Page Content -->
+ <input id="id_id" name="id" type="hidden" value="{{_test}}">
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-12 text-center">
+        <h1 class="mt-5"><img class="mb-4" src="{{ url_for('static',filename='images/logo.png') }}" alt="" height="54">GoOutSafe</h1>
+        <br>
+        <h2 class="mt-5">Welcome on board!</h2>
+
+                <h3>The next step to join GoOutSafe is to create a Restaurant</h3><br><br>
+                <a href="/restaurant/create"><button class="btn btn-primary">Create Restaurant</button></a>
+
+      </div>
+    </div>
+  </div>
+
+{% include 'footer.html' %}

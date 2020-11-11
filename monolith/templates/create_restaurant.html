@@ -1,0 +1,39 @@
+{% include("header.html") %}
+  <body class="text-center">
+  <!-- Navigation -->
+      <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+          <a class="navbar-brand" href="/">GoOutSafe</a>
+      </nav>
+    <br>
+    <form class="container form-signin mt-5"  action="" method="POST">
+      <img class="mb-4" src="{{ url_for('static',filename='images/logo.png') }}" alt=""  height="72">
+      <h1 class="h3 mb-3 font-weight-normal">Register your Restaurant</h1>
+    Tip: ctrl+click on multiple value fields like Cuisine Type and Openings<br>
+    You can create table of all sizes once you create the restaurant
+      {{ form.hidden_tag() }}
+      <dl class="row justify-content-center">
+        <div class="col-md-3 m-2">
+           {% for field in form.display %}
+           {% if form[field].name == "open_days" %}
+               </div><div class="col-md-3 m-2">
+           {% endif %}
+           <dt>{{ form[field].label }}</dt>
+           <dd>{{ form[field](class_="form-control", placeholder=form[field].label.text) }}</dd>
+             {% if form[field].errors %}
+                {% for e in form[field].errors %}
+                 <p class="help-block">{{ e }}</p>
+                {% endfor %}
+             {% endif %}
+           {% endfor %}
+           {% if message %}
+              <div class="alert alert-danger" role="alert">
+                  {{ message }}
+              </div>
+          {% endif  %}
+        </div>
+      </dl>
+    <button class="btn btn-lg btn-primary btn-block" id="registerRestaurantSubmit" type="submit">Register your restaurant</button>
+  </form>
+  <br><br>
+{% include("footer.html") %}
+

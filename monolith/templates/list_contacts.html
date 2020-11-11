@@ -1,0 +1,32 @@
+{% include 'header.html' %}
+  <!-- Page Content -->
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-12 text-center">
+        <input id="id_id" name="id" type="hidden" value="{{_test}}">
+          <h1 class="mt-5 mb-5">Non positive contacts</h1>
+          <table id="allrestaurants" class="display" style="width:100%">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Name</th>
+                <th>Bithday</th>
+                <th>Email</th>
+                <th>Phone number</th>
+              </tr>
+            </thead>
+            <tbody>
+                {% for contact in contacts %}
+                    <tr>
+                      {% for data in contact %}
+                        <td>{{ data }}</td>
+                      {% endfor %}
+                        
+                    </tr>
+                {% endfor %}
+            </tbody>
+          </table>
+      </div>
+    </div>
+  </div>
+{% include 'footer.html' %}

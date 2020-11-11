@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>GoOutSafe</title>
+
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootswatch/4.5.2/cosmo/bootstrap.min.css"
+          integrity="sha384-5QFXyVb+lrCzdN228VS3HmzpiE7ZVwLQtkt+0d9W43LQMzz4HBnnqvVxKg6O+04d" crossorigin="anonymous">
+    <!-- Custom styles for this template -->
+    <link href="{{ url_for('static',filename='styles/login.css') }}" rel="stylesheet">
+  </head>
+
+  <body class="text-center">
+    <input id="id_id" name="id" type="hidden" value="{{_test}}">
+  <!-- Navigation -->
+      <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+          <a class="navbar-brand" href="/">GoOutSafe</a>
+      </nav>
+    <form class="form-signin"  action="" method="POST">
+      <img class="mb-4" src="{{ url_for('static',filename='images/logo.png') }}" alt=""  height="72">
+      
+      {{ form.hidden_tag() }}
+      <dl>
+       {% for field in form.display %}
+       <dt>{{ form[field].label(class_="sr-only") }}</dt>
+       <dd>{{ form[field](class_="form-control", placeholder=form[field].label.text) }}</dd>
+         {% if form[field].errors %}
+            {% for e in form[field].errors %}
+             <p class="help-block">{{ e }}</p>
+            {% endfor %}
+         {% endif %}
+       {% endfor %}
+       {% if message %}
+          <div class="alert alert-danger" role="alert">
+              {{ message }}
+          </div>
+      {% endif  %}
+      </dl>
+    <button class="btn btn-lg btn-primary btn-block" type="submit">Get a list</button>
+  </form>
+ </body>
+</html>
+

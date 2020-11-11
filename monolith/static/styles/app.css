@@ -1,0 +1,42 @@
+.profile-head {
+    transform: translateY(5rem)
+}
+
+.profile-cover {
+    background: black;
+    background-size: cover;
+    background-repeat: no-repeat
+}
+
+.ratingStats {
+    color: #ffc518 !important;
+}
+
+.material-icons {
+  vertical-align: middle;
+  line-height: 0 !important;
+  position: relative;
+  top: -1px;
+}
+
+.aligner {
+  vertical-align: middle;
+  line-height: 1 !important;
+  position: relative;
+  top: -1px;
+}
+
+.footer {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  height:220px;
+}
+
+html {
+  position: relative;
+  min-height: 100%;
+}
+body {
+  margin-bottom: 350px; /* Margin bottom by footer height */
+}

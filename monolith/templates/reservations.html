@@ -1,0 +1,63 @@
+{% include 'header.html' %}
+  <!-- Page Content -->
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-12 text-center">
+          <h1 class="mt-5 mb-5">My Restaurant Reservations</h1>
+
+        <div class="card-group text-center">
+          <div class="card mb-3">
+            <div class="card-body">
+              <h6 class="card-title">Reservations at Lunch:</h6>
+              <p class="card-text text-primary"><span style="font-size: 48px;">{{ reservations_n[0] }}</span></p>
+            </div>
+          </div>
+          <div class="card mb-3">
+            <div class="card-body">
+              <h6 class="card-title">Reservations at Dinner: </h6>
+              <p class="card-text text-primary"><span style="font-size: 48px;">{{ reservations_n[1] }}</span></p>
+            </div>
+          </div>
+          <div class="card mb-3">
+            <div class="card-body">
+              <h6 class="card-title">Reservations in restaurant: </h6>
+              <p class="card-text text-primary"><span style="font-size: 48px;">{{ reservations_n[2] }}</span></p>
+            </div>
+          </div>
+        </div>
+          <table id="myreservations" class="display" style="width:100%">
+            <thead>
+              <tr>
+                  <th>#</th>
+                  <th>Table</th>
+                  <th>Date and time</th>
+                  <th># of person</th>
+                  <th>Customer fullname</th>
+                  <th>Phone number</th>
+                  <th>Email</th>
+                  <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+                {% for reservation in reservations_as_list %}
+                    <tr>
+                        <td>{{reservation.id}}</td>
+                        <td>{{reservation.id_table}}</td>
+                        <td>{{my_date_formatter(reservation.reservation_date)}}</td>
+                        <td>{{reservation.people_number}}</td>
+                        <td>{{reservation.firstname}} {{reservation.lastname}}</td>
+                        <td>{{reservation.phone}}</td>
+                        <td>{{reservation.email}}</td>
+                        {% if reservation.checkin %}
+                            <td>Checked in</td>
+                        {% else %}
+                            <td><button class="btn btn-primary checkIn" data-id="{{ reservation.id }}">Checkin</button></td>
+                        {% endif %}
+                    </tr>
+                {% endfor %}
+            </tbody>
+          </table>
+      </div>
+    </div>
+  </div>
+{% include 'footer.html' %}

@@ -1,0 +1,18 @@
+language: python
+python: 3.6
+branches:
+  only:
+    - main
+env:
+  - TOX_ENV=py36,p37,p38
+install:
+  - pip install -r requirements.txt
+  - pip install pytest-cov
+  - pip install coverage==4.5.4
+  - pip install python-coveralls
+  - pip install tox
+  - pip install pyyaml
+script:
+  - tox -e $TOX_ENV
+notifications:
+  email: false

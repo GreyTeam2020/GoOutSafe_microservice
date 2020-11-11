@@ -1,0 +1,15 @@
+[run]
+omit =
+    monolith/templates/*
+    monolith/tests/fixtures/*
+    monolith/tests/conftest.py
+    monolith/utils/__init__.py
+    monolith/views/__init__.py
+    monolith/model/__init__.py
+    monolith/config/app.config
+    monolith/background.py 
+    monolith/services/__init__.py
+    monolith/__init__.py
+    monolith/utils/send_mail.py
+    monolith/utils/formatter.py
+    monolith/utils/dispaccer_events.py

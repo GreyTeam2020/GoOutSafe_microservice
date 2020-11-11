@@ -1,0 +1,97 @@
+{% include 'header.html' %}
+  <!-- Page Content -->
+ <input id="id_id" name="id" type="hidden" value="{{_test}}">
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-12 text-center">
+        <h1 class="mt-5"><img class="mb-4" src="{{ url_for('static',filename='images/logo.png') }}" alt="" height="54">GoOutSafe</h1>
+        {% if is_positive %}
+            <div class="jumbotron" style="background-color:#ff4c4c">
+              <h1 class="display-4">You are marked as Positive</h1>
+              <p class="lead">The Health Authority marked you as positive. Please say home and take care!<br>Your booking feature is currently disabled</p>
+              <hr class="my-4">
+              <p>To learn more about quarantine regulations in this country, please click here</p>
+              <p class="lead">
+                <a class="btn btn-light btn-lg" href="http://www.salute.gov.it/portale/nuovocoronavirus/dettaglioFaqNuovoCoronavirus.jsp?lingua=english&id=230" role="button">Learn more</a>
+              </p>
+            </div>
+        {% endif %}
+       {% if search|length != 0 %}
+            <h2>You search for: {{ search }}</h2>
+        {% endif %}
+        <br>
+        <h2 class="mt-5">Restaurants</h2>
+        <button class="btn btn-secondary mb-3" id="switchView">Switch to Map View</button>
+        <div id="card-view">
+            <div class="row lead d-flex justify-content-center">
+            {% if restaurants|length == 0 %}
+                <h3>No restaurant found</h3>
+            {% endif %}
+            {% for restaurant in restaurants%}
+                <div class="card text-white bg-light m-1" style="max-width: 20rem;">
+                  <div class="card-header text-dark text-capitalize">{{ restaurant.name }}</div>
+                  <div class="card-body">
+                    <img src="https://images.pexels.com/photos/6267/menu-restaurant-vintage-table.jpg?auto=compress&cs=tinysrgb&dpr=1&w=500"
+                        class="card-img-top" alt="logo restaurant"/>
+                    <div class="ratingStats" data-rating="{{ restaurant.rating  }}"></div>
+                    <a href="/restaurant/{{ restaurant.id }}"><button class="btn btn-link">Visit</button></a>&nbsp;
+                       {% if not is_positive %}
+                            <button class="btn btn-primary showBooking" data-id="{{ restaurant.id }}">Book</button>
+                       {% endif %}
+                  </div>
+                </div>
+            {% endfor %}
+            </div>
+        </div>
+        <div id="map-view" style="height:600px;display:none"></div>
+      </div>
+    </div>
+  </div>
+
+    <div class="modal" tabindex="-1" role="dialog" id="bookTable">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">New Booking</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <form id ="bookTableForm" action="/restaurant/book" method="POST">
+              <dl class="center-datepicker">
+               {% for field in form.display %}
+                   <dt>{{ form[field].label }}</dt>
+                   <dd class="text-center">{{ form[field](class_="form-control", placeholder=form[field].label.text) }}</dd>
+                     {% if form[field].errors %}
+                        {% for e in form[field].errors %}
+                         <p class="help-block">{{ e }}</p>
+                        {% endfor %}
+                     {% endif %}
+               {% endfor %}
+               {% if error %}
+                  <div class="alert alert-danger" role="alert">
+                      {{ error }}
+                  </div>
+              {% endif  %}
+              </dl>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-primary" id="newBook">Book!</button>
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+        var map = L.map('map-view').setView([51.505, -0.09], 13);
+        L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', { attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'}).addTo(map);
+        var markers = []
+        {% for restaurant in restaurants%}
+            markers.push(L.marker([{{ restaurant.lat }}, {{ restaurant.lon }}]).addTo(map));
+        {% endfor %}
+        var group = new L.featureGroup(markers);
+    </script>
+{% include 'footer.html' %}

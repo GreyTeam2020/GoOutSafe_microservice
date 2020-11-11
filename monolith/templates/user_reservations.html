@@ -1,0 +1,104 @@
+{% include 'header.html' %}
+  <!-- Page Content -->
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-12 text-center">
+          <h1 class="mt-5 mb-5">Update Reservations</h1>
+          <table id="myreservation" class="display" style="width:100%">
+            <thead>
+              <tr>
+                  <th>#</th>
+                  <th>Date</th>
+                  <th>Restaurant</th>
+                  <th>People</th>
+                  <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+                {% for reservation in reservations_as_list %}
+                    <tr>
+                        <td><a class="showUpdateBooking" href="#"
+                               data-reservation_id="{{ reservation.id }}"
+                               data-rest_id="{{ reservation.rest_id }}"
+                               data-reservation_date="{{ my_date_formatter(reservation.reservation_date) }}"
+                               data-people_number="{{ reservation.people_number }}"
+                        >{{ reservation.id }}</a></td>
+                        <td>{{ my_date_formatter(reservation.reservation_date) }}</td>
+                        <td><a href="/restaurant/{{ reservation.rest_id }}">{{ reservation.name }}</a></td>
+                        <td>{{ reservation.people_number }}</td>
+                        <td><button class="btn btn-primary deleteBooking" data-id="{{ reservation.id }}">Delete</button></td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+          </table>
+      </div>
+    </div>
+  </div>
+
+
+  <div class="modal" tabindex="-1" role="dialog" id="bookUpdateTable">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Update Booking</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <form id ="bookTableForm" action="/restaurant/book_update" method="POST">
+              <dl class="center-datepicker">
+               {% for field in form.display %}
+                   <dt>{{ form[field].label }}</dt>
+                   <dd class="text-center">{{ form[field](class_="form-control", placeholder=form[field].label.text) }}</dd>
+                     {% if form[field].errors %}
+                        {% for e in form[field].errors %}
+                         <p class="help-block">{{ e }}</p>
+                        {% endfor %}
+                     {% endif %}
+               {% endfor %}
+               {% if error %}
+                  <div class="alert alert-danger" role="alert">
+                      {{ error }}
+                  </div>
+              {% endif  %}
+              </dl>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-primary" id="newBook">Update Book!</button>
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+<script>
+    {% if deleted %}
+        Swal.fire({
+            position: 'center',
+            icon: 'success',
+            title: 'Your reservation has been canceled',
+            showConfirmButton: false,
+            timer: 1500
+        });
+    {% endif %}
+
+    {% if new_book %}
+        Swal.fire({
+            position: 'center',
+            {% if new_book[0] is not none %}
+                icon: 'success',
+                title: 'Your reservation has been updated',
+            {% else %}
+                icon: 'error',
+                title: 'Cannot place your booking: {{ new_book[1] }}',
+            {% endif %}
+            showConfirmButton: false,
+            timer: 1500
+        });
+    {% endif %}
+
+</script>
+
+{% include 'footer.html' %}

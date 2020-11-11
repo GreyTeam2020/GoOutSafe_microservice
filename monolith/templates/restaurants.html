@@ -1,0 +1,15 @@
+{% include "header.html" %}
+    <h1>Restaurant List</h1>
+    <h5>{{message}}</h5>
+    <ul>
+      {% for restaurant in restaurants: %}
+      <li>
+      "{{restaurant.name}}"    Likes: {{restaurant.likes}} 
+      {% if current_user.is_authenticated %}
+      <a href="/restaurant/like/{{restaurant.id}}">Like it!</a>
+      <a href="/restaurant/{{restaurant.id}}">See Details!</a>
+      {% endif %}
+      </li>
+      {% endfor %}
+    </ul>
+{% include "footer.html" %}

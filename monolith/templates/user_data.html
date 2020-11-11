@@ -1,0 +1,44 @@
+{% include 'header.html' %}
+  <!-- Page Content -->
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-lg-5 text-center">
+          <h1 class="mt-5 mb-5">User Data</h1>
+          {% if message %}
+              <div class="alert alert-success" role="alert">
+                <b>Success</b><br>
+                {{ message }}
+              </div>
+          {%  elif error%}
+              <div class="alert alert-danger" role="alert">
+                <b>Error</b><br>
+                {{ error }}
+              </div>
+          {% endif %}
+          <form action="" method="POST">
+              {{ form.hidden_tag() }}
+              <dl>
+               {% for field in form.display %}
+                  {% if form[field].name != "password" %}
+                   <dt>{{ form[field].label(class_="") }}</dt>
+                   <dd>{{ form[field](class_="form-control", placeholder=form[field].label.text) }}</dd>
+                     {% if form[field].errors %}
+                        {% for e in form[field].errors %}
+                         <p class="help-block">{{ e }}</p>
+                        {% endfor %}
+                     {% endif %}
+                   {% endif %}
+               {% endfor %}
+               {% if error %}
+                  <div class="alert alert-danger" role="alert">
+                      {{ error }}
+                  </div>
+              {% endif  %}
+              </dl>
+            <button class="btn btn-lg btn-success btn-block" type="submit">Update Data</button>
+          </form>
+        <a class="btn btn-lg btn-danger btn-block" href="/user/delete" role="button">Delete account</a>
+      </div>
+    </div>
+  </div>
+{% include 'footer.html' %}

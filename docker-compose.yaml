@@ -1,0 +1,30 @@
+version: "3.8"
+
+services:
+    gooutsafe:
+        depends_on:
+            - redis
+        restart: always
+        build: .
+        ports:
+            - "5000:5000"
+        expose:
+            - "5000"
+        volumes:
+            - ./monolith/db:/code/monolith/db
+    celery:
+        depends_on:
+            - redis
+            - gooutsafe
+        build: .
+        restart: always
+        command: celery -A monolith:celery worker --loglevel=DEBUG -B
+        links:
+            -  redis
+        volumes:
+            - ./monolith/db:/code/monolith/db
+    redis:
+        image: "redis:alpine"
+        container_name: rd01
+        expose:
+            - "6379"

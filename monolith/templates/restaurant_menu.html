@@ -1,0 +1,67 @@
+{% include 'header.html' %}
+  <!-- Page Content -->
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-12 text-center">
+          <h1 class="mt-5 mb-5">My Restaurant Menu</h1>
+          <button class="btn btn-success" data-toggle="modal" data-target="#addDish">Add dish</button>
+          <table id="mymenu" class="display" style="width:100%">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Dish Name</th>
+                <th>Price</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+                {% for dish in dishes %}
+                    <tr>
+                        <td>{{ dish.id }}</td>
+                        <td>{{ dish.name }}</td>
+                        <td>{{ dish.price }}</td>
+                        <td><a href=""><a href="/restaurant/menu/delete/{{ dish.id }}"><button class="btn btn-danger">Delete</button></a></td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+          </table>
+      </div>
+    </div>
+  </div>
+
+    <div class="modal" tabindex="-1" role="dialog" id="addDish">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">New Dish</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <form method="POST" action="/restaurant/menu" id="addDishForm">
+                {{ form.hidden_tag()  }}
+                {% for field in form.display %}
+                   <dt>{{ form[field].label }}</dt>
+                   <dd class="text-center">{{ form[field](class_="form-control", placeholder=form[field].label.text) }}</dd>
+                     {% if form[field].errors %}
+                        {% for e in form[field].errors %}
+                         <p class="help-block">{{ e }}</p>
+                        {% endfor %}
+                     {% endif %}
+               {% endfor %}
+               {% if error %}
+                  <div class="alert alert-danger" role="alert">
+                      {{ error }}
+                  </div>
+              {% endif  %}
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-primary" id="submitDish">Add Dish</button>
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
+{% include 'footer.html' %}
