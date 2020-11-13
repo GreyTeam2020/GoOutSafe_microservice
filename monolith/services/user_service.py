@@ -1,3 +1,4 @@
+from flask import session
 from flask_login import current_user
 
 from monolith.database import db, User, Positive, Reservation, Role
@@ -10,6 +11,10 @@ class UserService:
     - create a new user
     - deleter a user if exist
     """
+
+    @staticmethod
+    def log_in_user(user):
+        session["current_user"] = user.serialize()
 
     @staticmethod
     def get_user_role(user_id: int):
