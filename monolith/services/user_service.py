@@ -27,7 +27,7 @@ class UserService:
 
         role_value = role.json()["value"]
 
-        #set the role in the session
+        # set the role in the session
         session["SESSION"] = role_value
 
         if role_value == "OPERATOR":
