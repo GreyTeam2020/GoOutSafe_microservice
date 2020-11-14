@@ -1,6 +1,8 @@
-from flask import session
-from flask_login import current_user
+import requests
+from flask import session, current_app
+from flask_login import current_user, login_user
 
+from monolith.app_constant import USER_MICROSERVICE_URL
 from monolith.database import db, User, Positive, Reservation, Role
 from monolith.forms import UserForm
 
@@ -15,6 +17,18 @@ class UserService:
     @staticmethod
     def log_in_user(user):
         session["current_user"] = user.serialize()
+        login_user(user)
+
+        role = requests.get(
+            USER_MICROSERVICE_URL + "/role/" + str(user.role_id)
+        )
+
+        if not role.ok:
+            current_app.logger.error(role.json())
+            return False
+
+        session["SESSION"] = role.json()['value']
+        return True
 
     @staticmethod
     def get_user_role(user_id: int):

@@ -40,7 +40,6 @@ def load_user(user_id):
         session["current_user"]["phone"],
         session["current_user"]["firstname"],
         session["current_user"]["lastname"],
-        session["current_user"]["password"],
         session["current_user"]["dateofbirth"],
         session["current_user"]["role_id"],
     )
