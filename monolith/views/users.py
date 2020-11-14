@@ -60,7 +60,42 @@ def _create_generic_user(role_id: int = 3, name_on_page: str = "customer"):
 
 @users.route("/user/create_operator", methods=["GET", "POST"])
 def create_operator():
-    return _create_generic_user(2, "operator")
+    form = UserForm()
+    if request.method == "POST":
+        if form.validate_on_submit():
+            form.email = request.form.get("email")
+            form.phone = request.form.get("phone")
+            form.password = request.form.get("password")
+            form.dateofbirth = request.form.get("dateofbirth")
+            form.firstname = request.form.get("firstname")
+            form.lastname = request.form.get("lastname")
+
+            response = requests.post(
+                USER_MICROSERVICE_URL + "/user/create_operator",
+                data=json.dumps(
+                    {
+                        "email": form.email,
+                        "phone": form.phone,
+                        "password": form.password,
+                        "dateofbirth": form.dateofbirth,
+                        "firstname": form.firstname,
+                        "lastname": form.lastname,
+                    }
+                ),
+                headers={"Content-type": "application/json"},
+            )
+            if not response.ok:
+                current_app.logger.error("Error from USER microservice")
+                return render_template(
+                    "create_user.html",
+                    form=form,
+                    message="An error occured while creating the user",
+                    type="customer",
+                )
+
+            return redirect("/")
+
+    return render_template("create_user.html", form=form, type="operator")
 
 
 @users.route("/user/create_user", methods=["GET", "POST"])

@@ -27,6 +27,7 @@ class UserService:
 
         role_value = role.json()["value"]
 
+        #set the role in the session
         session["SESSION"] = role_value
 
         if role_value == "OPERATOR":
@@ -37,6 +38,8 @@ class UserService:
             session["RESTAURANT_ID"] = restaurant.id
             session["RESTAURANT_NAME"] = restaurant.name
             """
+            pass
+        return True
 
     @staticmethod
     def get_user_role(user_id: int):

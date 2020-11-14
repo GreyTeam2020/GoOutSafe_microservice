@@ -48,6 +48,7 @@ def login():
         if UserService.log_in_user(user):
             return redirect("/")
         else:
+            current_app.logger.error("log in failed")
             return render_template(
                 "login.html",
                 form=form,
