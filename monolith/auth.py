@@ -1,7 +1,10 @@
 import functools
+import json
+
 from flask_login import current_user, LoginManager
 from flask import session
 from monolith.database import User
+from monolith.model import UserModel
 
 login_manager = LoginManager()
 
@@ -30,7 +33,16 @@ def roles_allowed(func=None, roles=None):
 
 @login_manager.user_loader
 def load_user(user_id):
-    user = User.query.get(user_id)
+    # user = User.query.get(user_id)
+    user = UserModel(
+        session["current_user"]["id"],
+        session["current_user"]["email"],
+        session["current_user"]["phone"],
+        session["current_user"]["firstname"],
+        session["current_user"]["lastname"],
+        session["current_user"]["dateofbirth"],
+        session["current_user"]["role_id"],
+    )
     if user is not None:
         user._authenticated = True
     return user

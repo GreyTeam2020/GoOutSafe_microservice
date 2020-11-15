@@ -37,7 +37,6 @@ def create_celery_app():
     db.init_app(app)
     db.create_all(app=app)
 
-
     celery_app = Celery(app.import_name, backend=BACKEND, broker=BROKER)
 
     # celery.conf.update(app.config)

@@ -1,6 +1,9 @@
-from flask_login import current_user
+import requests
+from flask import session, current_app
+from flask_login import current_user, login_user
 
-from monolith.database import db, User, Positive, Reservation, Role
+from monolith.app_constant import USER_MICROSERVICE_URL
+from monolith.database import db, User, Positive, Reservation, Role, Restaurant
 from monolith.forms import UserForm
 
 
@@ -10,6 +13,33 @@ class UserService:
     - create a new user
     - deleter a user if exist
     """
+
+    @staticmethod
+    def log_in_user(user):
+        session["current_user"] = user.serialize()
+        login_user(user)
+
+        role = requests.get(USER_MICROSERVICE_URL + "/role/" + str(user.role_id))
+
+        if not role.ok:
+            current_app.logger.error(role.json())
+            return False
+
+        role_value = role.json()["value"]
+
+        # set the role in the session
+        session["SESSION"] = role_value
+
+        if role_value == "OPERATOR":
+            # TODO
+            # get from restaurant microservice the restaurant of the user
+            # and set the session like
+            """
+            session["RESTAURANT_ID"] = restaurant.id
+            session["RESTAURANT_NAME"] = restaurant.name
+            """
+            pass
+        return True
 
     @staticmethod
     def get_user_role(user_id: int):

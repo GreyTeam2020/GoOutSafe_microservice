@@ -1,8 +1,14 @@
-from flask import Blueprint, render_template, redirect, session
+import json
+
+import requests
+from flask import Blueprint, render_template, redirect, session, current_app
 from flask_login import login_user, logout_user
 
 from monolith.database import db, User, Role, Restaurant
 from monolith.forms import LoginForm
+from monolith.app_constant import USER_MICROSERVICE_URL
+from monolith.model import UserModel
+from monolith.services import UserService
 
 auth = Blueprint("auth", __name__)
 
@@ -12,28 +18,44 @@ def login():
     form = LoginForm()
     if form.validate_on_submit():
         email, password = form.data["email"], form.data["password"]
-        q = db.session.query(User).filter(User.email == email)
-        user = q.first()
-        if user is not None and user.authenticate(password):
-            login_user(user)
-            q = db.session.query(Role).filter(Role.id == user.role_id)
-            role = q.first()
-            if role is not None:
-                session["ROLE"] = role.value
-                # if is operator, load restaurant information and load in session
-                if role.value == "OPERATOR":
-                    q = db.session.query(Restaurant).filter(
-                        Restaurant.owner_id == user.id
-                    )
-                    restaurant = q.first()
-                    if restaurant is not None:
-                        session["RESTAURANT_ID"] = restaurant.id
-                        session["RESTAURANT_NAME"] = restaurant.name
-            return redirect("/")
-        else:
+
+        response = requests.post(
+            USER_MICROSERVICE_URL + "/user/login",
+            data=json.dumps(
+                {
+                    "email": email,
+                    "password": password,
+                }
+            ),
+            headers={"Content-type": "application/json"},
+        )
+
+        if not response.ok:
+            current_app.logger.error(response.json())
             return render_template(
                 "login.html", form=form, _test="error_login", message="User not exist"
             )
+
+        user = UserModel(
+            response.json()["id"],
+            response.json()["email"],
+            response.json()["phone"],
+            response.json()["firstname"],
+            response.json()["lastname"],
+            response.json()["dateofbirth"],
+            response.json()["role_id"],
+        )
+        if UserService.log_in_user(user):
+            return redirect("/")
+        else:
+            current_app.logger.error("log in failed")
+            return render_template(
+                "login.html",
+                form=form,
+                _test="error_login",
+                message="An error occurred during log in. Please try later",
+            )
+
     return render_template("login.html", _test="first_visit_login", form=form)
 
 
