@@ -1,14 +1,13 @@
 import json
 
 import requests
-from flask import Blueprint, render_template, redirect, session, current_app
+from flask import Blueprint, render_template, redirect, session, current_app, jsonify
 from flask_login import login_user, logout_user
 
-from monolith.database import db, User, Role, Restaurant
 from monolith.forms import LoginForm
-from monolith.app_constant import USER_MICROSERVICE_URL
 from monolith.model import UserModel
 from monolith.services import UserService
+from monolith.app_constant import USER_MICROSERVICE_URL
 
 auth = Blueprint("auth", __name__)
 
@@ -18,15 +17,9 @@ def login():
     form = LoginForm()
     if form.validate_on_submit():
         email, password = form.data["email"], form.data["password"]
-
-        response = requests.post(
-            USER_MICROSERVICE_URL + "/user/login",
-            data=json.dumps(
-                {
-                    "email": email,
-                    "password": password,
-                }
-            ),
+        json_login = {"email": email, "password": password}
+        response = requests.post("{}/user/login".format(USER_MICROSERVICE_URL),
+            data=json.dumps(json_login),
             headers={"Content-type": "application/json"},
         )
 
