@@ -1,3 +1,3 @@
 [submodule "users_microservice"]
 	path = users_microservice
-	url = git@github.com:GreyTeam2020/GoOutSafe_Primer2020.git
+	url = https://github.com/GreyTeam2020/users_microservice.git
