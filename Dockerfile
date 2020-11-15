@@ -7,7 +7,6 @@ ENV FLASK_APP=monolith/app.py
 #RUN virtualenv venv
 RUN pip install -r requirements.txt
 RUN python setup.py develop
-EXPOSE 5000
 CMD ["python", "monolith/app.py"]
 #CMD ["flask", "run"]
 #CMD ["bash", "build_and_run.sh"]

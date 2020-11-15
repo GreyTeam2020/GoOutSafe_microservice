@@ -4,33 +4,32 @@ from werkzeug.security import check_password_hash
 
 
 class UserModel:
-    def __init__(
-        self,
-        id,
-        email,
-        phone,
-        firstname,
-        lastname,
-        dateofbirth,
-        role_id,
-        is_active=True,
-        is_admin=False,
-    ):
-        self.id = id
-        self.email = email
-        self.phone = phone
-        self.firstname = firstname
-        self.lastname = lastname
-        self.dateofbirth = dateofbirth
-        self.is_active = is_active
-        self.is_admin = is_admin
-        self.role_id = role_id
+    def __init__(self):
         self.is_anonymous = False
         self._authenticated = False
+        self.is_active = True
+        self.is_admin = False
+
+    @classmethod
+    def feel_from_json(cls, json_obj):
+        """
+        This method bind the object json that contains the user information.
+        """
+        cls.id = json_obj["id"]
+        cls.email = json_obj["email"]
+        cls.phone = json_obj["phone"]
+        cls.firstname = json_obj["firstname"]
+        cls.lastname = json_obj["lastname"]
+        cls.dateofbirth = json_obj["dateofbirth"]
+        cls.role_id = json_obj["role_id"]
 
     @property
     def is_authenticated(self):
         return self._authenticated
+
+    @classmethod
+    def set_authenticated(cls, authenticated):
+        cls._authenticated = authenticated
 
     def get_id(self):
         return self.id
