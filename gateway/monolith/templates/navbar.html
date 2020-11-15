@@ -1,4 +1,4 @@
- <nav class="navbar navbar-expand-md navbar-dark bg-dark">
+e <nav class="navbar navbar-expand-md navbar-dark bg-dark">
 
     <div class="mx-auto order-0">
         <a class="navbar-brand mx-auto" href="/">
@@ -40,14 +40,14 @@
 
             {% if current_user.is_authenticated %}
                 <li class="nav-item">
-                    <a class="nav-link" href="/logout"><button class="btn btn-outline-light btn-sm aligner">Logout</button></a>
+                    <a class="nav-link" href="/ui/logout"><button class="btn btn-outline-light btn-sm aligner">Logout</button></a>
                 </li>
             {% else %}
                 <li class="nav-item">
-                    <a class="nav-link" href="/login"><button class="btn btn-primary text-light">Sign In</button></a>
+                    <a class="nav-link" href="/ui/login"><button class="btn btn-primary text-light">Sign In</button></a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="/user/create_user"><button class="btn btn-outline-light">Sign Up</button></a>
+                    <a class="nav-link" href="/ui/user/create_user"><button class="btn btn-outline-light">Sign Up</button></a>
                 </li>
             {% endif %}
         </ul>

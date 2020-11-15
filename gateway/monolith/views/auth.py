@@ -1,7 +1,7 @@
 import json
 
 import requests
-from flask import Blueprint, render_template, redirect, session, current_app, jsonify
+from flask import Blueprint, render_template, redirect, session, current_app, jsonify, request
 from flask_login import login_user, logout_user
 
 from monolith.forms import LoginForm
@@ -15,34 +15,35 @@ auth = Blueprint("auth", __name__)
 @auth.route("/login", methods=["GET", "POST"])
 def login():
     form = LoginForm()
-    if form.validate_on_submit():
-        email, password = form.data["email"], form.data["password"]
-        json_login = {"email": email, "password": password}
-        response = requests.post("{}/user/login".format(USER_MICROSERVICE_URL),
-            data=json.dumps(json_login),
-            headers={"Content-type": "application/json"},
-        )
-
-        if not response.ok:
-            current_app.logger.error(response.json())
-            return render_template(
-                "login.html", form=form, _test="error_login", message="User not exist"
+    if request.method == "POST":
+        if form.validate_on_submit():
+            email, password = form.data["email"], form.data["password"]
+            json_login = {"email": email, "password": password}
+            response = requests.post("{}/login".format(USER_MICROSERVICE_URL),
+                data=json_login,
             )
 
-        user = UserModel()
-        user.fill_from_json(response.json())
-        if UserService.log_in_user(user):
-            return redirect("/")
-        else:
-            current_app.logger.error("log in failed")
-            return render_template(
-                "login.html",
-                form=form,
-                _test="error_login",
-                message="An error occurred during log in. Please try later",
-            )
+            if not response.ok:
+                current_app.logger.error(response.json())
+                return render_template(
+                    "login.html", form=form, _test="error_login", message="User not exist",
+                    base_url="http://localhost/ui/login"
+                )
 
-    return render_template("login.html", _test="first_visit_login", form=form)
+            user = UserModel()
+            user.fill_from_json(response.json())
+            if UserService.log_in_user(user):
+                return redirect("/")
+            else:
+                current_app.logger.error("log in failed")
+                return render_template(
+                    "login.html",
+                    form=form,
+                    _test="error_login",
+                    message="An error occurred during log in. Please try later",
+                    base_url="http://localhost/ui/login"
+                )
+    return render_template("login.html", _test="first_visit_login", form=form, base_url="http://localhost/ui/login")
 
 
 @auth.route("/logout")
