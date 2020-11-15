@@ -8,7 +8,7 @@ from monolith.services.user_service import UserService
 from monolith.services.booking_services import BookingServices
 from monolith.auth import roles_allowed
 from monolith.utils.formatter import my_date_formatter
-from monolith.model.User import UserModel
+from monolith.model.user_model import UserModel
 from flask_login import current_user, login_user, login_required
 import requests, json
 

@@ -1,15 +1,18 @@
 version: "3.8"
 
 services:
+    ngnix:
+        image: nginx:latest
+        restart: always
+        volumes:
+            - ./nginx.conf:/etc/nginx/conf.d/default.conf
+        ports:
+          - "80:80"
     gooutsafe:
         depends_on:
             - redis
         restart: always
         build: .
-        ports:
-            - "5000:5000"
-        expose:
-            - "5000"
         volumes:
             - ./monolith/db:/code/monolith/db
     celery:
