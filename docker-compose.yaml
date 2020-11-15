@@ -12,20 +12,23 @@ services:
         depends_on:
             - redis
         restart: always
-        build: .
+        build: ./gateway
         volumes:
-            - ./monolith/db:/code/monolith/db
+            - ./gateway/db:/code/gateway/db
+    user_api:
+        restart: always
+        build: ./users_microservice
     celery:
         depends_on:
             - redis
             - gooutsafe
-        build: .
+        build: ./gateway
         restart: always
         command: celery -A monolith:celery worker --loglevel=DEBUG -B
         links:
             -  redis
         volumes:
-            - ./monolith/db:/code/monolith/db
+            - ./gateway/db:/code/gateway/db
     redis:
         image: "redis:alpine"
         container_name: rd01

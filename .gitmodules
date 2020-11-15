@@ -1,0 +1,2 @@
+[submodule "users_microservice"]
+	url = https://github.com/GreyTeam2020/users_microservice.git

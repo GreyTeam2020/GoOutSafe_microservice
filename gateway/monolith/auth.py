@@ -29,8 +29,8 @@ def roles_allowed(func=None, roles=None):
 @login_manager.user_loader
 def load_user(user_id):
     # user = User.query.get(user_id)
-    user = UserModel()
-    user.fill_from_json(session["current_user"])
-    if user is not None:
+    if "current_user" in session:
+        user = UserModel()
+        user.fill_from_json(session["current_user"])
         user.set_authenticated(True)
-    return user
+    return None

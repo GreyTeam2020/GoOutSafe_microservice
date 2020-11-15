@@ -1,4 +1,12 @@
-from flask import Blueprint, redirect, render_template, request, current_app, session
+from flask import (
+    Blueprint,
+    redirect,
+    render_template,
+    request,
+    current_app,
+    session,
+    jsonify,
+)
 from monolith.database import db, User, Like, Role
 from monolith.forms import UserForm, UserEditForm
 from monolith.forms import ReservationForm
@@ -42,120 +50,50 @@ def _create_generic_user(role_id: int = 3, name_on_page: str = "customer"):
                     ),
                     type=name_on_page,
                 )
-            user = User()
-            form.populate_obj(user)
-            user = UserService.create_user(user, form.password.data, role_id)
-            if user is not None and user.authenticate(form.password.data):
-                login_user(user)
+            user = UserService.create_user(form, role_id)
+            if user is False:
+                current_app.logger.error("An error occured while creating the user")
+                return render_template(
+                    "create_user.html",
+                    form=form,
+                    message="An error occured while creating the user",
+                    type=name_on_page,
+                )
             DispatcherMessage.send_message(
                 REGISTRATION_EMAIL,
                 [user.email, user.lastname, "112344"],
             )
             new_role = UserService.get_user_role(role_id)
             if new_role is not None:
-                session["ROLE"] = new_role.value
+                session["ROLE"] = new_role
             return redirect("/")
     return render_template("create_user.html", form=form, type=name_on_page)
 
 
 @users.route("/user/create_operator", methods=["GET", "POST"])
 def create_operator():
-    form = UserForm()
-    if request.method == "POST":
-        if form.validate_on_submit():
-            form.email = request.form.get("email")
-            form.phone = request.form.get("phone")
-            form.password = request.form.get("password")
-            form.dateofbirth = request.form.get("dateofbirth")
-            form.firstname = request.form.get("firstname")
-            form.lastname = request.form.get("lastname")
-
-            response = requests.post(
-                USER_MICROSERVICE_URL + "/user/create_operator",
-                data=json.dumps(
-                    {
-                        "email": form.email,
-                        "phone": form.phone,
-                        "password": form.password,
-                        "dateofbirth": form.dateofbirth,
-                        "firstname": form.firstname,
-                        "lastname": form.lastname,
-                    }
-                ),
-                headers={"Content-type": "application/json"},
-            )
-            if not response.ok:
-                current_app.logger.error("Error from USER microservice")
-                return render_template(
-                    "create_user.html",
-                    form=form,
-                    message="An error occured while creating the user",
-                    type="customer",
-                )
-
-            return redirect("/")
-
-    return render_template("create_user.html", form=form, type="operator")
+    return _create_generic_user(3, "operator")
 
 
 @users.route("/user/create_user", methods=["GET", "POST"])
 def create_user():
-    form = UserForm()
-    if request.method == "POST":
-        if form.validate_on_submit():
-            form.email = request.form.get("email")
-            form.phone = request.form.get("phone")
-            form.password = request.form.get("password")
-            form.dateofbirth = request.form.get("dateofbirth")
-            form.firstname = request.form.get("firstname")
-            form.lastname = request.form.get("lastname")
-
-            response = requests.post(
-                USER_MICROSERVICE_URL + "/user/create_user",
-                data=json.dumps(
-                    {
-                        "email": form.email,
-                        "phone": form.phone,
-                        "password": form.password,
-                        "dateofbirth": form.dateofbirth,
-                        "firstname": form.firstname,
-                        "lastname": form.lastname,
-                    }
-                ),
-                headers={"Content-type": "application/json"},
-            )
-            if not response.ok:
-                current_app.logger.error("Error from USER microservice")
-                return render_template(
-                    "create_user.html",
-                    form=form,
-                    message="An error occured while creating the user",
-                    type="customer",
-                )
-
-            return redirect("/")
-
-    return render_template("create_user.html", form=form, type="customer")
-
-    # return _create_generic_user(3, "customer")
+    return _create_generic_user(3, "customer")
 
 
 @users.route("/user/data", methods=["GET", "POST"])
 @login_required
 def user_data():
-    message = None
     if request.method == "POST":
         form = UserEditForm()
         if form.validate_on_submit():
             UserService.modify_user(form)
             return render_template("user_data.html", form=form)
-        print(form.errors.items())
+        current_app.logger.debug(form.errors.items())
         return render_template("user_data.html", form=form, error="Error in the data")
-    else:
-        q = User.query.filter_by(id=current_user.id).first()
-        if q is not None:
-            form = UserForm(obj=q)
-            return render_template("user_data.html", form=form)
+    user = current_user
+    if user is not None:
+        form = UserForm(obj=user)
+        return render_template("user_data.html", form=form)
 
 
 @users.route("/user/delete")
