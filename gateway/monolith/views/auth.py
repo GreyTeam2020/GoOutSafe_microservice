@@ -30,6 +30,7 @@ def login():
             url = "{}/login".format(USER_MICROSERVICE_URL)
             current_app.logger.debug("URL to user microservice: {}".format(url))
             # Look at https://github.com/psf/requests/issues/1198
+            # TODO implement it the method inside the login
             try:
                 current_app.logger.debug(
                     "Test call to role with URL: {}".format(
@@ -56,7 +57,8 @@ def login():
                 )
 
             if not response.ok:
-                current_app.logger.error(response.json())
+                json = response.json()
+                current_app.logger.error(json)
                 return render_template(
                     "login.html",
                     form=form,
@@ -64,9 +66,10 @@ def login():
                     message="User not exist",
                     base_url="http://localhost/ui/login",
                 )
-
+            json = response.json()
+            current_app.logger.debug("Result from microservices: {}".format(json))
             user = UserModel()
-            user.fill_from_json(response.json())
+            user.fill_from_json(json)
             if UserService.log_in_user(user):
                 return redirect("/ui")
             else:

@@ -3,7 +3,7 @@ from flask import session, current_app
 from flask_login import current_user, login_user
 
 from monolith.database import db, Positive
-from monolith.forms import UserForm
+from monolith.forms import UserForm, LoginForm
 from monolith.app_constant import USER_MICROSERVICE_URL
 from monolith.model import UserModel
 
@@ -89,7 +89,7 @@ class UserService:
             else:
                 json["phone"] = phone
             current_app.logger.debug("Url is {}".format(url))
-            response = requests.get(url=url)
+            response = requests.post(url=url, json=json)
         except requests.exceptions.ConnectionError as ex:
             current_app.logger.error(
                 "Error during the microservice call {}".format(str(ex))
@@ -142,15 +142,13 @@ class UserService:
                 "Error during the microservice call {}".format(str(ex))
             )
             return False
-        json = response.json()
         if not response.ok:
+            json = response.json()
             current_app.logger.error("Error from USER microservice")
             current_app.logger.error("Error received {}".format(response.reason))
             current_app.logger.error("Error response received {}".format(json))
-            return None
-        user = UserModel()
-        user.fill_from_json(json)
-        return user
+            return False
+        return True
 
     @staticmethod
     def modify_user(user_form: UserForm, role_id: int = None):
@@ -229,19 +227,12 @@ class UserService:
     @staticmethod
     def is_positive(user_id: int):
         """
+        TODO implement it
         Given a userid i return if the user is currently positive
         :param user_id: user id of the user checked
         return: boolean if the user is positive
         """
-        check = (
-            db.session.query(Positive)
-            .filter_by(user_id=user_id)
-            .filter_by(marked=True)
-            .first()
-        )
-        if check is None:
-            return False
-        return True
+        return False
 
     @staticmethod
     def get_customer_reservation(fromDate: str, toDate: str, customer_id: str):
@@ -267,3 +258,13 @@ class UserService:
         result = db.engine.execute(stmt, params)
         reservations_as_list = result.fetchall()
         return reservations_as_list
+
+    @staticmethod
+    def user_login(form: LoginForm):
+        """
+        TODO implement it
+        This method contains the logic to perform the request to microservices and
+        receive the answer
+        :return the object user or None
+        """
+        pass

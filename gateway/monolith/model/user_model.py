@@ -15,7 +15,8 @@ class UserModel:
         """
         This method bind the object json that contains the user information.
         """
-        cls.id = json_obj["id"]
+        if "id" in json_obj:
+            cls.id = json_obj["id"]
         cls.email = json_obj["email"]
         cls.phone = json_obj["phone"]
         cls.firstname = json_obj["firstname"]

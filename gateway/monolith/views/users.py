@@ -51,7 +51,7 @@ def _create_generic_user(role_id: int = 3, name_on_page: str = "customer"):
                     type=name_on_page,
                 )
             user = UserService.create_user(form, role_id)
-            if user is None:
+            if user is False:
                 current_app.logger.error("An error occured while creating the user")
                 return render_template(
                     "create_user.html",
