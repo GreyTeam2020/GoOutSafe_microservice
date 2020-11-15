@@ -11,7 +11,7 @@ class UserModel:
         self.is_admin = False
 
     @classmethod
-    def feel_from_json(cls, json_obj):
+    def fill_from_json(cls, json_obj):
         """
         This method bind the object json that contains the user information.
         """

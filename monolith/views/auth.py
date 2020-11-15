@@ -36,15 +36,8 @@ def login():
                 "login.html", form=form, _test="error_login", message="User not exist"
             )
 
-        user = UserModel(
-            response.json()["id"],
-            response.json()["email"],
-            response.json()["phone"],
-            response.json()["firstname"],
-            response.json()["lastname"],
-            response.json()["dateofbirth"],
-            response.json()["role_id"],
-        )
+        user = UserModel()
+        user.fill_from_json(response.json())
         if UserService.log_in_user(user):
             return redirect("/")
         else:

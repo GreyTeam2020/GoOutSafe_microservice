@@ -30,7 +30,7 @@ def roles_allowed(func=None, roles=None):
 def load_user(user_id):
     # user = User.query.get(user_id)
     user = UserModel()
-    user.feel_from_json(session["current_user"])
+    user.fill_from_json(session["current_user"])
     if user is not None:
         user.set_authenticated(True)
     return user
