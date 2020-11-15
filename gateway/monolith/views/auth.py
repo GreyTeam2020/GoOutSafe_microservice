@@ -23,8 +23,12 @@ def login():
             current_app.logger.debug("URL to user microservice: {}".format(url))
             # Look at https://github.com/psf/requests/issues/1198
             try:
-                response = requests.post(url, data=json_login)
-            except requests.exceptions.ConnectionError:
+                current_app.logger.debug("Test call to role with URL: {}".format("{}/role/1".format(USER_MICROSERVICE_URL)))
+                response = requests.get(url="{}/role/1".format(USER_MICROSERVICE_URL), allow_redirects=True)
+                current_app.logger.debug("Test call to role: {}".format(response.json()))
+                response = requests.post(url=url, json=json_login, allow_redirects=True)
+            except requests.exceptions.ConnectionError as ex:
+                current_app.logger.error("Error during the microservice call {}".format(str(ex)))
                 return render_template(
                     "login.html", form=form, _test="error_login", message="Connection refused",
                     base_url="http://localhost/ui/login"

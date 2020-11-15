@@ -24,7 +24,7 @@ services:
             - gooutsafe
         build: ./gateway
         restart: always
-        command: celery -A gateway:celery worker --loglevel=DEBUG -B
+        command: celery -A monolith:celery worker --loglevel=DEBUG -B
         links:
             -  redis
         volumes:

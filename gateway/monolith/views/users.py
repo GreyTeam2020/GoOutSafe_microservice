@@ -1,4 +1,4 @@
-from flask import Blueprint, redirect, render_template, request, current_app, session
+from flask import Blueprint, redirect, render_template, request, current_app, session, jsonify
 from monolith.database import db, User, Like, Role
 from monolith.forms import UserForm, UserEditForm
 from monolith.forms import ReservationForm
@@ -103,29 +103,32 @@ def create_user():
     form = UserForm()
     if request.method == "POST":
         if form.validate_on_submit():
-            form.email = request.form.get("email")
-            form.phone = request.form.get("phone")
-            form.password = request.form.get("password")
-            form.dateofbirth = request.form.get("dateofbirth")
-            form.firstname = request.form.get("firstname")
-            form.lastname = request.form.get("lastname")
-
-            response = requests.post(
-                USER_MICROSERVICE_URL + "/user/create_user",
-                data=json.dumps(
-                    {
-                        "email": form.email,
-                        "phone": form.phone,
-                        "password": form.password,
-                        "dateofbirth": form.dateofbirth,
-                        "firstname": form.firstname,
-                        "lastname": form.lastname,
+            email = form.email.data
+            current_app.logger.debug("New user email {}".format(email))
+            phone = form.phone.data
+            current_app.logger.debug("New user phone {}".format(phone))
+            password = form.password.data
+            current_app.logger.debug("New user password {}".format(password))
+            date = form.dateofbirth.data
+            current_app.logger.debug("New user date {}".format(date))
+            firstname = form.firstname.data
+            current_app.logger.debug("New user date {}".format(firstname))
+            lastname = form.lastname.data
+            current_app.logger.debug("New user date {}".format(lastname))
+            json_request = {
+                        "email": email,
+                        "phone": phone,
+                        "password": password,
+                        "dateofbirth": str(date),
+                        "firstname": firstname,
+                        "lastname": lastname,
                     }
-                ),
-                headers={"Content-type": "application/json"},
+            response = requests.post(USER_MICROSERVICE_URL + "/create_user",
+                json=json_request,
             )
             if not response.ok:
                 current_app.logger.error("Error from USER microservice")
+                current_app.logger.error("Error received {}".format(response.reason))
                 return render_template(
                     "create_user.html",
                     form=form,
@@ -133,7 +136,7 @@ def create_user():
                     type="customer",
                 )
 
-            return redirect("/")
+            return redirect("/ui")
 
     return render_template("create_user.html", form=form, type="customer")
 
