@@ -182,6 +182,7 @@ class UserService:
             "role": role_id,
             "id": current_user.id,
         }
+        current_app.logger.debug("Request body \n{}".format(json_request))
         try:
             url = "{}/data".format(USER_MICROSERVICE_URL)
             current_app.logger.debug("Url is: {}".format(url))

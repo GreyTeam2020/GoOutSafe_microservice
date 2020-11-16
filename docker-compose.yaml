@@ -13,6 +13,7 @@ services:
         build: ./gateway
         volumes:
             - ./gateway/db:/code/monolith/db
+            - ./gateway:/code
         ports:
             - 80:5000
     user_api:
