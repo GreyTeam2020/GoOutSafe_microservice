@@ -20,7 +20,7 @@ services:
         restart: always
         build: ./users_microservice
         volumes:
-            - ./gateway/users_microservice/db:/code/db
+            - ./users_microservice:/code
     celery:
         depends_on:
             - redis

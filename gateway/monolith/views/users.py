@@ -81,10 +81,14 @@ def user_data():
     if request.method == "POST":
         form = UserEditForm()
         if form.validate_on_submit():
-            UserService.modify_user(form)
-            return render_template("user_data.html", form=form)
+            user = UserService.modify_user(form)
+            if user is not None:
+                session["current_user"] = user.serialize()
+                return render_template("user_data.html", form=form, message="Modified")
+            else:
+                return render_template("user_data.html", form=form, error="Error during the operation")
         current_app.logger.debug(form.errors.items())
-        return render_template("user_data.html", form=form, error="Error in the data")
+        return render_template("user_data.html", form=form, message="Error in the data")
     user = current_user
     if user is not None:
         form = UserEditForm(obj=user)

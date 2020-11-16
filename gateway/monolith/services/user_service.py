@@ -184,23 +184,24 @@ class UserService:
         }
         current_app.logger.debug("Request body \n{}".format(json_request))
         try:
-            url = "{}/data".format(USER_MICROSERVICE_URL)
+            url = "{}/data/".format(USER_MICROSERVICE_URL)
             current_app.logger.debug("Url is: {}".format(url))
             response = requests.put(url, json=json_request)
+            current_app.logger.debug("Header Request: {}".format(response.request.headers))
+            current_app.logger.debug("Body Request: {}".format(response.request.body))
         except requests.exceptions.ConnectionError as ex:
             current_app.logger.error(
                 "Error during the microservice call {}".format(str(ex))
             )
-            return False
-        current_app.logger.debug(
-            "Response: ".format(str(response.text))
-        )
-        json = response.json()
+            return None
+
         if not response.ok:
             current_app.logger.error("Error from USER microservice")
             current_app.logger.error("Error received {}".format(response.reason))
-            current_app.logger.error("Error response received {}".format(json))
+            #current_app.logger.error("Error response received {}".format(json))
             return None
+        json = response.json()
+        current_app.logger.debug("Response: ".format(json))
         user = UserModel()
         user.fill_from_json(json)
         return user
