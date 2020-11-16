@@ -14,7 +14,7 @@ services:
         restart: always
         build: ./gateway
         volumes:
-            - ./gateway/db:/code/gateway/db
+            - ./gateway/db:/code/monolith/db
     user_api:
         restart: always
         build: ./users_microservice
