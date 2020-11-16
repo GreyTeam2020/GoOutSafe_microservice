@@ -1,2 +1,5 @@
 [submodule "users_microservice"]
 	url = https://github.com/GreyTeam2020/users_microservice.git
+[submodule "email_microservice"]
+	path = email_microservice
+	url = https://github.com/GreyTeam2020/email_microservice.git
