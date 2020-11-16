@@ -6,8 +6,6 @@ services:
         restart: always
         volumes:
             - ./nginx.conf:/etc/nginx/conf.d/default.conf
-        ports:
-          - "80:80"
     gooutsafe:
         depends_on:
             - redis
@@ -15,9 +13,13 @@ services:
         build: ./gateway
         volumes:
             - ./gateway/db:/code/monolith/db
+        ports:
+            - 80:5000
     user_api:
         restart: always
         build: ./users_microservice
+        volumes:
+            - ./gateway/users_microservice/db:/code/db
     celery:
         depends_on:
             - redis

@@ -9,3 +9,4 @@ gooutsafe.egg-info/
 logger.txt
 
 logger2.txt
+/gateway/users_microservice/db/user.db
