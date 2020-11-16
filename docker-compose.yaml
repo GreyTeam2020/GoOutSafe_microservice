@@ -8,7 +8,8 @@ services:
             - ./nginx.conf:/etc/nginx/conf.d/default.conf
     gooutsafe:
         depends_on:
-            - redis
+            - user_api
+            - sendemail_api
         restart: always
         build: ./gateway
         volumes:
@@ -21,19 +22,34 @@ services:
         build: ./users_microservice
         volumes:
             - ./users_microservice:/code
+    sendemail_api:
+        restart: always
+        build: ./email_microservice
     celery:
         depends_on:
             - redis
             - gooutsafe
         build: ./gateway
         restart: always
-        command: celery -A monolith:celery worker --loglevel=DEBUG -B
+        command: celery -A monolith:celery beat --loglevel=DEBUG
         links:
             -  redis
         volumes:
             - ./gateway/db:/code/gateway/db
+    celery_send_email:
+        depends_on:
+            - redis
+        build: ./email_microservice
+        restart: always
+        command: celery -A background.celery_app worker --loglevel=DEBUG
+        links:
+            - redis
     redis:
         image: "redis:alpine"
         container_name: rd01
         expose:
             - "6379"
+    redis_email:
+        image: "redis:alpine"
+        container_name: rd02
+        command: --port 6380
