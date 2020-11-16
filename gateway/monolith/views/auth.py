@@ -69,7 +69,7 @@ def login():
             user = UserModel()
             user.fill_from_json(json)
             if UserService.log_in_user(user):
-                return redirect("/ui")
+                return redirect("/")
             else:
                 current_app.logger.error("log in failed")
                 return render_template(

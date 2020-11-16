@@ -59,10 +59,7 @@ def _create_generic_user(role_id: int = 3, name_on_page: str = "customer"):
                     message="An error occured while creating the user",
                     type=name_on_page,
                 )
-            DispatcherMessage.send_message(
-                REGISTRATION_EMAIL,
-                [user.email, user.lastname, "112344"],
-            )
+            #TODO: send registration email
             new_role = UserService.get_user_role(role_id)
             if new_role is not None:
                 session["ROLE"] = new_role
