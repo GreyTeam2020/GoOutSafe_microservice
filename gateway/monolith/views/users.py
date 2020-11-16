@@ -7,18 +7,15 @@ from flask import (
     session,
     jsonify,
 )
-from monolith.database import db, User, Like, Role
 from monolith.forms import UserForm, UserEditForm
 from monolith.forms import ReservationForm
-from monolith.utils.dispaccer_events import DispatcherMessage
-from monolith.app_constant import REGISTRATION_EMAIL, USER_MICROSERVICE_URL
-from monolith.services.user_service import UserService
+from monolith.services import UserService, SendEmailService
 from monolith.services.booking_services import BookingServices
 from monolith.auth import roles_allowed
 from monolith.utils.formatter import my_date_formatter
 from monolith.model.user_model import UserModel
 from flask_login import current_user, login_user, login_required
-import requests, json
+import requests
 
 users = Blueprint("users", __name__)
 
@@ -59,8 +56,7 @@ def _create_generic_user(role_id: int = 3, name_on_page: str = "customer"):
                     message="An error occured while creating the user",
                     type=name_on_page,
                 )
-            #TODO: send registration email
-
+            SendEmailService.confirm_registration(form.email.data, form.firstname.data)
             return redirect("/login")
     return render_template("create_user.html", form=form, type=name_on_page)
 
