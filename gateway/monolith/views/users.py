@@ -89,7 +89,7 @@ def user_data():
         return render_template("user_data.html", form=form, error="Error in the data")
     user = current_user
     if user is not None:
-        form = UserForm(obj=user)
+        form = UserEditForm(obj=user)
         return render_template("user_data.html", form=form)
 
 
