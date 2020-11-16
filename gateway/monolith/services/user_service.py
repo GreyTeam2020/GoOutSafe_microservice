@@ -37,7 +37,7 @@ class UserService:
         role_value = json_response["value"]
 
         # set the role in the session
-        session["SESSION"] = role_value
+        session["ROLE"] = role_value
 
         if role_value == "OPERATOR":
             # TODO
@@ -167,39 +167,41 @@ class UserService:
         current_app.logger.debug("New user email {}".format(email))
         phone = user_form.phone.data
         current_app.logger.debug("New user phone {}".format(phone))
-        password = user_form.password.data
-        current_app.logger.debug("New user password {}".format(password))
         date = user_form.dateofbirth.data
-        current_app.logger.debug("New user date {}".format(date))
+        current_app.logger.debug("New user birth {}".format(date))
         firstname = user_form.firstname.data
-        current_app.logger.debug("New user date {}".format(firstname))
+        current_app.logger.debug("New user firstname {}".format(firstname))
         lastname = user_form.lastname.data
-        current_app.logger.debug("New user date {}".format(lastname))
+        current_app.logger.debug("New user lastname {}".format(lastname))
         json_request = {
             "email": email,
             "phone": phone,
-            "password": password,
             "dateofbirth": str(date),
             "firstname": firstname,
             "lastname": lastname,
             "role": role_id,
             "id": current_user.id,
         }
+        current_app.logger.debug("Request body \n{}".format(json_request))
         try:
-            url = "{}/data".format(USER_MICROSERVICE_URL)
+            url = "{}/data/".format(USER_MICROSERVICE_URL)
             current_app.logger.debug("Url is: {}".format(url))
-            response = requests.post(url, json=json_request)
+            response = requests.put(url, json=json_request)
+            current_app.logger.debug("Header Request: {}".format(response.request.headers))
+            current_app.logger.debug("Body Request: {}".format(response.request.body))
         except requests.exceptions.ConnectionError as ex:
             current_app.logger.error(
                 "Error during the microservice call {}".format(str(ex))
             )
-            return False
-        json = response.json()
+            return None
+
         if not response.ok:
             current_app.logger.error("Error from USER microservice")
             current_app.logger.error("Error received {}".format(response.reason))
-            current_app.logger.error("Error response received {}".format(json))
+            #current_app.logger.error("Error response received {}".format(json))
             return None
+        json = response.json()
+        current_app.logger.debug("Response: ".format(json))
         user = UserModel()
         user.fill_from_json(json)
         return user
@@ -209,7 +211,7 @@ class UserService:
         try:
             url = "{}/delete/{}".format(USER_MICROSERVICE_URL, str(user_id))
             current_app.logger.debug("Url is: {}".format(url))
-            response = requests.get(url)
+            response = requests.delete(url)
         except requests.exceptions.ConnectionError as ex:
             current_app.logger.error(
                 "Error during the microservice call {}".format(str(ex))

@@ -35,10 +35,10 @@ def _create_generic_user(role_id: int = 3, name_on_page: str = "customer"):
         if form.validate_on_submit():
             q_user_email = UserService.user_is_present(email=form.email.data)
             q_user_phone = UserService.user_is_present(phone=form.phone.data)
-            current_app.logger.error(
+            current_app.logger.debug(
                 "user with email is null? {}".format(q_user_email is None)
             )
-            current_app.logger.error(
+            current_app.logger.debug(
                 "user with phone is null? {}".format(q_user_phone is None)
             )
             if (q_user_email is not None) or (q_user_phone is not None):
@@ -59,14 +59,9 @@ def _create_generic_user(role_id: int = 3, name_on_page: str = "customer"):
                     message="An error occured while creating the user",
                     type=name_on_page,
                 )
-            DispatcherMessage.send_message(
-                REGISTRATION_EMAIL,
-                [user.email, user.lastname, "112344"],
-            )
-            new_role = UserService.get_user_role(role_id)
-            if new_role is not None:
-                session["ROLE"] = new_role
-            return redirect("/")
+            #TODO: send registration email
+
+            return redirect("/login")
     return render_template("create_user.html", form=form, type=name_on_page)
 
 
@@ -86,13 +81,17 @@ def user_data():
     if request.method == "POST":
         form = UserEditForm()
         if form.validate_on_submit():
-            UserService.modify_user(form)
-            return render_template("user_data.html", form=form)
+            user = UserService.modify_user(form)
+            if user is not None:
+                session["current_user"] = user.serialize()
+                return render_template("user_data.html", form=form, message="Modified")
+            else:
+                return render_template("user_data.html", form=form, error="Error during the operation")
         current_app.logger.debug(form.errors.items())
-        return render_template("user_data.html", form=form, error="Error in the data")
+        return render_template("user_data.html", form=form, message="Error in the data")
     user = current_user
     if user is not None:
-        form = UserForm(obj=user)
+        form = UserEditForm(obj=user)
         return render_template("user_data.html", form=form)
 
 

@@ -52,8 +52,7 @@ def login():
                     "login.html",
                     form=form,
                     _test="error_login",
-                    message="Connection refused",
-                    base_url="http://localhost/ui/login",
+                    message="Connection refused"
                 )
 
             if not response.ok:
@@ -63,29 +62,26 @@ def login():
                     "login.html",
                     form=form,
                     _test="error_login",
-                    message="User not exist",
-                    base_url="http://localhost/ui/login",
+                    message="User not exist"
                 )
             json = response.json()
             current_app.logger.debug("Result from microservices: {}".format(json))
             user = UserModel()
             user.fill_from_json(json)
             if UserService.log_in_user(user):
-                return redirect("/ui")
+                return redirect("/")
             else:
                 current_app.logger.error("log in failed")
                 return render_template(
                     "login.html",
                     form=form,
                     _test="error_login",
-                    message="An error occurred during log in. Please try later",
-                    base_url="http://localhost/ui/login",
+                    message="An error occurred during log in. Please try later"
                 )
     return render_template(
         "login.html",
         _test="first_visit_login",
-        form=form,
-        base_url="http://localhost/ui/login",
+        form=form
     )
 
 

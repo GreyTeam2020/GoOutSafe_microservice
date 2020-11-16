@@ -33,4 +33,5 @@ def load_user(user_id):
         user = UserModel()
         user.fill_from_json(session["current_user"])
         user.set_authenticated(True)
+        return user
     return None
