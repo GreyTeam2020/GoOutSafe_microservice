@@ -35,10 +35,10 @@ def _create_generic_user(role_id: int = 3, name_on_page: str = "customer"):
         if form.validate_on_submit():
             q_user_email = UserService.user_is_present(email=form.email.data)
             q_user_phone = UserService.user_is_present(phone=form.phone.data)
-            current_app.logger.error(
+            current_app.logger.debug(
                 "user with email is null? {}".format(q_user_email is None)
             )
-            current_app.logger.error(
+            current_app.logger.debug(
                 "user with phone is null? {}".format(q_user_phone is None)
             )
             if (q_user_email is not None) or (q_user_phone is not None):
@@ -60,10 +60,8 @@ def _create_generic_user(role_id: int = 3, name_on_page: str = "customer"):
                     type=name_on_page,
                 )
             #TODO: send registration email
-            new_role = UserService.get_user_role(role_id)
-            if new_role is not None:
-                session["ROLE"] = new_role
-            return redirect("/")
+
+            return redirect("/login")
     return render_template("create_user.html", form=form, type=name_on_page)
 
 

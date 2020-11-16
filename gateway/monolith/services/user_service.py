@@ -177,7 +177,6 @@ class UserService:
             "email": email,
             "phone": phone,
             "dateofbirth": str(date),
-            "password": "#TODO remove this",
             "firstname": firstname,
             "lastname": lastname,
             "role": role_id,
