@@ -16,6 +16,8 @@ from monolith.forms import RestaurantForm
 from monolith.database import db
 from sqlalchemy.sql.expression import func, extract
 from monolith.model.restaurant_model import RestaurantModel
+from monolith.app_constant import RESTAURANTS_MICROSERVICE_URL
+from monolith.utils.http_utils import HttpUtils
 
 
 class RestaurantServices:
@@ -79,7 +81,13 @@ class RestaurantServices:
         """
         Method to return a list of all restaurants inside the database
         """
-        all_restaurants = db.session.query(Restaurant).all()
+        url = "{}".format(RESTAURANTS_MICROSERVICE_URL)
+        current_app.logger.debug("URL microservices: {}".format(url))
+        response = HttpUtils.make_get_request(url)
+        if response is None:
+            current_app.logger.error("Microservices error")
+            return []
+        all_restaurants = response["restaurants"]
         return all_restaurants
 
     @staticmethod

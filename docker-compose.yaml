@@ -22,6 +22,11 @@ services:
         build: ./users_microservice
         volumes:
             - ./users_microservice:/code
+    restaurants_api:
+        restart: always
+        build: ./restaurants_microservice
+        volumes:
+            - ./restaurants_microservice:/code
     sendemail_api:
         restart: always
         build: ./email_microservice
