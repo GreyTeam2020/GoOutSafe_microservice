@@ -122,6 +122,13 @@ def create_restaurant():
             newrestaurant = RestaurantServices.create_new_restaurant(
                 form, current_user.id, _max_seats
             )
+            if newrestaurant is None:
+                return render_template(
+                    "create_restaurant.html",
+                    _test="create_rest_failed",
+                    form=form,
+                    message="Error on create services",
+                )
             session["RESTAURANT_ID"] = newrestaurant.id
             return redirect("/")
     return render_template(

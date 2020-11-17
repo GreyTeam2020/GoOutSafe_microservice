@@ -39,23 +39,28 @@ class RestaurantServices:
         # avg_time is the the how much time the people stay inside the restaurants
         name_rest = form.name.data
         current_app.logger.debug("New rest name is {}".format(name_rest))
-        phone_rest = form.phone.data
+        phone_rest = int(form.phone.data)
         current_app.logger.debug("Phone is: {}".format(phone_rest))
         covid_measures = form.covid_measures.data
         current_app.logger.debug("Covid Measures is: {}".format(covid_measures))
         owner_email = current_user.email
         current_app.logger.debug("owner_email is {}".format(owner_email))
+        lat_rest = float(form.lat.data)
+        lon_rest = float(form.lon.data)
+        current_app.logger.debug("Restaurant position is lat={} lon={}".format(lat_rest, lon_rest))
         restaurant_json = {
             "name": name_rest,
             "covid_measures": covid_measures,
             "owner_email": current_user.email,
             "phone": phone_rest,
+            "lat": lat_rest,
+            "lon": lon_rest,
             "rating": 0,
             "avg_time": 0
         }
         current_app.logger.debug("Restaurants obj is {}".format(restaurant_json))
-        json_body["restaurant"]: restaurant_json
-        n_table_rest = form.n_tables.data
+        json_body["restaurant"] = restaurant_json
+        n_table_rest = int(form.n_tables.data)
         current_app.logger.debug("N tables is: {}".format(n_table_rest))
         json_body["restaurant_tables"] = n_table_rest
         opening_json = []
@@ -65,20 +70,21 @@ class RestaurantServices:
             day_json = {}
             week_day = int(days[i])
             current_app.logger.debug("Week day is {}".format(week_day))
-            close_dinner = form.close_dinner.data
+            close_dinner = str(form.close_dinner.data)
             current_app.logger.debug("Close dinner {}".format(close_dinner))
-            close_lunch = form.close_lunch.data
+            close_lunch = str(form.close_lunch.data)
             current_app.logger.debug("Close lunch  {}".format(close_lunch))
-            close_lunch = form.close_lunch.data
+            close_lunch = str(form.close_lunch.data)
             current_app.logger.debug("Close lunch  {}".format(close_lunch))
-            open_dinner = form.open_dinner.data
+            open_dinner = str(form.open_dinner.data)
             current_app.logger.debug("Open dinner {}".format(open_dinner))
-            open_lunch = form.open_lunch.data
+            open_lunch = str(form.open_lunch.data)
             current_app.logger.debug("Open lunch {}".format(open_lunch))
             day_json["close_dinner"] = close_dinner
             day_json["close_lunch"] = close_lunch
             day_json["open_dinner"] = open_dinner
             day_json["open_lunch"] = open_lunch
+            day_json["week_day"] = week_day
             opening_json.append(day_json)
         current_app.logger.debug("Opening day list \n{}".format(opening_json))
         json_body["opening"] = opening_json
@@ -89,6 +95,7 @@ class RestaurantServices:
 
         url = "{}/create".format(RESTAURANTS_MICROSERVICE_URL)
         current_app.logger.debug("URL is: {}".format(url))
+        current_app.logger.debug("Request body is: {}".format(json_body))
         restaurant = HttpUtils.make_post_request(url, json_body)
         return restaurant
 
