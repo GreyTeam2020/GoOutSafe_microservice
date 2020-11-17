@@ -3,3 +3,6 @@
 [submodule "email_microservice"]
 	path = email_microservice
 	url = https://github.com/GreyTeam2020/email_microservice.git
+[submodule "restaurants_microservice"]
+	path = restaurants_microservice
+	url = https://github.com/GreyTeam2020/restaurants_microservice.git
