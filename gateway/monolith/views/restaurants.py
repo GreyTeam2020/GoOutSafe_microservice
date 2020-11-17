@@ -129,7 +129,7 @@ def create_restaurant():
                     form=form,
                     message="Error on create services",
                 )
-            session["RESTAURANT_ID"] = newrestaurant.id
+            session["RESTAURANT_ID"] = newrestaurant["id"]
             return redirect("/")
     return render_template(
         "create_restaurant.html", _test="create_rest_test", form=form
