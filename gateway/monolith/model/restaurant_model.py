@@ -14,6 +14,7 @@ class RestaurantModel:
         self.photos = []
         self.dishes = []
         self.opening_hours = []
+        self.cusine = []
 
     def bind_menu(self, db_object):
         """

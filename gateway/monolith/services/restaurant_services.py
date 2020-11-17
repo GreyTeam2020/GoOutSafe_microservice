@@ -137,7 +137,7 @@ class RestaurantServices:
         response = HttpUtils.make_get_request(url)
         if response is None:
             return None
-        return response
+        return response["dishes"]
 
     @staticmethod
     def get_menu_restaurant(restaurant_id: int):
@@ -149,7 +149,7 @@ class RestaurantServices:
         response = HttpUtils.make_get_request(url)
         if response is None:
             return None
-        return response
+        return response["menus"]
 
     @staticmethod
     def get_opening_hours_restaurant(restaurant_id: int):
@@ -161,7 +161,7 @@ class RestaurantServices:
         response = HttpUtils.make_get_request(url)
         if response is None:
             return None
-        return response
+        return response["opening hours"]
 
     @staticmethod
     def get_photos_restaurants(restaurant_id: int):
@@ -173,7 +173,7 @@ class RestaurantServices:
         response = HttpUtils.make_get_request(url)
         if response is None:
             return None
-        return response
+        return response["Photos"]
 
     @staticmethod
     def get_reservation_rest(owner_id, restaurant_id, from_date, to_date, email):
