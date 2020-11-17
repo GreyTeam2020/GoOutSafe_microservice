@@ -63,7 +63,7 @@ def _create_generic_user(role_id: int = 3, name_on_page: str = "customer"):
 
 @users.route("/user/create_operator", methods=["GET", "POST"])
 def create_operator():
-    return _create_generic_user(3, "operator")
+    return _create_generic_user(2, "operator")
 
 
 @users.route("/user/create_user", methods=["GET", "POST"])
