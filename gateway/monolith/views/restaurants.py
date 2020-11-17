@@ -25,6 +25,7 @@ from monolith.forms import RestaurantForm, RestaurantTableForm
 from monolith.utils.formatter import my_date_formatter
 from monolith.utils.dispaccer_events import DispatcherMessage
 from monolith.app_constant import CALCULATE_RATING_RESTAURANT
+from monolith.services.user_service import UserService
 
 restaurants = Blueprint("restaurants", __name__)
 
@@ -108,8 +109,8 @@ def create_restaurant():
                         form.name.data, form.lat.data, form.lon.data
                     ),
                 )
-            q_user = db.session.query(User).filter_by(id=current_user.id).first()
-            if q_user is None:
+            user = UserService.user_is_present(current_user.email)
+            if user is None:
                 return render_template(
                     "create_restaurant.html",
                     _test="anonymus_user_test",
@@ -119,9 +120,16 @@ def create_restaurant():
 
             # set the owner
             newrestaurant = RestaurantServices.create_new_restaurant(
-                form, q_user.id, _max_seats
+                form, current_user.id, _max_seats
             )
-            session["RESTAURANT_ID"] = newrestaurant.id
+            if newrestaurant is None:
+                return render_template(
+                    "create_restaurant.html",
+                    _test="create_rest_failed",
+                    form=form,
+                    message="Error on create services",
+                )
+            session["RESTAURANT_ID"] = newrestaurant["id"]
             return redirect("/")
     return render_template(
         "create_restaurant.html", _test="create_rest_test", form=form

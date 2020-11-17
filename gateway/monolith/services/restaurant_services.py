@@ -2,6 +2,8 @@ from datetime import datetime
 from decimal import Decimal
 
 from flask import current_app
+from flask_login import current_user
+
 from monolith.database import (
     Restaurant,
     Menu,
@@ -16,6 +18,8 @@ from monolith.forms import RestaurantForm
 from monolith.database import db
 from sqlalchemy.sql.expression import func, extract
 from monolith.model.restaurant_model import RestaurantModel
+from monolith.app_constant import RESTAURANTS_MICROSERVICE_URL
+from monolith.utils.http_utils import HttpUtils
 
 
 class RestaurantServices:
@@ -30,48 +34,69 @@ class RestaurantServices:
         This method contains all logic save inside the a new restaurant
         :return:
         """
-        restaurant = Restaurant()
-        form.populate_obj(restaurant)
-        restaurant.owner_id = user_id
-        restaurant.likes = 0
-        restaurant.covid_measures = form.covid_measures.data
+        json_body = {}
+        # Menu on restaurants microservices is the cuisine type on the form
+        # avg_time is the the how much time the people stay inside the restaurants
+        name_rest = form.name.data
+        current_app.logger.debug("New rest name is {}".format(name_rest))
+        phone_rest = int(form.phone.data)
+        current_app.logger.debug("Phone is: {}".format(phone_rest))
+        covid_measures = form.covid_measures.data
+        current_app.logger.debug("Covid Measures is: {}".format(covid_measures))
+        owner_email = current_user.email
+        current_app.logger.debug("owner_email is {}".format(owner_email))
+        lat_rest = float(form.lat.data)
+        lon_rest = float(form.lon.data)
+        current_app.logger.debug("Restaurant position is lat={} lon={}".format(lat_rest, lon_rest))
+        restaurant_json = {
+            "name": name_rest,
+            "covid_measures": covid_measures,
+            "owner_email": current_user.email,
+            "phone": phone_rest,
+            "lat": lat_rest,
+            "lon": lon_rest,
+            "rating": 0,
+            "avg_time": 0
+        }
+        current_app.logger.debug("Restaurants obj is {}".format(restaurant_json))
+        json_body["restaurant"] = restaurant_json
+        n_table_rest = int(form.n_tables.data)
+        current_app.logger.debug("N tables is: {}".format(n_table_rest))
+        json_body["restaurant_tables"] = n_table_rest
+        opening_json = []
 
-        db.session.add(restaurant)
-        db.session.commit()
-
-        for i in range(int(form.n_tables.data)):
-            new_table = RestaurantTable()
-            new_table.restaurant_id = restaurant.id
-            new_table.max_seats = max_sit
-            new_table.available = True
-            new_table.name = ""
-
-            db.session.add(new_table)
-            db.session.commit()
-
-        # inserimento orari di apertura
         days = form.open_days.data
         for i in range(len(days)):
-            new_opening = OpeningHours()
-            new_opening.restaurant_id = restaurant.id
-            new_opening.week_day = int(days[i])
-            new_opening.open_lunch = form.open_lunch.data
-            new_opening.close_lunch = form.close_lunch.data
-            new_opening.open_dinner = form.open_dinner.data
-            new_opening.close_dinner = form.close_dinner.data
-            db.session.add(new_opening)
-            db.session.commit()
+            day_json = {}
+            week_day = int(days[i])
+            current_app.logger.debug("Week day is {}".format(week_day))
+            close_dinner = str(form.close_dinner.data)
+            current_app.logger.debug("Close dinner {}".format(close_dinner))
+            close_lunch = str(form.close_lunch.data)
+            current_app.logger.debug("Close lunch  {}".format(close_lunch))
+            close_lunch = str(form.close_lunch.data)
+            current_app.logger.debug("Close lunch  {}".format(close_lunch))
+            open_dinner = str(form.open_dinner.data)
+            current_app.logger.debug("Open dinner {}".format(open_dinner))
+            open_lunch = str(form.open_lunch.data)
+            current_app.logger.debug("Open lunch {}".format(open_lunch))
+            day_json["close_dinner"] = close_dinner
+            day_json["close_lunch"] = close_lunch
+            day_json["open_dinner"] = open_dinner
+            day_json["open_lunch"] = open_lunch
+            day_json["week_day"] = week_day
+            opening_json.append(day_json)
+        current_app.logger.debug("Opening day list \n{}".format(opening_json))
+        json_body["opening"] = opening_json
 
-        # inserimento tipi di cucina
-        cuisin_type = form.cuisine.data
-        for i in range(len(cuisin_type)):
-            new_cuisine = Menu()
-            new_cuisine.restaurant_id = restaurant.id
-            new_cuisine.cusine = cuisin_type[i]
-            new_cuisine.description = ""
-            db.session.add(new_cuisine)
-            db.session.commit()
+        cuisine_type = form.cuisine.data
+        current_app.logger.debug("cuisine_type list is \n{}".format(cuisine_type))
+        json_body["menu"] = cuisine_type
 
+        url = "{}/create".format(RESTAURANTS_MICROSERVICE_URL)
+        current_app.logger.debug("URL is: {}".format(url))
+        current_app.logger.debug("Request body is: {}".format(json_body))
+        restaurant = HttpUtils.make_post_request(url, json_body)
         return restaurant
 
     @staticmethod
@@ -79,7 +104,13 @@ class RestaurantServices:
         """
         Method to return a list of all restaurants inside the database
         """
-        all_restaurants = db.session.query(Restaurant).all()
+        url = "{}".format(RESTAURANTS_MICROSERVICE_URL)
+        current_app.logger.debug("URL microservices: {}".format(url))
+        response = HttpUtils.make_get_request(url)
+        if response is None:
+            current_app.logger.error("Microservices error")
+            return []
+        all_restaurants = response["restaurants"]
         return all_restaurants
 
     @staticmethod

@@ -19,7 +19,7 @@ home = Blueprint("home", __name__)
 @home.route("/")
 def index():
     DispatcherMessage.send_message(CALCULATE_RATING_RESTAURANTS, [])
-    restaurants = db.session.query(Restaurant).all()
+    restaurants = RestaurantServices.get_all_restaurants()
     if current_user is None:
         _test = "anonymous_test"
     else:

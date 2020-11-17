@@ -1,5 +1,4 @@
 from monolith.app_constant import *
-from monolith.services.restaurant_services import RestaurantServices
 
 _CELERY = False
 
@@ -24,10 +23,4 @@ class DispatcherMessage:
         file app_constant.py and check if there is condition to dispatc the test
         :return: nothings
         """
-        if _CELERY is False:
-            if type_message == CALCULATE_RATING_RESTAURANTS:
-                RestaurantServices.calculate_rating_for_all()
-            elif type_message == CALCULATE_RATING_RESTAURANT:
-                RestaurantServices.get_rating_restaurant(params[0])
-            return
         return
