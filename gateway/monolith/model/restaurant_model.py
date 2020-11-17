@@ -1,4 +1,7 @@
-from monolith.database import Restaurant, Menu, PhotoGallery, MenuDish, OpeningHours
+from monolith.model.menu_model import MenuModel
+from monolith.model.dish_model import DishModel
+from monolith.model.photo_model import PhotoModel
+from monolith.model.opening_hours_model import OpeningHoursModel
 
 
 class RestaurantModel:
@@ -8,50 +11,63 @@ class RestaurantModel:
 
     def __init__(self) -> None:
         ## Array of cusine
-        self.cusine = []
-        # Array of PhotoGallery
         self.photos = []
-        # Array of MenuDish
         self.dishes = []
-        ## array of OpeningHours
         self.opening_hours = []
 
-    def bind_restaurant(self, db_object: Restaurant):
-        """
-        This method contains the code to bind the db object with a model of application
-        :param db_object: instance of Restaurant from database
-        """
-        self.name = db_object.name
-        self.phone = db_object.phone
-        self.lat = db_object.lat
-        self.lon = db_object.lon
-        self.covid_measures = db_object.covid_measures
-
-    def bind_menu(self, db_object: Menu):
+    def bind_menu(self, db_object):
         """
         This method bind the object from the db to RestaurantModel
         :param db_object: instance of Menu object from database
         """
-        self.cusine.append(db_object.cusine)
+        for dish in db_object:
+            model = MenuModel()
+            model.fill_from_json(dish)
+            self.cusine.append(model)
 
-    def bind_photo(self, db_obj: PhotoGallery):
+    def bind_photo(self, db_obj):
         """
         This method bind the object from the database to RestaurantModel
         :param db_obj: instance of Menu object from database
         """
-        self.photos.append(db_obj)
+        for photo in db_obj:
+            model = PhotoModel()
+            model.fill_from_json(photo)
+            self.photos.append(model)
 
-    def bind_dish(self, db_obj: MenuDish):
+    def bind_dish(self, db_obj):
         """
         This method bind the information inside the object
         :param db_obj: instance of MenuDish object from database
         """
-        self.dishes.append(db_obj)
+        for dish in db_obj:
+            model = DishModel()
+            model.fill_from_json(dish)
+            self.dishes.append(model)
 
-    def bind_hours(self, obj: OpeningHours):
+    def bind_hours(self, obj):
         """
         This method bind the information inside the object
         :param obj: instance of OpeningHours object from database
         :return:
         """
-        self.opening_hours.append(obj)
+        for hour in obj:
+            model = OpeningHoursModel()
+            model.fill_from_json(hour)
+            self.opening_hours.append(model)
+
+    def from_simple_json(self, only_rest):
+        """
+        This method parser the json and make the model available
+        this parser only the information related to restaurants
+        """
+        if "id" in only_rest:
+            self.id = only_rest["id"]
+        self.name = only_rest["name"]
+        self.phone = only_rest["phone"]
+        self.owner_email = only_rest["owner_email"]
+        self.lon = only_rest["lon"]
+        self.lat = only_rest["lat"]
+        self.covid_measures = only_rest["covid_measures"]
+        self.rating = only_rest["rating"]
+        self.avg_time = only_rest["avg_time"]
