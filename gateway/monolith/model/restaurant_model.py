@@ -21,9 +21,9 @@ class RestaurantModel:
         This method bind the object from the db to RestaurantModel
         :param db_object: instance of Menu object from database
         """
-        for dish in db_object:
+        for cuisine in db_object:
             model = MenuModel()
-            model.fill_from_json(dish)
+            model.fill_from_json(cuisine)
             self.cusine.append(model)
 
     def bind_photo(self, db_obj):

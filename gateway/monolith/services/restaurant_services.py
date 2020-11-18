@@ -145,7 +145,7 @@ class RestaurantServices:
     @staticmethod
     def get_menu_restaurant(restaurant_id: int):
         """
-        This method help to retreival all information inside the
+        This method help to retrieve all information inside the
         """
         url = "{}/{}/menu".format(RESTAURANTS_MICROSERVICE_URL, restaurant_id)
         current_app.logger.debug("URL to microservices is {}".format(url))
@@ -384,10 +384,10 @@ class RestaurantServices:
         if model is None:
             return None
 
-        cusine = RestaurantServices.get_menu_restaurant(restaurant_id)
-        if cusine is None:
+        cuisine = RestaurantServices.get_menu_restaurant(restaurant_id)
+        if cuisine is None:
             return None
-        model.bind_menu(cusine)
+        model.bind_menu(cuisine)
 
         photos = RestaurantServices.get_photos_restaurants(restaurant_id)
         if photos is None:
