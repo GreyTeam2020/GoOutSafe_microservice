@@ -267,8 +267,11 @@ class RestaurantServices:
         """
         Given the id return the name of the restaurant
         """
-        name = db.session.query(Restaurant.name).filter_by(id=restaurant_id).first()[0]
-        return name
+        response = HttpUtils.make_get_request("{}/{}/name".format(RESTAURANTS_MICROSERVICE_URL, restaurant_id))
+        if response is None:
+            return ""
+
+        return response["result"]
 
     @staticmethod
     def get_restaurants_by_keyword(name: str = None):
@@ -280,7 +283,15 @@ class RestaurantServices:
         """
         if name is None:
             raise Exception("Name is required to make this type of research")
-        return Restaurant.query.filter(Restaurant.name.ilike("%{}%".format(name))).all()
+        response = HttpUtils.make_get_request("{}/search/{}".format(RESTAURANTS_MICROSERVICE_URL, name))
+
+        rest_list = []
+        for json in response["restaurants"]:
+            rest = RestaurantModel()
+            rest.from_simple_json(json)
+            rest_list.append(rest)
+
+        return rest_list
 
     @staticmethod
     def get_restaurant_people(restaurant_id: int):
