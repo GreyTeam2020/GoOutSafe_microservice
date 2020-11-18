@@ -57,7 +57,7 @@ class RestaurantModel:
             model.fill_from_json(hour)
             self.opening_hours.append(model)
 
-    def from_simple_json(self, only_rest):
+    def fill_from_json(self, only_rest):
         """
         This method parser the json and make the model available
         this parser only the information related to restaurants

@@ -99,7 +99,7 @@ class RestaurantServices:
         current_app.logger.debug("Request body is: {}".format(json_body))
         restaurant = HttpUtils.make_post_request(url, json_body)
         restaurant_model = RestaurantModel()
-        restaurant_model.from_simple_json(restaurant)
+        restaurant_model.fill_from_json(restaurant)
         return restaurant_model
 
     @staticmethod
@@ -129,7 +129,7 @@ class RestaurantServices:
             return None
         current_app.logger.debug(restaurant)
         restaurant_model = RestaurantModel()
-        restaurant_model.from_simple_json(restaurant)
+        restaurant_model.fill_from_json(restaurant)
         return restaurant_model
 
     @staticmethod
@@ -298,7 +298,7 @@ class RestaurantServices:
         rest_list = []
         for json in response["restaurants"]:
             rest = RestaurantModel()
-            rest.from_simple_json(json)
+            rest.fill_from_json(json)
             rest_list.append(rest)
 
         return rest_list
@@ -415,46 +415,3 @@ class RestaurantServices:
         model.bind_hours(q_hours)
 
         return model
-
-    @staticmethod
-    def get_rating_restaurant(restaurant_id: int) -> float:
-        """
-        TODO(vincenzopalazzo) this function need more testing.
-        This method perform the request to calculate the rating of the restaurants
-        with the review.
-        :param restaurant_id: the restaurant id
-        :return: the rating value, as 0.0 or 5.0
-        """
-        rating_value = 0.0
-        restaurant = db.session.query(Restaurant).filter_by(id=restaurant_id).first()
-        if restaurant is None:
-            raise Exception(
-                "Restaurant with id {} don't exist on database".format(restaurant_id)
-            )
-        reviews_list = (
-            db.session.query(Review).filter_by(restaurant_id=restaurant_id).all()
-        )
-        if (reviews_list is None) or (len(reviews_list) == 0):
-            return rating_value
-
-        for review in reviews_list:
-            rating_value = rating_value + float(review.stars)
-
-        rating_value = rating_value / float(len(reviews_list))
-        current_app.logger.debug(
-            "Rating calculate for restaurant with name {} is {}".format(
-                restaurant.name, rating_value
-            )
-        )
-        restaurant.rating = Decimal(rating_value)
-        db.session.commit()
-        return rating_value
-
-    @staticmethod
-    def calculate_rating_for_all():
-        """
-        This method is used inside celery background task to calculate the rating for each restaurants
-        """
-        restaurants_list = db.session.query(Restaurant).all()
-        for restaurant in restaurants_list:
-            RestaurantServices.get_rating_restaurant(restaurant.id)
