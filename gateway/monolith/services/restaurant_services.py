@@ -18,6 +18,8 @@ from monolith.model.restaurant_model import RestaurantModel
 from monolith.app_constant import RESTAURANTS_MICROSERVICE_URL
 from monolith.utils.http_utils import HttpUtils
 
+from monolith.model.review_model import ReviewModel
+
 
 class RestaurantServices:
     """
@@ -123,6 +125,7 @@ class RestaurantServices:
         restaurant = HttpUtils.make_get_request(url)
         if restaurant is None:
             return None
+        current_app.logger.debug(restaurant)
         restaurant_model = RestaurantModel()
         restaurant_model.from_simple_json(restaurant)
         return restaurant_model
@@ -226,31 +229,38 @@ class RestaurantServices:
         if stars < 0 or stars > 5:
             return None
 
-        new_review = Review()
-        new_review.restaurant_id = restaurant_id
-        new_review.reviewer_id = reviewer_id
-        new_review.stars = stars
-        new_review.review = review
+        json = {"stars": stars, "review": review, "reviewer_email": current_user.email}
+        response = HttpUtils.make_post_request("{}/{}/reviews".format(RESTAURANTS_MICROSERVICE_URL, restaurant_id), json)
 
-        db.session.add(new_review)
-        db.session.commit()
+        if response is None:
+            return None
 
-        return new_review
+        review = ReviewModel()
+        # TODO: qui mi serve la nuova review nella response, perchè altrimenti non ho dati che mi servono,
+        # TODO: per adesso li invento
+        json["id"] = 1
+        json["data"] = datetime.now().strftime("%m/%d/%Y, %H:%M:%S")
+        json["restaurant_id"] = restaurant_id
+        # TODO: fine dati inventati
+        review.fill_from_json(json)
+        return review
 
     @staticmethod
     def get_three_reviews(restaurant_id):
         """
         Given the restaurant_di return three random reviews
         """
-        reviews = (
-            db.session.query(Review)
-            .filter_by(restaurant_id=restaurant_id)
-            .order_by(func.random())
-            .limit(3)
-            .all()
-        )
+        response = HttpUtils.make_get_request("{}/{}/reviews/3".format(RESTAURANTS_MICROSERVICE_URL, restaurant_id))
 
-        return reviews
+        if response is None:
+            return []
+
+        review_list = []
+        for json in response["Reviews"]:
+            review = ReviewModel()
+            review.fill_from_json(json)
+            review_list.append(review)
+        return review_list
 
     @staticmethod
     def get_restaurant_name(restaurant_id):
