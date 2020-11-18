@@ -6,13 +6,10 @@ from flask_login import current_user
 
 from monolith.database import (
     Restaurant,
-    Menu,
     OpeningHours,
     RestaurantTable,
     Review,
     Reservation,
-    PhotoGallery,
-    MenuDish,
 )
 from monolith.forms import RestaurantForm
 from monolith.database import db
@@ -97,7 +94,9 @@ class RestaurantServices:
         current_app.logger.debug("URL is: {}".format(url))
         current_app.logger.debug("Request body is: {}".format(json_body))
         restaurant = HttpUtils.make_post_request(url, json_body)
-        return restaurant
+        restaurant_model = RestaurantModel()
+        restaurant_model.from_simple_json(restaurant)
+        return restaurant_model
 
     @staticmethod
     def get_all_restaurants():
@@ -112,6 +111,69 @@ class RestaurantServices:
             return []
         all_restaurants = response["restaurants"]
         return all_restaurants
+
+    @staticmethod
+    def get_rest_by_id(id: int):
+        """
+        This method contains the logic to get an restaurants by id
+        :param id: The restaurants id
+        """
+        url = "{}/{}".format(RESTAURANTS_MICROSERVICE_URL, id)
+        current_app.logger.debug("URL to microservices is {}".format(url))
+        restaurant = HttpUtils.make_get_request(url)
+        if restaurant is None:
+            return None
+        restaurant_model = RestaurantModel()
+        restaurant_model.from_simple_json(restaurant)
+        return restaurant_model
+
+    @staticmethod
+    def get_dishes_restaurant(restaurant_id: int):
+        """
+        This method return the restaurants dished
+        """
+        url = "{}/{}/dishes".format(RESTAURANTS_MICROSERVICE_URL, restaurant_id)
+        current_app.logger.debug("URL to microservices is {}".format(url))
+        response = HttpUtils.make_get_request(url)
+        if response is None:
+            return None
+        return response["dishes"]
+
+    @staticmethod
+    def get_menu_restaurant(restaurant_id: int):
+        """
+        This method help to retreival all information inside the
+        """
+        url = "{}/{}/menu".format(RESTAURANTS_MICROSERVICE_URL, restaurant_id)
+        current_app.logger.debug("URL to microservices is {}".format(url))
+        response = HttpUtils.make_get_request(url)
+        if response is None:
+            return None
+        return response["menus"]
+
+    @staticmethod
+    def get_opening_hours_restaurant(restaurant_id: int):
+        """
+        This method help to retreival all information inside the
+        """
+        url = "{}/{}/openings".format(RESTAURANTS_MICROSERVICE_URL, restaurant_id)
+        current_app.logger.debug("URL to microservices is {}".format(url))
+        response = HttpUtils.make_get_request(url)
+        if response is None:
+            return None
+        return response["opening hours"]
+
+    @staticmethod
+    def get_photos_restaurants(restaurant_id: int):
+        """
+        This method retrieval all information about the restaurants photos
+        """
+        url = "{}/{}/photos".format(RESTAURANTS_MICROSERVICE_URL, restaurant_id)
+        current_app.logger.debug("URL to microservices is {}".format(url))
+        response = HttpUtils.make_get_request(url)
+        if response is None:
+            return None
+        return response["Photos"]
 
     @staticmethod
     def get_reservation_rest(owner_id, restaurant_id, from_date, to_date, email):
@@ -297,34 +359,29 @@ class RestaurantServices:
         This method contains the logic to get all informations about the restaurants.
         :return: RestaurantsModel
         """
-        model = RestaurantModel()
-        rest = db.session.query(Restaurant).filter_by(id=restaurant_id).all()
-        if (rest is None) or (len(rest) == 0):
+        model = RestaurantServices.get_rest_by_id(restaurant_id)
+        if model is None:
             return None
-        rest = rest[0]
-        model.bind_restaurant(rest)
-        q_cuisine = db.session.query(Menu).filter_by(restaurant_id=restaurant_id).all()
-        for cusine in q_cuisine:
-            model.bind_menu(cusine)
-        photos = (
-            db.session.query(PhotoGallery)
-            .filter_by(restaurant_id=int(restaurant_id))
-            .all()
-        )
-        for photo in photos:
-            model.bind_photo(photo)
 
-        dishes = db.session.query(MenuDish).filter_by(restaurant_id=restaurant_id).all()
-        for dish in dishes:
-            model.bind_dish(dish)
+        cusine = RestaurantServices.get_menu_restaurant(restaurant_id)
+        if cusine is None:
+            return None
+        model.bind_menu(cusine)
 
-        q_hours = (
-            db.session.query(OpeningHours)
-            .filter_by(restaurant_id=int(restaurant_id))
-            .all()
-        )
-        for hour in q_hours:
-            model.bind_hours(hour)
+        photos = RestaurantServices.get_photos_restaurants(restaurant_id)
+        if photos is None:
+            return None
+        model.bind_photo(photos)
+
+        dishes = RestaurantServices.get_dishes_restaurant(restaurant_id)
+        if dishes is None:
+            return None
+        model.bind_dish(dishes)
+
+        q_hours = RestaurantServices.get_opening_hours_restaurant(restaurant_id)
+        if q_hours is None:
+            return None
+        model.bind_hours(q_hours)
 
         return model
 
