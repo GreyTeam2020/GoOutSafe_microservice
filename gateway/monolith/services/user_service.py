@@ -1,5 +1,5 @@
 import requests
-from flask import session, current_app
+from flask import session, current_app, redirect
 from flask_login import current_user, login_user
 
 from monolith.database import db, Positive
@@ -56,14 +56,16 @@ class UserService:
                     "Error during the microservice call {}".format(str(ex))
                 )
                 return False
-            restaurant = RestaurantModel()
-            current_app.logger.debug(
-                "Creating Restaurant model starting from: {}".format(response.json())
-            )
-            restaurant.from_simple_json(response.json())
 
-            session["RESTAURANT_ID"] = restaurant.id
-            session["RESTAURANT_NAME"] = restaurant.name
+            if response.ok:
+                restaurant = RestaurantModel()
+                current_app.logger.debug(
+                    "Creating Restaurant model starting from: {}".format(response.json())
+                )
+                restaurant.from_simple_json(response.json())
+
+                session["RESTAURANT_ID"] = restaurant.id
+                session["RESTAURANT_NAME"] = restaurant.name
 
         return True
 
