@@ -53,6 +53,7 @@ def restaurant_sheet(restaurant_id):
 
     model = RestaurantServices.get_all_restaurants_info(restaurant_id)
     if model is None:
+        ##TODO FIX THIS with a message in a view
         abort(501)
 
     # q_hours = db.session.query(OpeningHours).filter_by(restaurant_id=int(restaurant_id)).all()
