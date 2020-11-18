@@ -97,7 +97,7 @@ class RestaurantServices:
         current_app.logger.debug("Request body is: {}".format(json_body))
         restaurant = HttpUtils.make_post_request(url, json_body)
         restaurant_model = RestaurantModel()
-        restaurant_model.from_simple_json(restaurant)
+        restaurant_model.fill_from_json(restaurant)
         return restaurant_model
 
     @staticmethod
@@ -127,7 +127,7 @@ class RestaurantServices:
             return None
         current_app.logger.debug(restaurant)
         restaurant_model = RestaurantModel()
-        restaurant_model.from_simple_json(restaurant)
+        restaurant_model.fill_from_json(restaurant)
         return restaurant_model
 
     @staticmethod
@@ -288,7 +288,7 @@ class RestaurantServices:
         rest_list = []
         for json in response["restaurants"]:
             rest = RestaurantModel()
-            rest.from_simple_json(json)
+            rest.fill_from_json(json)
             rest_list.append(rest)
 
         return rest_list
