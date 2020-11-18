@@ -5,7 +5,7 @@ from flask_login import current_user, login_user
 from monolith.database import db, Positive
 from monolith.forms import UserForm, LoginForm
 from monolith.app_constant import USER_MICROSERVICE_URL, RESTAURANTS_MICROSERVICE_URL
-
+from monolith.utils.http_utils import HttpUtils
 from monolith.model import RestaurantModel
 from monolith.model import UserModel
 
@@ -16,6 +16,28 @@ class UserService:
     - create a new user
     - deleter a user if exist
     """
+
+    @staticmethod
+    def login_user(email: str, password: str) -> (UserModel,  int):
+        """
+        This method perform the http request to perform the login on user microservices
+        :return It return the user if the login has success
+        """
+        current_app.logger.debug("Email user: {}".format(email))
+        current_app.logger.debug("Password is {}".format(password))
+        url = "{}/login/".format(USER_MICROSERVICE_URL)
+        current_app.logger.debug("URL to call microservices: {}".format(url))
+        json = {
+            "email": email,
+            "password": password
+        }
+        response, status_code = HttpUtils.make_post_request(url, json)
+        if response is None:
+            return None, status_code
+        user = UserModel()
+        user.fill_from_json(response)
+        return user, status_code
+
 
     @staticmethod
     def log_in_user(user):
@@ -77,7 +99,7 @@ class UserService:
         :return: role value of the user
         """
         try:
-            url = "{}/role/{}".format(USER_MICROSERVICE_URL, str(role_id))
+            url = "{}/role/{}/".format(USER_MICROSERVICE_URL, str(role_id))
             current_app.logger.debug("Url is {}".format(url))
             response = requests.get(url=url)
         except requests.exceptions.ConnectionError as ex:

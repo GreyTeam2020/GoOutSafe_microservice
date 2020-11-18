@@ -10,6 +10,7 @@ services:
         depends_on:
             - user_api
             - sendemail_api
+            - restaurants_api
         restart: always
         build: ./gateway
         volumes:
@@ -33,17 +34,16 @@ services:
     celery:
         depends_on:
             - redis
-            - gooutsafe
-        build: ./gateway
+        build: ./restaurants_microservice
         restart: always
-        command: celery -A monolith:celery beat --loglevel=DEBUG
+        command: celery -A background.celery_app worker --loglevel=DEBUG -B
         links:
             -  redis
         volumes:
-            - ./gateway/db:/code/gateway/db
+            - ./restaurants_microservice:/code/
     celery_send_email:
         depends_on:
-            - redis
+            - redis_email
         build: ./email_microservice
         restart: always
         command: celery -A background.celery_app worker --loglevel=DEBUG

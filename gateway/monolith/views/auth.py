@@ -26,28 +26,12 @@ def login():
     if request.method == "POST":
         if form.validate_on_submit():
             email, password = form.data["email"], form.data["password"]
-            json_login = {"email": email, "password": password}
             url = "{}/login".format(USER_MICROSERVICE_URL)
             current_app.logger.debug("URL to user microservice: {}".format(url))
-            # Look at https://github.com/psf/requests/issues/1198
-            # TODO implement it the method inside the login
-            try:
-                current_app.logger.debug(
-                    "Test call to role with URL: {}".format(
-                        "{}/role/1".format(USER_MICROSERVICE_URL)
-                    )
-                )
-                response = requests.get(
-                    url="{}/role/1".format(USER_MICROSERVICE_URL), allow_redirects=True
-                )
-                current_app.logger.debug(
-                    "Test call to role: {}".format(response.json())
-                )
-                response = requests.post(url=url, json=json_login, allow_redirects=True)
-            except requests.exceptions.ConnectionError as ex:
-                current_app.logger.error(
-                    "Error during the microservice call {}".format(str(ex))
-                )
+            # Look at https://urllib3.readthedocs.io/en/latest/user-guide.html#certificate-verification
+            user, status_code = UserService.login_user(email, password)
+            # TODO improve the error code inside the User API
+            if status_code != 404:
                 return render_template(
                     "login.html",
                     form=form,
@@ -55,19 +39,14 @@ def login():
                     message="Connection refused",
                 )
 
-            if not response.ok:
-                json = response.json()
-                current_app.logger.error(json)
+            if status_code == 404:
                 return render_template(
                     "login.html",
                     form=form,
                     _test="error_login",
                     message="User not exist",
                 )
-            json = response.json()
-            current_app.logger.debug("Result from microservices: {}".format(json))
-            user = UserModel()
-            user.fill_from_json(json)
+
             if UserService.log_in_user(user):
                 return redirect("/")
             else:
