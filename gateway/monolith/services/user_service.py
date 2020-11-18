@@ -47,7 +47,9 @@ class UserService:
             # and set the session
             try:
                 url = "{}/id/{}".format(RESTAURANTS_MICROSERVICE_URL, str(user.email))
-                current_app.logger.debug("Getting the restaurant of the user: Url is {}".format(url))
+                current_app.logger.debug(
+                    "Getting the restaurant of the user: Url is {}".format(url)
+                )
                 response = requests.get(url=url)
             except requests.exceptions.ConnectionError as ex:
                 current_app.logger.error(
@@ -55,12 +57,13 @@ class UserService:
                 )
                 return False
             restaurant = RestaurantModel()
-            current_app.logger.debug("Creating Restaurant model starting from: {}".format(response.json()))
+            current_app.logger.debug(
+                "Creating Restaurant model starting from: {}".format(response.json())
+            )
             restaurant.from_simple_json(response.json())
 
             session["RESTAURANT_ID"] = restaurant.id
             session["RESTAURANT_NAME"] = restaurant.name
-
 
         return True
 
@@ -202,7 +205,9 @@ class UserService:
             url = "{}/data/".format(USER_MICROSERVICE_URL)
             current_app.logger.debug("Url is: {}".format(url))
             response = requests.put(url, json=json_request)
-            current_app.logger.debug("Header Request: {}".format(response.request.headers))
+            current_app.logger.debug(
+                "Header Request: {}".format(response.request.headers)
+            )
             current_app.logger.debug("Body Request: {}".format(response.request.body))
         except requests.exceptions.ConnectionError as ex:
             current_app.logger.error(
@@ -213,7 +218,7 @@ class UserService:
         if not response.ok:
             current_app.logger.error("Error from USER microservice")
             current_app.logger.error("Error received {}".format(response.reason))
-            #current_app.logger.error("Error response received {}".format(json))
+            # current_app.logger.error("Error response received {}".format(json))
             return None
         json = response.json()
         current_app.logger.debug("Response: ".format(json))
@@ -285,3 +290,24 @@ class UserService:
         :return the object user or None
         """
         pass
+
+    @staticmethod
+    def get_user_by_email(email):
+        try:
+            url = "{}/email".format(USER_MICROSERVICE_URL, email)
+            current_app.logger.debug("Url is: {}".format(url))
+            response = requests.post(url, json={"email": email})
+        except requests.exceptions.ConnectionError as ex:
+            current_app.logger.error(
+                "Error during the microservice call {}".format(str(ex))
+            )
+            return None
+        if not response.ok:
+            current_app.logger.error(
+                "Microservice response is: {}".format(response.text)
+            )
+            return None
+        user = UserModel()
+        current_app.logger.debug("Microservice response is: {}".format(response.json()))
+        user.fill_from_json(response.json())
+        return user

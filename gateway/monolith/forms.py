@@ -26,7 +26,7 @@ class UserEditForm(FlaskForm):
     lastname = f.StringField("lastname", validators=[DataRequired()])
     phone = f.StringField("phone", validators=[DataRequired()])
     dateofbirth = f.DateField("dateofbirth", format="%d/%m/%Y")
-    display = ["email", "firstname", "lastname", "phone","dateofbirth"]
+    display = ["email", "firstname", "lastname", "phone", "dateofbirth"]
 
 
 class RestaurantForm(FlaskForm):

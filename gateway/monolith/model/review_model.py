@@ -2,7 +2,6 @@ from datetime import datetime
 
 
 class ReviewModel:
-
     def fill_from_json(self, json_obj):
         self.id = json_obj["id"]
         self.stars = json_obj["stars"]

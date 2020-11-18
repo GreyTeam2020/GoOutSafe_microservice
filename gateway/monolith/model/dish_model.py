@@ -1,4 +1,3 @@
-
 class DishModel:
     """
     This is the class model about the dish db concept

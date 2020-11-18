@@ -46,7 +46,9 @@ class RestaurantServices:
         current_app.logger.debug("owner_email is {}".format(owner_email))
         lat_rest = float(form.lat.data)
         lon_rest = float(form.lon.data)
-        current_app.logger.debug("Restaurant position is lat={} lon={}".format(lat_rest, lon_rest))
+        current_app.logger.debug(
+            "Restaurant position is lat={} lon={}".format(lat_rest, lon_rest)
+        )
         restaurant_json = {
             "name": name_rest,
             "covid_measures": covid_measures,
@@ -55,7 +57,7 @@ class RestaurantServices:
             "lat": lat_rest,
             "lon": lon_rest,
             "rating": 0,
-            "avg_time": 0
+            "avg_time": 0,
         }
         current_app.logger.debug("Restaurants obj is {}".format(restaurant_json))
         json_body["restaurant"] = restaurant_json
@@ -230,7 +232,9 @@ class RestaurantServices:
             return None
 
         json = {"stars": stars, "review": review, "reviewer_email": current_user.email}
-        response = HttpUtils.make_post_request("{}/{}/reviews".format(RESTAURANTS_MICROSERVICE_URL, restaurant_id), json)
+        response = HttpUtils.make_post_request(
+            "{}/{}/reviews".format(RESTAURANTS_MICROSERVICE_URL, restaurant_id), json
+        )
 
         if response is None:
             return None
@@ -250,7 +254,9 @@ class RestaurantServices:
         """
         Given the restaurant_di return three random reviews
         """
-        response = HttpUtils.make_get_request("{}/{}/reviews/3".format(RESTAURANTS_MICROSERVICE_URL, restaurant_id))
+        response = HttpUtils.make_get_request(
+            "{}/{}/reviews/3".format(RESTAURANTS_MICROSERVICE_URL, restaurant_id)
+        )
 
         if response is None:
             return []
@@ -267,7 +273,9 @@ class RestaurantServices:
         """
         Given the id return the name of the restaurant
         """
-        response = HttpUtils.make_get_request("{}/{}/name".format(RESTAURANTS_MICROSERVICE_URL, restaurant_id))
+        response = HttpUtils.make_get_request(
+            "{}/{}/name".format(RESTAURANTS_MICROSERVICE_URL, restaurant_id)
+        )
         if response is None:
             return ""
 
@@ -283,7 +291,9 @@ class RestaurantServices:
         """
         if name is None:
             raise Exception("Name is required to make this type of research")
-        response = HttpUtils.make_get_request("{}/search/{}".format(RESTAURANTS_MICROSERVICE_URL, name))
+        response = HttpUtils.make_get_request(
+            "{}/search/{}".format(RESTAURANTS_MICROSERVICE_URL, name)
+        )
 
         rest_list = []
         for json in response["restaurants"]:

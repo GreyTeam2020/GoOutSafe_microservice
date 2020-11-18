@@ -2,7 +2,6 @@ from datetime import datetime
 
 
 class OpeningHoursModel:
-
     def fill_from_json(self, json_obj):
         if "id" in json_obj:
             self.id = json_obj["id"]

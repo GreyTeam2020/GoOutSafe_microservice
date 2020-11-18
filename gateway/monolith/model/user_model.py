@@ -21,9 +21,11 @@ class UserModel:
         self.phone = json_obj["phone"]
         self.firstname = json_obj["firstname"]
         self.lastname = json_obj["lastname"]
-        #TODO: sistemare questa brutta roba
+        # TODO: sistemare questa brutta roba
         if isinstance(json_obj["dateofbirth"], str):
-            self.dateofbirth = datetime.strptime(json_obj["dateofbirth"], "%Y-%m-%dT%H:%M:%SZ")
+            self.dateofbirth = datetime.strptime(
+                json_obj["dateofbirth"], "%Y-%m-%dT%H:%M:%SZ"
+            )
         else:
             self.dateofbirth = json_obj["dateofbirth"]
         self.role_id = json_obj["role_id"]

@@ -45,6 +45,7 @@ def create_celery_app():
 
 celery_app = create_celery_app()
 
+
 @celery_app.task
 def calculate_rating_about_restaurant(restaurants_id: int):
     """
