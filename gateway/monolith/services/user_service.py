@@ -4,7 +4,9 @@ from flask_login import current_user, login_user
 
 from monolith.database import db, Positive
 from monolith.forms import UserForm, LoginForm
-from monolith.app_constant import USER_MICROSERVICE_URL
+from monolith.app_constant import USER_MICROSERVICE_URL, RESTAURANTS_MICROSERVICE_URL
+
+from monolith.model import RestaurantModel
 from monolith.model import UserModel
 
 
@@ -42,12 +44,24 @@ class UserService:
         if role_value == "OPERATOR":
             # TODO
             # get from restaurant microservice the restaurant of the user
-            # and set the session like
-            """
+            # and set the session
+            try:
+                url = "{}/id/{}".format(RESTAURANTS_MICROSERVICE_URL, str(user.email))
+                current_app.logger.debug("Getting the restaurant of the user: Url is {}".format(url))
+                response = requests.get(url=url)
+            except requests.exceptions.ConnectionError as ex:
+                current_app.logger.error(
+                    "Error during the microservice call {}".format(str(ex))
+                )
+                return False
+            restaurant = RestaurantModel()
+            current_app.logger.debug("Creating Restaurant model starting from: {}".format(response.json()))
+            restaurant.from_simple_json(response.json())
+
             session["RESTAURANT_ID"] = restaurant.id
             session["RESTAURANT_NAME"] = restaurant.name
-            """
-            pass
+
+
         return True
 
     @staticmethod
@@ -95,6 +109,7 @@ class UserService:
                 "Error during the microservice call {}".format(str(ex))
             )
             return None
+        current_app.logger.debug("Response is {}".format(response.text))
         json = response.json()
         if response.ok is False:
             current_app.logger.error("Request error: {}".format(json))
