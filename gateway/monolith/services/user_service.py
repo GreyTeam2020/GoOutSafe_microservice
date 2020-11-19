@@ -25,7 +25,7 @@ class UserService:
         """
         current_app.logger.debug("Email user: {}".format(email))
         current_app.logger.debug("Password is {}".format(password))
-        url = "{}/login/".format(USER_MICROSERVICE_URL)
+        url = "{}/login".format(USER_MICROSERVICE_URL)
         current_app.logger.debug("URL to call microservices: {}".format(url))
         json = {
             "email": email,

@@ -6,6 +6,12 @@ services:
         restart: always
         volumes:
             - ./nginx.conf:/etc/nginx/conf.d/default.conf
+        networks:
+            default:
+                aliases:
+                    - user_api
+                    - restaurants_api
+                    - sendemail_api
     gooutsafe:
         depends_on:
             - user_api

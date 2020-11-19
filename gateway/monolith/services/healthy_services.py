@@ -15,7 +15,6 @@ from sqlalchemy import extract
 
 from monolith.services import UserService
 from monolith.tests.utils import get_user_with_id
-from monolith.utils.dispaccer_events import DispatcherMessage
 from monolith.app_constant import *
 
 

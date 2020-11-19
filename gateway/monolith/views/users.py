@@ -15,7 +15,6 @@ from monolith.auth import roles_allowed
 from monolith.utils.formatter import my_date_formatter
 from monolith.model.user_model import UserModel
 from flask_login import current_user, login_user, login_required
-import requests
 
 users = Blueprint("users", __name__)
 

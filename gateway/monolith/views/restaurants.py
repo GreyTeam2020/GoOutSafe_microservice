@@ -23,7 +23,6 @@ from monolith.auth import roles_allowed
 from flask_login import current_user, login_required
 from monolith.forms import RestaurantForm, RestaurantTableForm
 from monolith.utils.formatter import my_date_formatter
-from monolith.utils.dispaccer_events import DispatcherMessage
 from monolith.app_constant import CALCULATE_RATING_RESTAURANT
 from monolith.services.user_service import UserService
 

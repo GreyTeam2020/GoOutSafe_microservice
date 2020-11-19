@@ -12,6 +12,3 @@ pip-tools==5.3.1
 black==20.8b1
 pytest==6.1.2
 pytest-cov
-pyOpenSSL
-urllib3[secure]
-certifi

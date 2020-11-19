@@ -53,7 +53,7 @@ class HttpUtils:
             current_app.logger.debug(
                 "Header Request: {}".format(response.request.headers)
             )
-            current_app.logger.debug("Body Request: {}".format(response.request.body), rify=False)
+            current_app.logger.debug("Body Request: {}".format(response.request.body))
         except requests.exceptions.ConnectionError as ex:
             current_app.logger.error(
                 "Error during the microservice call {}".format(str(ex))
@@ -63,6 +63,7 @@ class HttpUtils:
         if response.ok is False:
             current_app.logger.error("Error from microservice")
             current_app.logger.error("Error received {}".format(response.reason))
+            current_app.logger.error("Error content {}".format(response.json()))
             return None, response.status_code
         json = response.json()
         current_app.logger.debug("Response is: ".format(json))
