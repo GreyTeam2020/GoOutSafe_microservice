@@ -93,30 +93,32 @@ def create_restaurant():
     """
     form = RestaurantForm()
     if request.method == "POST":
-        if form.validate_on_submit():
-            user = UserService.user_is_present(current_user.email)
-            if user is None:
-                return render_template(
-                    "create_restaurant.html",
-                    _test="anonymus_user_test",
-                    form=form,
-                    message="User not logged",
-                )
-
-            # create the restaurant
-            newrestaurant = RestaurantServices.create_new_restaurant(
-                form, current_user.id, _max_seats
+        #TODO check why it's not working this if statement below
+        #if form.validate_on_submit():
+        current_app.logger.debug("Check if user {} si present".format(current_user.email))
+        user = UserService.user_is_present(current_user.email)
+        if user is None:
+            return render_template(
+                "create_restaurant.html",
+                _test="anonymus_user_test",
+                form=form,
+                message="User not logged",
             )
-            if newrestaurant is None:
-                return render_template(
-                    "create_restaurant.html",
-                    _test="create_rest_failed",
-                    form=form,
-                    message="Error on create services",
-                )
-            session["RESTAURANT_ID"] = newrestaurant["id"]
-            session["RESTAURANT_NAME"] = newrestaurant["name"]
-            return redirect("/")
+
+        # create the restaurant
+        newrestaurant = RestaurantServices.create_new_restaurant(
+            form, current_user.id, _max_seats
+        )
+        if newrestaurant is None:
+            return render_template(
+                "create_restaurant.html",
+                _test="create_rest_failed",
+                form=form,
+                message="Error on create services",
+            )
+        session["RESTAURANT_ID"] = newrestaurant.id
+        session["RESTAURANT_NAME"] = newrestaurant.name
+        return redirect("/")
     return render_template(
         "create_restaurant.html", _test="create_rest_test", form=form
     )

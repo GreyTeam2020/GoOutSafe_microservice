@@ -38,14 +38,22 @@ class RestaurantServices:
         # avg_time is the the how much time the people stay inside the restaurants
         name_rest = form.name.data
         current_app.logger.debug("New rest name is {}".format(name_rest))
-        phone_rest = int(form.phone.data)
+        #I'm putting this tries because form.sumbitting in the endpoint does not work
+        #so I'm checking here if the field are ok
+        try:
+            phone_rest = int(form.phone.data)
+        except:
+            return None
         current_app.logger.debug("Phone is: {}".format(phone_rest))
         covid_measures = form.covid_measures.data
         current_app.logger.debug("Covid Measures is: {}".format(covid_measures))
         owner_email = current_user.email
         current_app.logger.debug("owner_email is {}".format(owner_email))
-        lat_rest = float(form.lat.data)
-        lon_rest = float(form.lon.data)
+        try:
+            lat_rest = float(form.lat.data)
+            lon_rest = float(form.lon.data)
+        except:
+            return None
         current_app.logger.debug(
             "Restaurant position is lat={} lon={}".format(lat_rest, lon_rest)
         )
@@ -95,9 +103,7 @@ class RestaurantServices:
         json_body["menu"] = cuisine_type
 
         url = "{}/create".format(RESTAURANTS_MICROSERVICE_URL)
-        current_app.logger.debug("URL is: {}".format(url))
-        current_app.logger.debug("Request body is: {}".format(json_body))
-        restaurant = HttpUtils.make_post_request(url, json_body)
+        restaurant, status_code = HttpUtils.make_post_request(url, json_body)
         restaurant_model = RestaurantModel()
         restaurant_model.fill_from_json(restaurant)
         return restaurant_model
@@ -166,7 +172,7 @@ class RestaurantServices:
         response = HttpUtils.make_get_request(url)
         if response is None:
             return None
-        return response["opening hours"]
+        return response["openings"]
 
     @staticmethod
     def get_photos_restaurants(restaurant_id: int):
@@ -178,7 +184,7 @@ class RestaurantServices:
         response = HttpUtils.make_get_request(url)
         if response is None:
             return None
-        return response["Photos"]
+        return response["photos"]
 
     @staticmethod
     def get_reservation_rest(owner_id, restaurant_id, from_date, to_date, email):
