@@ -82,7 +82,7 @@ class UserService:
                         response.json()
                     )
                 )
-                restaurant.from_simple_json(response.json())
+                restaurant.fill_from_json(response.json())
 
                 session["RESTAURANT_ID"] = restaurant.id
                 session["RESTAURANT_NAME"] = restaurant.name

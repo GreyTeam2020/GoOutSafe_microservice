@@ -72,3 +72,6 @@ class RestaurantModel:
         self.covid_measures = only_rest["covid_measures"]
         self.rating = only_rest["rating"]
         self.avg_time = only_rest["avg_time"]
+
+    def serialize(self):
+        return dict([(k, v) for k, v in self.__dict__.items() if k[0] != "_"])

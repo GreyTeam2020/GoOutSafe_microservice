@@ -15,6 +15,7 @@ from monolith.forms import RestaurantForm
 from monolith.database import db
 from sqlalchemy.sql.expression import func, extract
 from monolith.model.restaurant_model import RestaurantModel
+from monolith.model.table_model import TableModel
 from monolith.app_constant import RESTAURANTS_MICROSERVICE_URL
 from monolith.utils.http_utils import HttpUtils
 
@@ -168,11 +169,34 @@ class RestaurantServices:
         This method help to retreival all information inside the
         """
         url = "{}/{}/openings".format(RESTAURANTS_MICROSERVICE_URL, restaurant_id)
-        current_app.logger.debug("URL to microservices is {}".format(url))
         response = HttpUtils.make_get_request(url)
         if response is None:
             return None
         return response["openings"]
+
+    @staticmethod
+    def get_restaurant_tables(restaurant_id: int):
+        """
+        This method retrieves all tables of a restaurant
+        :param restaurant_id: id of the restaurant
+        """
+        url = "{}/{}/tables".format(RESTAURANTS_MICROSERVICE_URL, restaurant_id)
+        response = HttpUtils.make_get_request(url)
+        #if no tables
+        if response is None:
+            return []
+
+        #otherwise pick from json all tables
+        #model them into TableModel
+        #and return a list of them
+        all_tables=[]
+        for json_table in response["tables"]:
+            current_app.logger.debug("table {}, seats {}".format(json_table["name"], json_table["max_seats"]))
+            new_table = TableModel()
+            new_table.fill_from_json(json_table)
+            all_tables.append(new_table)
+        return all_tables
+
 
     @staticmethod
     def get_photos_restaurants(restaurant_id: int):
@@ -421,3 +445,18 @@ class RestaurantServices:
         model.bind_hours(q_hours)
 
         return model
+
+    @staticmethod
+    def update_restaurant(restaurant_id, name, lat, lon, anticovid_measures):
+        restaurant = RestaurantServices.get_rest_by_id(restaurant_id)
+        if restaurant is None:
+            return None
+        restaurant.name = name
+        restaurant.lat = lat
+        restaurant.lon = lon
+        restaurant.covid_measures = anticovid_measures
+        url = "{}/update".format(RESTAURANTS_MICROSERVICE_URL)
+        response, status_code = HttpUtils.make_put_request(url, restaurant.serialize())
+        if status_code == 200:
+            return True
+        return None
