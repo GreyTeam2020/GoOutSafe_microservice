@@ -29,7 +29,13 @@ services:
         build: ./users_microservice
         volumes:
             - ./users_microservice:/code
+
     restaurants_api:
+        restart: always
+        build: ./restaurants_microservice
+        volumes:
+            - ./restaurants_microservice:/code
+    restaurants_api_2:
         restart: always
         build: ./restaurants_microservice
         volumes:
