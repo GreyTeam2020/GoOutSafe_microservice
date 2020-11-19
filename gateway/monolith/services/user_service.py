@@ -84,7 +84,7 @@ class UserService:
                 current_app.logger.debug(
                     "Creating Restaurant model starting from: {}".format(response.json())
                 )
-                restaurant.from_simple_json(response.json())
+                restaurant.fill_from_json(response.json())
 
                 session["RESTAURANT_ID"] = restaurant.id
                 session["RESTAURANT_NAME"] = restaurant.name
