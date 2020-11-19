@@ -18,7 +18,7 @@ class UserService:
     """
 
     @staticmethod
-    def login_user(email: str, password: str) -> (UserModel,  int):
+    def login_user(email: str, password: str) -> (UserModel, int):
         """
         This method perform the http request to perform the login on user microservices
         :return It return the user if the login has success
@@ -27,17 +27,13 @@ class UserService:
         current_app.logger.debug("Password is {}".format(password))
         url = "{}/login".format(USER_MICROSERVICE_URL)
         current_app.logger.debug("URL to call microservices: {}".format(url))
-        json = {
-            "email": email,
-            "password": password
-        }
+        json = {"email": email, "password": password}
         response, status_code = HttpUtils.make_post_request(url, json)
         if response is None:
             return None, status_code
         user = UserModel()
         user.fill_from_json(response)
         return user, status_code
-
 
     @staticmethod
     def log_in_user(user):
@@ -82,7 +78,9 @@ class UserService:
             if response.ok:
                 restaurant = RestaurantModel()
                 current_app.logger.debug(
-                    "Creating Restaurant model starting from: {}".format(response.json())
+                    "Creating Restaurant model starting from: {}".format(
+                        response.json()
+                    )
                 )
                 restaurant.from_simple_json(response.json())
 

@@ -93,9 +93,11 @@ def create_restaurant():
     """
     form = RestaurantForm()
     if request.method == "POST":
-        #TODO check why it's not working this if statement below
-        #if form.validate_on_submit():
-        current_app.logger.debug("Check if user {} si present".format(current_user.email))
+        # TODO check why it's not working this if statement below
+        # if form.validate_on_submit():
+        current_app.logger.debug(
+            "Check if user {} si present".format(current_user.email)
+        )
         user = UserService.user_is_present(current_user.email)
         if user is None:
             return render_template(
