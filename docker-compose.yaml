@@ -35,6 +35,11 @@ services:
         build: ./restaurants_microservice
         volumes:
             - ./restaurants_microservice:/code
+    booking_api:
+        restart: always
+        build: ./booking_microservice
+        volumes:
+            - ./booking_microservice:/code
     sendemail_api:
         build: ./email_microservice
     celery:
