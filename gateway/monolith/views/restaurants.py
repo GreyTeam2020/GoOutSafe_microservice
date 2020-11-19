@@ -180,11 +180,12 @@ def my_data():
 
     # get the resturant info and fill the form
     # this part is both for POST and GET requests
-    q = Restaurant.query.filter_by(id=session["RESTAURANT_ID"]).first()
-    if q is not None:
-        form = RestaurantForm(obj=q)
+    restaurant = RestaurantServices.get_rest_by_id(session["RESTAURANT_ID"])
+    if restaurant is not None:
+        form = RestaurantForm(obj=restaurant)
         form2 = RestaurantTableForm()
-        tables = RestaurantTable.query.filter_by(restaurant_id=session["RESTAURANT_ID"])
+        #tables = RestaurantTable.query.filter_by(restaurant_id=session["RESTAURANT_ID"])
+        tables = RestaurantServices.get_restaurant_tables(session["RESTAURANT_ID"])
         return render_template(
             "restaurant_data.html",
             form=form,
@@ -194,7 +195,7 @@ def my_data():
             message=message,
         )
     else:
-        return redirect("/create_restaurant")
+        return redirect("/restaurant/create")
 
 
 @restaurants.route("/restaurant/tables", methods=["GET", "POST"])

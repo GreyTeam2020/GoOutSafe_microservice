@@ -15,6 +15,7 @@ from monolith.forms import RestaurantForm
 from monolith.database import db
 from sqlalchemy.sql.expression import func, extract
 from monolith.model.restaurant_model import RestaurantModel
+from monolith.model.table_model import TableModel
 from monolith.app_constant import RESTAURANTS_MICROSERVICE_URL
 from monolith.utils.http_utils import HttpUtils
 
@@ -168,11 +169,32 @@ class RestaurantServices:
         This method help to retreival all information inside the
         """
         url = "{}/{}/openings".format(RESTAURANTS_MICROSERVICE_URL, restaurant_id)
-        current_app.logger.debug("URL to microservices is {}".format(url))
         response = HttpUtils.make_get_request(url)
         if response is None:
             return None
         return response["openings"]
+
+    @staticmethod
+    def get_restaurant_tables(restaurant_id: int):
+        """
+        This method retrieves all tables of a restaurant
+        :param restaurant_id: id of the restaurant
+        """
+        url = "{}/{}/tables".format(RESTAURANTS_MICROSERVICE_URL, restaurant_id)
+        response = HttpUtils.make_get_request(url)
+        #if no tables
+        if response is None:
+            return []
+
+        #otherwise pick from json all tables
+        #model them into TableModel
+        #and return a list of them
+        all_tables=[]
+        for json_table in response["tables"]:
+            new_table = TableModel()
+            all_tables.append(new_table.fill_from_json(json_table))
+        return all_tables
+
 
     @staticmethod
     def get_photos_restaurants(restaurant_id: int):
