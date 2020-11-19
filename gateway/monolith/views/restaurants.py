@@ -23,7 +23,6 @@ from monolith.auth import roles_allowed
 from flask_login import current_user, login_required
 from monolith.forms import RestaurantForm, RestaurantTableForm
 from monolith.utils.formatter import my_date_formatter
-from monolith.utils.dispaccer_events import DispatcherMessage
 from monolith.app_constant import CALCULATE_RATING_RESTAURANT
 from monolith.services.user_service import UserService
 
@@ -94,44 +93,32 @@ def create_restaurant():
     """
     form = RestaurantForm()
     if request.method == "POST":
-        if form.validate_on_submit():
-            q = db.session.query(Restaurant).filter_by(
-                name=form.name.data,
-                phone=form.phone.data,
-                lat=form.lat.data,
-                lon=form.lon.data,
+        #TODO check why it's not working this if statement below
+        #if form.validate_on_submit():
+        current_app.logger.debug("Check if user {} si present".format(current_user.email))
+        user = UserService.user_is_present(current_user.email)
+        if user is None:
+            return render_template(
+                "create_restaurant.html",
+                _test="anonymus_user_test",
+                form=form,
+                message="User not logged",
             )
-            if q.first() is not None:
-                return render_template(
-                    "create_restaurant.html",
-                    form=form,
-                    _test="rest_already_here_test",
-                    message="Restaurant {} in {}:{} already existed".format(
-                        form.name.data, form.lat.data, form.lon.data
-                    ),
-                )
-            user = UserService.user_is_present(current_user.email)
-            if user is None:
-                return render_template(
-                    "create_restaurant.html",
-                    _test="anonymus_user_test",
-                    form=form,
-                    message="User not logged",
-                )
 
-            # set the owner
-            newrestaurant = RestaurantServices.create_new_restaurant(
-                form, current_user.id, _max_seats
+        # create the restaurant
+        newrestaurant = RestaurantServices.create_new_restaurant(
+            form, current_user.id, _max_seats
+        )
+        if newrestaurant is None:
+            return render_template(
+                "create_restaurant.html",
+                _test="create_rest_failed",
+                form=form,
+                message="Error on create services",
             )
-            if newrestaurant is None:
-                return render_template(
-                    "create_restaurant.html",
-                    _test="create_rest_failed",
-                    form=form,
-                    message="Error on create services",
-                )
-            session["RESTAURANT_ID"] = newrestaurant["id"]
-            return redirect("/")
+        session["RESTAURANT_ID"] = newrestaurant.id
+        session["RESTAURANT_NAME"] = newrestaurant.name
+        return redirect("/")
     return render_template(
         "create_restaurant.html", _test="create_rest_test", form=form
     )

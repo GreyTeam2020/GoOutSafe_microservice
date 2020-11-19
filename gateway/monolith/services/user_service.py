@@ -1,10 +1,12 @@
 import requests
-from flask import session, current_app
+from flask import session, current_app, redirect
 from flask_login import current_user, login_user
 
 from monolith.database import db, Positive
 from monolith.forms import UserForm, LoginForm
-from monolith.app_constant import USER_MICROSERVICE_URL
+from monolith.app_constant import USER_MICROSERVICE_URL, RESTAURANTS_MICROSERVICE_URL
+from monolith.utils.http_utils import HttpUtils
+from monolith.model import RestaurantModel
 from monolith.model import UserModel
 
 
@@ -14,6 +16,28 @@ class UserService:
     - create a new user
     - deleter a user if exist
     """
+
+    @staticmethod
+    def login_user(email: str, password: str) -> (UserModel,  int):
+        """
+        This method perform the http request to perform the login on user microservices
+        :return It return the user if the login has success
+        """
+        current_app.logger.debug("Email user: {}".format(email))
+        current_app.logger.debug("Password is {}".format(password))
+        url = "{}/login".format(USER_MICROSERVICE_URL)
+        current_app.logger.debug("URL to call microservices: {}".format(url))
+        json = {
+            "email": email,
+            "password": password
+        }
+        response, status_code = HttpUtils.make_post_request(url, json)
+        if response is None:
+            return None, status_code
+        user = UserModel()
+        user.fill_from_json(response)
+        return user, status_code
+
 
     @staticmethod
     def log_in_user(user):
@@ -42,12 +66,29 @@ class UserService:
         if role_value == "OPERATOR":
             # TODO
             # get from restaurant microservice the restaurant of the user
-            # and set the session like
-            """
-            session["RESTAURANT_ID"] = restaurant.id
-            session["RESTAURANT_NAME"] = restaurant.name
-            """
-            pass
+            # and set the session
+            try:
+                url = "{}/id/{}".format(RESTAURANTS_MICROSERVICE_URL, str(user.email))
+                current_app.logger.debug(
+                    "Getting the restaurant of the user: Url is {}".format(url)
+                )
+                response = requests.get(url=url)
+            except requests.exceptions.ConnectionError as ex:
+                current_app.logger.error(
+                    "Error during the microservice call {}".format(str(ex))
+                )
+                return False
+
+            if response.ok:
+                restaurant = RestaurantModel()
+                current_app.logger.debug(
+                    "Creating Restaurant model starting from: {}".format(response.json())
+                )
+                restaurant.from_simple_json(response.json())
+
+                session["RESTAURANT_ID"] = restaurant.id
+                session["RESTAURANT_NAME"] = restaurant.name
+
         return True
 
     @staticmethod
@@ -58,7 +99,7 @@ class UserService:
         :return: role value of the user
         """
         try:
-            url = "{}/role/{}".format(USER_MICROSERVICE_URL, str(role_id))
+            url = "{}/role/{}/".format(USER_MICROSERVICE_URL, str(role_id))
             current_app.logger.debug("Url is {}".format(url))
             response = requests.get(url=url)
         except requests.exceptions.ConnectionError as ex:
@@ -95,6 +136,7 @@ class UserService:
                 "Error during the microservice call {}".format(str(ex))
             )
             return None
+        current_app.logger.debug("Response is {}".format(response.text))
         json = response.json()
         if response.ok is False:
             current_app.logger.error("Request error: {}".format(json))
@@ -187,7 +229,9 @@ class UserService:
             url = "{}/data/".format(USER_MICROSERVICE_URL)
             current_app.logger.debug("Url is: {}".format(url))
             response = requests.put(url, json=json_request)
-            current_app.logger.debug("Header Request: {}".format(response.request.headers))
+            current_app.logger.debug(
+                "Header Request: {}".format(response.request.headers)
+            )
             current_app.logger.debug("Body Request: {}".format(response.request.body))
         except requests.exceptions.ConnectionError as ex:
             current_app.logger.error(
@@ -198,7 +242,7 @@ class UserService:
         if not response.ok:
             current_app.logger.error("Error from USER microservice")
             current_app.logger.error("Error received {}".format(response.reason))
-            #current_app.logger.error("Error response received {}".format(json))
+            # current_app.logger.error("Error response received {}".format(json))
             return None
         json = response.json()
         current_app.logger.debug("Response: ".format(json))
@@ -270,3 +314,24 @@ class UserService:
         :return the object user or None
         """
         pass
+
+    @staticmethod
+    def get_user_by_email(email):
+        try:
+            url = "{}/email".format(USER_MICROSERVICE_URL, email)
+            current_app.logger.debug("Url is: {}".format(url))
+            response = requests.post(url, json={"email": email})
+        except requests.exceptions.ConnectionError as ex:
+            current_app.logger.error(
+                "Error during the microservice call {}".format(str(ex))
+            )
+            return None
+        if not response.ok:
+            current_app.logger.error(
+                "Microservice response is: {}".format(response.text)
+            )
+            return None
+        user = UserModel()
+        current_app.logger.debug("Microservice response is: {}".format(response.json()))
+        user.fill_from_json(response.json())
+        return user

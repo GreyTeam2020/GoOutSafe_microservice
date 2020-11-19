@@ -1,6 +1,7 @@
 import requests
 from flask import current_app
 
+
 class HttpUtils:
     """
     This class contains all the function to make the HTTP request
@@ -19,7 +20,9 @@ class HttpUtils:
         try:
             current_app.logger.debug("Url is: {}".format(to_url))
             response = requests.get(to_url)
-            current_app.logger.debug("Header Request: {}".format(response.request.headers))
+            current_app.logger.debug(
+                "Header Request: {}".format(response.request.headers)
+            )
         except requests.exceptions.ConnectionError as ex:
             current_app.logger.error(
                 "Error during the microservice call {}".format(str(ex))
@@ -47,18 +50,20 @@ class HttpUtils:
             current_app.logger.debug("Url is: {}".format(to_url))
             current_app.logger.debug("Body request is: {}".format(args))
             response = requests.post(url=to_url, json=args)
-            current_app.logger.debug("Header Request: {}".format(response.request.headers))
-            current_app.logger.debug("Body Request: {}".format(response.request.body))
+            current_app.logger.debug(
+                "Header Request: {}".format(response.request.headers)
+            )
         except requests.exceptions.ConnectionError as ex:
             current_app.logger.error(
                 "Error during the microservice call {}".format(str(ex))
             )
-            return None
+            return None, 500
 
-        if not response.ok:
+        if response.ok is False:
             current_app.logger.error("Error from microservice")
             current_app.logger.error("Error received {}".format(response.reason))
-            return None
+            current_app.logger.error("Error content {}".format(response.json()))
+            return None, response.status_code
         json = response.json()
-        current_app.logger.debug("Response is: ".format(json))
-        return json
+        current_app.logger.debug("Response is: {}".format(json))
+        return json, response.status_code

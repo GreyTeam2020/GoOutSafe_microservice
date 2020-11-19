@@ -15,7 +15,6 @@ from monolith.auth import roles_allowed
 from monolith.utils.formatter import my_date_formatter
 from monolith.model.user_model import UserModel
 from flask_login import current_user, login_user, login_required
-import requests
 
 users = Blueprint("users", __name__)
 
@@ -57,7 +56,22 @@ def _create_generic_user(role_id: int = 3, name_on_page: str = "customer"):
                     type=name_on_page,
                 )
             SendEmailService.confirm_registration(form.email.data, form.firstname.data)
-            return redirect("/login")
+            # if user is operator, do the login and redirect to the home
+            # in this way the home will show create restaurant page
+            if role_id == 2:
+                # we need to take the user from email
+                current_app.logger.debug(
+                    "Requesting user with email {}".format(form.email.data)
+                )
+                user = UserService.get_user_by_email(form.email.data)
+                # set the session
+                session["current_user"] = user.serialize()
+                login_user(user)
+                session["ROLE"] = "OPERATOR"
+                return redirect("/")
+            else:
+                return redirect("/login")
+
     return render_template("create_user.html", form=form, type=name_on_page)
 
 
@@ -82,7 +96,9 @@ def user_data():
                 session["current_user"] = user.serialize()
                 return render_template("user_data.html", form=form, message="Modified")
             else:
-                return render_template("user_data.html", form=form, error="Error during the operation")
+                return render_template(
+                    "user_data.html", form=form, error="Error during the operation"
+                )
         current_app.logger.debug(form.errors.items())
         return render_template("user_data.html", form=form, message="Error in the data")
     user = current_user

@@ -10,15 +10,12 @@ from monolith.services import (
     UserService,
     RestaurantServices,
 )
-from monolith.utils import DispatcherMessage
-from monolith.app_constant import CALCULATE_RATING_RESTAURANTS
 
 home = Blueprint("home", __name__)
 
 
 @home.route("/")
 def index():
-    DispatcherMessage.send_message(CALCULATE_RATING_RESTAURANTS, [])
     restaurants = RestaurantServices.get_all_restaurants()
     if current_user is None:
         _test = "anonymous_test"

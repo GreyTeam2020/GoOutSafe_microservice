@@ -1,3 +1,6 @@
+import logging
+
+import requests
 from flask import Flask
 import decimal
 from monolith.database import (
@@ -14,6 +17,7 @@ from monolith.views import blueprints
 from monolith.auth import login_manager
 import datetime
 
+logging.getLogger("urllib3").setLevel(logging.WARNING)
 
 def create_app(tests=False):
     app = Flask(__name__)

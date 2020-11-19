@@ -1,6 +1,5 @@
 import datetime
 from sqlalchemy import or_
-from monolith.utils.dispaccer_events import DispatcherMessage, CONFIRMATION_BOOKING
 
 from monolith.database import (
     db,

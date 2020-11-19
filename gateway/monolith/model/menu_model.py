@@ -1,6 +1,4 @@
-
 class MenuModel:
-
     def fill_from_json(self, json_obj):
         self.id = json_obj["id"]
         self.cusine = json_obj["cusine"]

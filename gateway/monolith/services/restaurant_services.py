@@ -18,6 +18,8 @@ from monolith.model.restaurant_model import RestaurantModel
 from monolith.app_constant import RESTAURANTS_MICROSERVICE_URL
 from monolith.utils.http_utils import HttpUtils
 
+from monolith.model.review_model import ReviewModel
+
 
 class RestaurantServices:
     """
@@ -36,15 +38,25 @@ class RestaurantServices:
         # avg_time is the the how much time the people stay inside the restaurants
         name_rest = form.name.data
         current_app.logger.debug("New rest name is {}".format(name_rest))
-        phone_rest = int(form.phone.data)
+        #I'm putting this tries because form.sumbitting in the endpoint does not work
+        #so I'm checking here if the field are ok
+        try:
+            phone_rest = int(form.phone.data)
+        except:
+            return None
         current_app.logger.debug("Phone is: {}".format(phone_rest))
         covid_measures = form.covid_measures.data
         current_app.logger.debug("Covid Measures is: {}".format(covid_measures))
         owner_email = current_user.email
         current_app.logger.debug("owner_email is {}".format(owner_email))
-        lat_rest = float(form.lat.data)
-        lon_rest = float(form.lon.data)
-        current_app.logger.debug("Restaurant position is lat={} lon={}".format(lat_rest, lon_rest))
+        try:
+            lat_rest = float(form.lat.data)
+            lon_rest = float(form.lon.data)
+        except:
+            return None
+        current_app.logger.debug(
+            "Restaurant position is lat={} lon={}".format(lat_rest, lon_rest)
+        )
         restaurant_json = {
             "name": name_rest,
             "covid_measures": covid_measures,
@@ -53,7 +65,7 @@ class RestaurantServices:
             "lat": lat_rest,
             "lon": lon_rest,
             "rating": 0,
-            "avg_time": 0
+            "avg_time": 30,
         }
         current_app.logger.debug("Restaurants obj is {}".format(restaurant_json))
         json_body["restaurant"] = restaurant_json
@@ -91,11 +103,9 @@ class RestaurantServices:
         json_body["menu"] = cuisine_type
 
         url = "{}/create".format(RESTAURANTS_MICROSERVICE_URL)
-        current_app.logger.debug("URL is: {}".format(url))
-        current_app.logger.debug("Request body is: {}".format(json_body))
-        restaurant = HttpUtils.make_post_request(url, json_body)
+        restaurant, status_code = HttpUtils.make_post_request(url, json_body)
         restaurant_model = RestaurantModel()
-        restaurant_model.from_simple_json(restaurant)
+        restaurant_model.fill_from_json(restaurant)
         return restaurant_model
 
     @staticmethod
@@ -123,8 +133,9 @@ class RestaurantServices:
         restaurant = HttpUtils.make_get_request(url)
         if restaurant is None:
             return None
+        current_app.logger.debug(restaurant)
         restaurant_model = RestaurantModel()
-        restaurant_model.from_simple_json(restaurant)
+        restaurant_model.fill_from_json(restaurant)
         return restaurant_model
 
     @staticmethod
@@ -142,7 +153,7 @@ class RestaurantServices:
     @staticmethod
     def get_menu_restaurant(restaurant_id: int):
         """
-        This method help to retreival all information inside the
+        This method help to retrieve all information inside the
         """
         url = "{}/{}/menu".format(RESTAURANTS_MICROSERVICE_URL, restaurant_id)
         current_app.logger.debug("URL to microservices is {}".format(url))
@@ -161,7 +172,7 @@ class RestaurantServices:
         response = HttpUtils.make_get_request(url)
         if response is None:
             return None
-        return response["opening hours"]
+        return response["openings"]
 
     @staticmethod
     def get_photos_restaurants(restaurant_id: int):
@@ -173,7 +184,7 @@ class RestaurantServices:
         response = HttpUtils.make_get_request(url)
         if response is None:
             return None
-        return response["Photos"]
+        return response["photos"]
 
     @staticmethod
     def get_reservation_rest(owner_id, restaurant_id, from_date, to_date, email):
@@ -226,39 +237,55 @@ class RestaurantServices:
         if stars < 0 or stars > 5:
             return None
 
-        new_review = Review()
-        new_review.restaurant_id = restaurant_id
-        new_review.reviewer_id = reviewer_id
-        new_review.stars = stars
-        new_review.review = review
+        json = {"stars": stars, "review": review, "reviewer_email": current_user.email}
+        url = "{}/{}/reviews".format(RESTAURANTS_MICROSERVICE_URL, restaurant_id)
+        current_app.logger.debug("URL to microservices: {}".format(url))
+        response = HttpUtils.make_post_request(url, json)
 
-        db.session.add(new_review)
-        db.session.commit()
+        if response is None:
+            return None
 
-        return new_review
+        review = ReviewModel()
+        # TODO: qui mi serve la nuova review nella response, perchè altrimenti non ho dati che mi servono,
+        # TODO: per adesso li invento
+        json["id"] = 1
+        json["data"] = datetime.now().strftime("%m/%d/%Y, %H:%M:%S")
+        json["restaurant_id"] = restaurant_id
+        # TODO: fine dati inventati
+        review.fill_from_json(json)
+        return review
 
     @staticmethod
     def get_three_reviews(restaurant_id):
         """
         Given the restaurant_di return three random reviews
         """
-        reviews = (
-            db.session.query(Review)
-            .filter_by(restaurant_id=restaurant_id)
-            .order_by(func.random())
-            .limit(3)
-            .all()
+        response = HttpUtils.make_get_request(
+            "{}/{}/reviews/3".format(RESTAURANTS_MICROSERVICE_URL, restaurant_id)
         )
 
-        return reviews
+        if response is None:
+            return []
+
+        review_list = []
+        for json in response["Reviews"]:
+            review = ReviewModel()
+            review.fill_from_json(json)
+            review_list.append(review)
+        return review_list
 
     @staticmethod
     def get_restaurant_name(restaurant_id):
         """
         Given the id return the name of the restaurant
         """
-        name = db.session.query(Restaurant.name).filter_by(id=restaurant_id).first()[0]
-        return name
+        response = HttpUtils.make_get_request(
+            "{}/{}/name".format(RESTAURANTS_MICROSERVICE_URL, restaurant_id)
+        )
+        if response is None:
+            return ""
+
+        return response["result"]
 
     @staticmethod
     def get_restaurants_by_keyword(name: str = None):
@@ -270,7 +297,17 @@ class RestaurantServices:
         """
         if name is None:
             raise Exception("Name is required to make this type of research")
-        return Restaurant.query.filter(Restaurant.name.ilike("%{}%".format(name))).all()
+        response = HttpUtils.make_get_request(
+            "{}/search/{}".format(RESTAURANTS_MICROSERVICE_URL, name)
+        )
+
+        rest_list = []
+        for json in response["restaurants"]:
+            rest = RestaurantModel()
+            rest.fill_from_json(json)
+            rest_list.append(rest)
+
+        return rest_list
 
     @staticmethod
     def get_restaurant_people(restaurant_id: int):
@@ -363,10 +400,10 @@ class RestaurantServices:
         if model is None:
             return None
 
-        cusine = RestaurantServices.get_menu_restaurant(restaurant_id)
-        if cusine is None:
+        cuisine = RestaurantServices.get_menu_restaurant(restaurant_id)
+        if cuisine is None:
             return None
-        model.bind_menu(cusine)
+        model.bind_menu(cuisine)
 
         photos = RestaurantServices.get_photos_restaurants(restaurant_id)
         if photos is None:
@@ -384,46 +421,3 @@ class RestaurantServices:
         model.bind_hours(q_hours)
 
         return model
-
-    @staticmethod
-    def get_rating_restaurant(restaurant_id: int) -> float:
-        """
-        TODO(vincenzopalazzo) this function need more testing.
-        This method perform the request to calculate the rating of the restaurants
-        with the review.
-        :param restaurant_id: the restaurant id
-        :return: the rating value, as 0.0 or 5.0
-        """
-        rating_value = 0.0
-        restaurant = db.session.query(Restaurant).filter_by(id=restaurant_id).first()
-        if restaurant is None:
-            raise Exception(
-                "Restaurant with id {} don't exist on database".format(restaurant_id)
-            )
-        reviews_list = (
-            db.session.query(Review).filter_by(restaurant_id=restaurant_id).all()
-        )
-        if (reviews_list is None) or (len(reviews_list) == 0):
-            return rating_value
-
-        for review in reviews_list:
-            rating_value = rating_value + float(review.stars)
-
-        rating_value = rating_value / float(len(reviews_list))
-        current_app.logger.debug(
-            "Rating calculate for restaurant with name {} is {}".format(
-                restaurant.name, rating_value
-            )
-        )
-        restaurant.rating = Decimal(rating_value)
-        db.session.commit()
-        return rating_value
-
-    @staticmethod
-    def calculate_rating_for_all():
-        """
-        This method is used inside celery background task to calculate the rating for each restaurants
-        """
-        restaurants_list = db.session.query(Restaurant).all()
-        for restaurant in restaurants_list:
-            RestaurantServices.get_rating_restaurant(restaurant.id)
