@@ -162,20 +162,12 @@ def my_data():
     """
     message = None
     if request.method == "POST":
-        # update query
-        q = Restaurant.query.filter_by(id=session["RESTAURANT_ID"]).update(
-            {
-                "name": request.form.get("name"),
-                "lat": request.form.get("lat"),
-                "lon": request.form.get("lon"),
-                "covid_measures": request.form.get("covid_measures"),
-            }
-        )
+        #update restaurant
+        restaurant_modified = RestaurantServices.update_restaurant(session["RESTAURANT_ID"], request.form.get("name"), request.form.get("lat"), request.form.get("lon"), request.form.get("covid_measures"))
         # if no resturant match the update query (session problem probably)
-        if q == 0:
-            message = "Some Errors occurs"
+        if restaurant_modified:
+            message = "Some errors occurs during modification. PLease try again later"
         else:
-            db.session.commit()
             message = "Restaurant data has been modified."
 
     # get the resturant info and fill the form
@@ -184,7 +176,7 @@ def my_data():
     if restaurant is not None:
         form = RestaurantForm(obj=restaurant)
         form2 = RestaurantTableForm()
-        #tables = RestaurantTable.query.filter_by(restaurant_id=session["RESTAURANT_ID"])
+        #get all tables
         tables = RestaurantServices.get_restaurant_tables(session["RESTAURANT_ID"])
         return render_template(
             "restaurant_data.html",

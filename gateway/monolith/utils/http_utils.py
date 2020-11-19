@@ -67,3 +67,34 @@ class HttpUtils:
         json = response.json()
         current_app.logger.debug("Response is: {}".format(json))
         return json, response.status_code
+
+    @staticmethod
+    def make_put_request(to_url: str, args):
+        """
+        This method contains the code to make the request
+        to a url.
+        :param to_url: The URL of the endpoint
+        :param args: Python object, this object help to fill the body request
+        :return the json response or None if there is some error
+        """
+        try:
+            current_app.logger.debug("Url is: {}".format(to_url))
+            current_app.logger.debug("Body request is: {}".format(args))
+            response = requests.put(url=to_url, json=args)
+            current_app.logger.debug(
+                "Header Request: {}".format(response.request.headers)
+            )
+        except requests.exceptions.ConnectionError as ex:
+            current_app.logger.error(
+                "Error during the microservice call {}".format(str(ex))
+            )
+            return None, 500
+
+        if response.ok is False:
+            current_app.logger.error("Error from microservice")
+            current_app.logger.error("Error received {}".format(response.reason))
+            current_app.logger.error("Error content {}".format(response.json()))
+            return None, response.status_code
+        json = response.json()
+        current_app.logger.debug("Response is: {}".format(json))
+        return json, response.status_code

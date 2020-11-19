@@ -443,3 +443,18 @@ class RestaurantServices:
         model.bind_hours(q_hours)
 
         return model
+
+    @staticmethod
+    def update_restaurant(restaurant_id, name, lat, lon, anticovid_measures):
+        restaurant = RestaurantServices.get_rest_by_id(restaurant_id)
+        if restaurant is None:
+            return None
+        restaurant.name = name
+        restaurant.lat = lat
+        restaurant.lon = lon
+        restaurant.covid_measures = anticovid_measures
+        url = "{}/update".format(RESTAURANTS_MICROSERVICE_URL)
+        response, status_code = HttpUtils.make_put_request(url, restaurant.serialize())
+        if status_code == 200:
+            return True
+        return None
