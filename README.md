@@ -13,7 +13,7 @@
 Each microservices is a separate repository that you can clone with the following commands
 
 ```bash
-git clone https://github.com/GreyTeam2020/GoOutSafe_microservice.git && git clone --recurse-submodules --remote-submodules
+git clone --recurse-submodules https://github.com/GreyTeam2020/GoOutSafe_microservice.git
 ```
 
 [Source](https://stackoverflow.com/a/3797061/7290562)
