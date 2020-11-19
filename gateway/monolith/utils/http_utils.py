@@ -66,5 +66,5 @@ class HttpUtils:
             current_app.logger.error("Error content {}".format(response.json()))
             return None, response.status_code
         json = response.json()
-        current_app.logger.debug("Response is: ".format(json))
+        current_app.logger.debug("Response is: {}".format(json))
         return json, response.status_code

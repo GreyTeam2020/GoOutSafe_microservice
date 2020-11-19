@@ -57,7 +57,7 @@ class RestaurantServices:
             "lat": lat_rest,
             "lon": lon_rest,
             "rating": 0,
-            "avg_time": 0,
+            "avg_time": 30,
         }
         current_app.logger.debug("Restaurants obj is {}".format(restaurant_json))
         json_body["restaurant"] = restaurant_json

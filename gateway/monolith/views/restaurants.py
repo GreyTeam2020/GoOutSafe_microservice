@@ -94,21 +94,6 @@ def create_restaurant():
     form = RestaurantForm()
     if request.method == "POST":
         if form.validate_on_submit():
-            q = db.session.query(Restaurant).filter_by(
-                name=form.name.data,
-                phone=form.phone.data,
-                lat=form.lat.data,
-                lon=form.lon.data,
-            )
-            if q.first() is not None:
-                return render_template(
-                    "create_restaurant.html",
-                    form=form,
-                    _test="rest_already_here_test",
-                    message="Restaurant {} in {}:{} already existed".format(
-                        form.name.data, form.lat.data, form.lon.data
-                    ),
-                )
             user = UserService.user_is_present(current_user.email)
             if user is None:
                 return render_template(
@@ -118,7 +103,7 @@ def create_restaurant():
                     message="User not logged",
                 )
 
-            # set the owner
+            # create the restaurant
             newrestaurant = RestaurantServices.create_new_restaurant(
                 form, current_user.id, _max_seats
             )
@@ -130,6 +115,7 @@ def create_restaurant():
                     message="Error on create services",
                 )
             session["RESTAURANT_ID"] = newrestaurant["id"]
+            session["RESTAURANT_NAME"] = newrestaurant["name"]
             return redirect("/")
     return render_template(
         "create_restaurant.html", _test="create_rest_test", form=form

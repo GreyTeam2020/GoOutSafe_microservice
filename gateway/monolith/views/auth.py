@@ -31,7 +31,7 @@ def login():
             # Look at https://urllib3.readthedocs.io/en/latest/user-guide.html#certificate-verification
             user, status_code = UserService.login_user(email, password)
             # TODO improve the error code inside the User API
-            if status_code != 404:
+            if user is None and status_code != 404:
                 return render_template(
                     "login.html",
                     form=form,
@@ -39,7 +39,7 @@ def login():
                     message="Connection refused",
                 )
 
-            if status_code == 404:
+            if user is None and status_code == 404:
                 return render_template(
                     "login.html",
                     form=form,
