@@ -238,9 +238,9 @@ class RestaurantServices:
             return None
 
         json = {"stars": stars, "review": review, "reviewer_email": current_user.email}
-        response = HttpUtils.make_post_request(
-            "{}/{}/reviews".format(RESTAURANTS_MICROSERVICE_URL, restaurant_id), json
-        )
+        url = "{}/{}/reviews".format(RESTAURANTS_MICROSERVICE_URL, restaurant_id)
+        current_app.logger.debug("URL to microservices: {}".format(url))
+        response = HttpUtils.make_post_request(url, json)
 
         if response is None:
             return None
