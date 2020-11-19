@@ -191,8 +191,10 @@ class RestaurantServices:
         #and return a list of them
         all_tables=[]
         for json_table in response["tables"]:
+            current_app.logger.debug("table {}, seats {}".format(json_table["name"], json_table["max_seats"]))
             new_table = TableModel()
-            all_tables.append(new_table.fill_from_json(json_table))
+            new_table.fill_from_json(json_table)
+            all_tables.append(new_table)
         return all_tables
 
 
