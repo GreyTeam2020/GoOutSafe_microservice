@@ -7,3 +7,6 @@
 [submodule "users_microservice"]
 	path = users_microservice
 	url = https://github.com/GreyTeam2020/users_microservice.git
+[submodule "booking_microservice"]
+	path = booking_microservice
+	url = https://github.com/GreyTeam2020/booking_microservice.git
