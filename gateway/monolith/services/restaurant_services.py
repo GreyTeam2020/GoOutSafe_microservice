@@ -38,8 +38,8 @@ class RestaurantServices:
         # avg_time is the the how much time the people stay inside the restaurants
         name_rest = form.name.data
         current_app.logger.debug("New rest name is {}".format(name_rest))
-        #I'm putting this tries because form.sumbitting in the endpoint does not work
-        #so I'm checking here if the field are ok
+        # I'm putting this tries because form.sumbitting in the endpoint does not work
+        # so I'm checking here if the field are ok
         try:
             phone_rest = int(form.phone.data)
         except:

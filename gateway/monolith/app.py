@@ -19,6 +19,7 @@ import datetime
 
 logging.getLogger("urllib3").setLevel(logging.WARNING)
 
+
 def create_app(tests=False):
     app = Flask(__name__)
     app.config["WTF_CSRF_SECRET_KEY"] = "A SECRET KEY"
