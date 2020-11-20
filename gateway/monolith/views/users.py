@@ -27,8 +27,10 @@ def _create_generic_user(role_id: int = 3, name_on_page: str = "customer"):
     :return: response template
     """
     form = UserForm()
+    current_app.logger.debug("Create a {} with method {}".format(name_on_page, request.method))
     if request.method == "POST":
         if form.validate_on_submit():
+            current_app.logger.debug("Form validate")
             q_user_email = UserService.user_is_present(email=form.email.data)
             q_user_phone = UserService.user_is_present(phone=form.phone.data)
             current_app.logger.debug(
@@ -44,6 +46,7 @@ def _create_generic_user(role_id: int = 3, name_on_page: str = "customer"):
                     message="Email {} and/or number {} already registered".format(
                         form.email.data, form.phone.data
                     ),
+                    _test="error_create_user_test",
                     type=name_on_page,
                 )
             user = UserService.create_user(form, role_id)
@@ -53,6 +56,7 @@ def _create_generic_user(role_id: int = 3, name_on_page: str = "customer"):
                     "create_user.html",
                     form=form,
                     message="An error occured while creating the user",
+                    _test="error_create_user_test",
                     type=name_on_page,
                 )
             SendEmailService.confirm_registration(form.email.data, form.firstname.data)

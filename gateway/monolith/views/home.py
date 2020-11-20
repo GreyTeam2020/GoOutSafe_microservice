@@ -51,30 +51,6 @@ def index():
                     "Saturday",
                     "Sunday",
                 ]
-                # record = (
-                #    db.session.query(Restaurant)
-                #    .filter_by(id=int(restaurant_id))
-                #    .first()
-                # )
-
-                # q_hours = (
-                #    db.session.query(OpeningHours)
-                #    .filter_by(restaurant_id=int(restaurant_id))
-                #    .all()
-                # )
-                # q_cuisine = (
-                #    db.session.query(Menu)
-                #    .filter_by(restaurant_id=int(restaurant_id))
-                #    .all()
-                # )
-                # photos = PhotoGallery.query.filter_by(
-                #    restaurant_id=int(restaurant_id)
-                # ).all()
-                # dishes = (
-                #    db.session.query(MenuDish)
-                #    .filter_by(restaurant_id=restaurant_id)
-                #    .all()
-                # )
 
                 return render_template(
                     "restaurantsheet.html",
