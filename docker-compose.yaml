@@ -3,7 +3,6 @@ version: "3.8"
 services:
     ngnix:
         image: nginx:latest
-        restart: always
         volumes:
             - ./nginx.conf:/etc/nginx/conf.d/default.conf
         networks:
@@ -17,7 +16,6 @@ services:
             - user_api
             - sendemail_api
             - restaurants_api
-        restart: always
         build: ./gateway
         volumes:
             - ./gateway/db:/code/monolith/db
@@ -25,29 +23,24 @@ services:
         ports:
             - 80:5000
     user_api:
-        restart: always
         build: ./users_microservice
         volumes:
             - ./users_microservice:/code
 
     restaurants_api:
-        restart: always
         build: ./restaurants_microservice
         volumes:
             - ./restaurants_microservice:/code
     restaurants_api_2:
-        restart: always
         build: ./restaurants_microservice
         volumes:
             - ./restaurants_microservice:/code
     sendemail_api:
-        restart: always
         build: ./email_microservice
     celery:
         depends_on:
             - redis
         build: ./restaurants_microservice
-        restart: always
         command: celery -A background.celery_app worker --loglevel=DEBUG -B
         links:
             -  redis
@@ -57,7 +50,6 @@ services:
         depends_on:
             - redis_email
         build: ./email_microservice
-        restart: always
         command: celery -A background.celery_app worker --loglevel=DEBUG
         links:
             - redis
