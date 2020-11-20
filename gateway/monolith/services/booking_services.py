@@ -29,14 +29,9 @@ class BookingServices:
 
     @staticmethod
     def delete_book(reservation_id: str, customer_id: str):
-        effected_rows = (
-            db.session.query(Reservation)
-            .filter_by(id=reservation_id)
-            .filter_by(customer_id=customer_id)
-            .delete()
-        )
-        db.session.commit()
-        return True if effected_rows > 0 else False
+        response, code = HttpUtils.make_delete_request("{}/{}?user_id={}".format(BOOKING_MICROSERVICE_URL, reservation_id, customer_id))
+
+        return response
 
     @staticmethod
     def update_book(
