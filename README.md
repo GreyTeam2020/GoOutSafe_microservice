@@ -1,6 +1,6 @@
 # GoOutSafe with microservices
 
-[![Build Status](https://travis-ci.com/GreyTeam2020/GoOutSafe_microservice.svg?token=sy94HsRanu5mrpdsRQbH&branch=main)](https://travis-ci.com/GreyTeam2020/GoOutSafe_microservice)
+![GitHub Workflow Status](https://img.shields.io/github/workflow/status/GreyTeam2020/GoOutSafe_microservice/docker-compose-actions-workflow?style=for-the-badge)
 
 ## Table of Content
 
