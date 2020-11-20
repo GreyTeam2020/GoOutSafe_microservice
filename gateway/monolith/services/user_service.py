@@ -264,9 +264,10 @@ class UserService:
             current_app.logger.error("Error from USER microservice")
             current_app.logger.error("Error received {}".format(response.reason))
             current_app.logger.error("Error response received {}".format(json))
-            return None
+            return False
         current_app.logger.debug("User deleted")
         current_app.logger.debug("Answer received: {}".format(current_app))
+        return True
 
     @staticmethod
     def is_positive(user_id: int):
