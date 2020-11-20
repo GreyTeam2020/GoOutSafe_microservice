@@ -1,5 +1,8 @@
 from flask import current_app
+from monolith.utils.http_utils import HttpUtils
+from monolith.app_constant import USER_MICROSERVICE_URL
 
+#DA RIMUOVERE
 from monolith.database import (
     db,
     Positive,
@@ -385,6 +388,7 @@ class HealthyServices:
 
         return contact_users
 
+
     @staticmethod
     def unmark_positive(user_email: str, user_phone: str) -> str:
         """
@@ -395,28 +399,29 @@ class HealthyServices:
         """
         if user_email == "" and user_phone == "":
             return "Insert an email or a phone number"
-
+        
         if user_email != "":
-            q_user = db.session.query(User).filter(
-                User.email == user_email, User.role_id == 3
-            )
+                body= str({
+                    "key": "email",
+                    "value": user_email
+                })
         else:
-            q_user = db.session.query(User).filter(
-                User.phone == user_phone, User.role_id == 3
-            )
+            body= str({
+                    "key": "phone",
+                    "value": user_phone
+                })
+        
+        URL = USER_MICROSERVICE_URL+"/unmark"
+        
+        response = HttpUtils.make_put_request(URL, body)
+        
+        if response is None:
+            return "An error occurs"
 
-        if q_user.first() is None:
-            return "The customer is not registered"
+        if response[1] == 400:
+            return "An error occurs, please try again"
 
-        q_already_positive = (
-            db.session.query(Positive)
-            .filter_by(user_id=q_user.first().id, marked=True)
-            .first()
-        )
+        if response[1] == 200:
+            return response[0]["result"]
 
-        if q_already_positive is not None:
-            q_already_positive.marked = False
-            db.session.commit()
-            return ""
-        else:
-            return "User with email {} is not Covid-19 positive".format(user_email)
+        return "Erorr"
