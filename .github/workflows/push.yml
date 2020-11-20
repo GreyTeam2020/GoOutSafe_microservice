@@ -1,0 +1,32 @@
+name: docker-compose-actions-workflow
+on: push
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Checkout email_microservice
+        uses: actions/checkout@v2
+        with:
+          repository: GreyTeam2020/email_microservice
+          token: ${{ secrets.EMAIL_SECRET }}
+          path: email_microservice
+          ref: main
+      - name: Checkout users_microservice
+        uses: actions/checkout@v2
+        with:
+          repository: GreyTeam2020/users_microservice
+          token: ${{ secrets.USER_SECRET }}
+          path: users_microservice
+          ref: main
+      - name: Checkout restaurants_microservice
+        uses: actions/checkout@v2
+        with:
+          repository: GreyTeam2020/restaurants_microservice
+          token: ${{ secrets.RESTAURANTS_SECRET }}
+          path: restaurants_microservice
+          ref: main
+      - name: GoOutSafe integration testing
+        run: |
+          docker-compose up -d
+          docker exec -it gooutsafe_microservice_gooutsafe_1 pytest
