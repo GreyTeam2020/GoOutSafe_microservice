@@ -24,7 +24,7 @@ class BookingServices:
             "people_number": people_number,
             "raw_friends": raw_friends
         }
-        response = HttpUtils.make_post_request(BOOKING_MICROSERVICE_URL, json)
+        response, code = HttpUtils.make_post_request(BOOKING_MICROSERVICE_URL, json)
         return response
 
     @staticmethod

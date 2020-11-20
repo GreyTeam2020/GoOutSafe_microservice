@@ -65,14 +65,14 @@ def index():
             request.form.get("friends"),
         )
 
-        if book[0] is None:
-            return render_template("booking.html", success=False, error=book[1])
+        if book is None:
+            return render_template("booking.html", success=False, error="Please try again later") #TODO: display error message
         else:
             return render_template(
                 "booking.html",
                 success=True,
-                restaurant_name=book[1],
-                table_name=book[2],
+                restaurant_name=book["restaurant_name"],
+                table_name=book["table_name"],
             )
     else:
         return render_template("booking.html", success=False, error="not logged in")
