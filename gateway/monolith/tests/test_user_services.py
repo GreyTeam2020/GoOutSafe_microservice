@@ -78,29 +78,30 @@ class Test_UserServices:
         - delete user to clean the database
         """
         form = UserForm()
-        form.firstname.data = "Vincenzo"
-        form.lastname.data = "Palazzo"
-        form.password = "Alibaba"
-        form.phone.data = "12345"
-        form.dateofbirth = "12/12/2020"
-        form.email.data = "alibaba@alibaba.com"
-        user = User()
-        form.populate_obj(user)
-        user = UserService.create_user(user, form.password, 2)
-        assert user is not None
-        assert user.role_id is 2
+        form.firstname.data = "user_{}".format(randrange(10000))
+        form.lastname.data = "user_{}".format(randrange(10000))
+        form.password.data = "pass_{}".format(randrange(10000))
+        form.phone.data = "12345{}".format(randrange(10000))
+        form.dateofbirth.data = "1995-12-12"
+        form.email.data = "alibaba{}@alibaba.com".format(randrange(10000))
+        result = UserService.create_user(form, 2)
+        assert result is True
+        assert result < 300
 
-        response = login(client, form.email.data, form.password)
-        assert response.status_code == 200
-        assert "logged_test" in response.data.decode("utf-8")
+        user_and_code = UserService.login_user(form.email.data, form.password.data)
+        user = user_and_code[0]
+        status_code = user_and_code[1]
+        assert user.firstname == form.firstname.data
+        assert user.id is not None
+        assert status_code < 300
 
-        formTest = UserForm(obj=user)
-        user_modified = UserService.modify_user(formTest, 3)
-        assert user is not None
-        assert user.role_id is not 2
-        UserService.delete_user(user_modified.id)
-        user_modified = get_user_with_email(user_modified.email)
-        assert user_modified is None
+        form.firstname.data = "Alibaba"
+        user_modified = UserService.modify_user(form, 3, user.id)
+        assert user_modified is not None
+        assert user_modified.role_id != 2
+
+        result_delete = UserService.delete_user(user_modified.id)
+        assert result_delete is True
 
     def test_delete_user_with_email(self):
         """
