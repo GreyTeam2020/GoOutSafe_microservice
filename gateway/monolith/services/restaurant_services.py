@@ -182,21 +182,22 @@ class RestaurantServices:
         """
         url = "{}/{}/tables".format(RESTAURANTS_MICROSERVICE_URL, restaurant_id)
         response = HttpUtils.make_get_request(url)
-        #if no tables
+        # if no tables
         if response is None:
             return []
 
-        #otherwise pick from json all tables
-        #model them into TableModel
-        #and return a list of them
-        all_tables=[]
+        # otherwise pick from json all tables
+        # model them into TableModel
+        # and return a list of them
+        all_tables = []
         for json_table in response["tables"]:
-            current_app.logger.debug("table {}, seats {}".format(json_table["name"], json_table["max_seats"]))
+            current_app.logger.debug(
+                "table {}, seats {}".format(json_table["name"], json_table["max_seats"])
+            )
             new_table = TableModel()
             new_table.fill_from_json(json_table)
             all_tables.append(new_table)
         return all_tables
-
 
     @staticmethod
     def get_photos_restaurants(restaurant_id: int):
@@ -460,3 +461,11 @@ class RestaurantServices:
         if status_code == 200:
             return True
         return None
+
+    @staticmethod
+    def delete_restaurant(name: str, phone: str) -> bool:
+        """
+        This method perform the request to microservices to delete the restaurants
+        :return true or false
+        """
+        return False

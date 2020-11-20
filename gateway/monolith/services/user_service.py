@@ -36,7 +36,7 @@ class UserService:
         return user, status_code
 
     @staticmethod
-    def log_in_user(user):
+    def log_in_user(user: UserModel):
         session["current_user"] = user.serialize()
         login_user(user)
         try:
@@ -191,15 +191,18 @@ class UserService:
         return True
 
     @staticmethod
-    def modify_user(user_form: UserForm, role_id: int = None):
+    def modify_user(user_form: UserForm, role_id: int = None, user_id: int = None):
         """
         This method take an user that is populate from te called (e.g: the flat form)
         and make the operation to store it as persistent (e.g database).
         We can assume that by default is not possible change the password
         :param form: the user form with new data
+        :param user_id: it is used only for test because the session is not available
         :param role_id: by default is none but it is possible setup to change also the role id
         :return: the user with the change if is changed
         """
+        if user_id is None:
+            user_id = current_user.id
         if role_id is None:
             role_id = current_user.role_id
 
@@ -220,7 +223,7 @@ class UserService:
             "firstname": firstname,
             "lastname": lastname,
             "role": role_id,
-            "id": current_user.id,
+            "id": user_id,
         }
         current_app.logger.debug("Request body \n{}".format(json_request))
         try:
@@ -264,9 +267,10 @@ class UserService:
             current_app.logger.error("Error from USER microservice")
             current_app.logger.error("Error received {}".format(response.reason))
             current_app.logger.error("Error response received {}".format(json))
-            return None
+            return False
         current_app.logger.debug("User deleted")
         current_app.logger.debug("Answer received: {}".format(current_app))
+        return True
 
     @staticmethod
     def is_positive(user_id: int):
