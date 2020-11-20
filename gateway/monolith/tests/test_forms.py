@@ -22,24 +22,25 @@ class Test_GoOutSafeForm:
         This test suit test the operation that we can do
         to login correctly an user
         """
-        email = "ham.burger@email.com"
-        password = "operator"
-        response = login(client, email, password)
+        form = UserForm()
+        form.firstname.data = "user_{}".format(randrange(10000))
+        form.lastname.data = "user_{}".format(randrange(10000))
+        form.password.data = "pass_{}".format(randrange(10000))
+        form.phone.data = "12345{}".format(randrange(10000))
+        form.dateofbirth.data = "1995-12-12"
+        form.email.data = "alibaba{}@alibaba.com".format(randrange(10000))
+        result = UserService.create_user(form, 2)
+        assert result is True
+        assert result < 300
+
+        response = login(client, form.email.data, form.password.data)
         assert response.status_code == 200
         assert "logged_test" in response.data.decode("utf-8")
 
-        q = db.session.query(User).filter_by(email=email)
-        q_user = q.first()
-        assert q_user is not None
-        assert q_user.authenticate(password) is True
+        user = UserService.user_is_present(form.email.data, form.phone.data)
 
-        response = logout(client)
-        assert response.status_code == 200
-        assert "not_logged_test" not in response.data.decode("utf-8")
-
-        q = db.session.query(User).filter_by(email=email)
-        q_user = q.first()
-        assert q_user is not None
+        result_delete = UserService.delete_user(user.id)
+        assert result_delete is True
 
     def test_login_form_ko(self, client):
         """
@@ -52,9 +53,8 @@ class Test_GoOutSafeForm:
         assert response.status_code == 200
         assert "error_login" in response.data.decode("utf-8")
 
-        q = db.session.query(User).filter_by(email=email)
-        q_user = q.first()
-        assert q_user is None
+        user = UserService.user_is_present(email, "1234555")
+        assert user is None
 
     def test_register_new_user_ok(self, client):
         """
@@ -68,21 +68,21 @@ class Test_GoOutSafeForm:
         :param client: The flask app created inside the fixtures
         """
         user_form = UserForm()
-        user_form.email = "Trumps_doctor@usa.gov"
-        user_form.firstname = "Anthony"
-        user_form.lastname = "Fauci"
-        user_form.dateofbirth = "12/12/2020"
-        user_form.password = "nocovid_in_us"
+        user_form.firstname.data = "user_{}".format(randrange(10000))
+        user_form.lastname.data = "user_{}".format(randrange(10000))
+        user_form.password.data = "pass_{}".format(randrange(10000))
+        user_form.phone.data = "12345{}".format(randrange(10000))
+        user_form.dateofbirth.data = "12/12/1995"
+        user_form.email.data = "alibaba{}@alibaba.com".format(randrange(10000))
         response = register_user(client, user_form)
         assert response.status_code == 200
-        assert "logged_test" in response.data.decode("utf-8")
+        assert "first_visit_login" in response.data.decode("utf-8")
 
         ## Search inside the DB if this user exist
-        user_query = get_user_with_email(user_form.email)
-        assert user_query is not None
-        assert user_query.authenticate(user_form.password) is True
+        user = UserService.user_is_present(user_form.email.data, user_form.phone.data)
+        assert user is not None
 
-        response = login(client, user_form.email, user_form.password)
+        response = login(client, user_form.email.data, user_form.password.data)
         assert response.status_code == 200
         assert "logged_test" in response.data.decode("utf-8")
 
@@ -90,8 +90,8 @@ class Test_GoOutSafeForm:
         assert response.status_code == 200
         assert "anonymous_test" not in response.data.decode("utf-8")
 
-        db.session.query(User).filter_by(id=user_query.id).delete()
-        db.session.commit()
+        result_delete = UserService.delete_user(user.id)
+        assert result_delete is True
 
     def test_register_new_restaurant_ok(self, client):
         """
@@ -106,35 +106,44 @@ class Test_GoOutSafeForm:
 
         :param client:
         """
-        email = "ham.burger@email.com"
-        password = "operator"
-        response = login(client, email, password)
+        user_form = UserForm()
+        user_form.firstname.data = "user_{}".format(randrange(10000))
+        user_form.lastname.data = "user_{}".format(randrange(10000))
+        user_form.password.data = "pass_{}".format(randrange(10000))
+        user_form.phone.data = "12345{}".format(randrange(10000))
+        user_form.dateofbirth.data = "12/12/1995"
+        user_form.email.data = "alibaba{}@alibaba.com".format(randrange(10000))
+        response = register_user(client, user_form, 2)
+        assert response.status_code == 200
         assert "logged_test" in response.data.decode("utf-8")
 
+        user = UserService.user_is_present(user_form.email.data, user_form.phone.data)
+        assert user is not None
+
         restaurant_form = RestaurantForm()
-        restaurant_form.name = "Gino Sorbillo"
-        restaurant_form.phone = "096321343"
-        restaurant_form.lat = 12
-        restaurant_form.lon = 12
-        restaurant_form.n_tables = 50
-        restaurant_form.covid_measures = "We can survive"
-        restaurant_form.cuisine = ["Italian food"]
-        restaurant_form.open_days = ["0"]
-        restaurant_form.open_lunch = "12:00"
-        restaurant_form.close_lunch = "15:00"
-        restaurant_form.open_dinner = "18:00"
-        restaurant_form.close_dinner = "00:00"
+        restaurant_form.name.data = "Gino Sorbillo_{}".format(randrange(10000))
+        restaurant_form.phone.data = "096321343_{}".format(randrange(10000))
+        restaurant_form.lat.data = 12
+        restaurant_form.lon.data = 12
+        restaurant_form.n_tables.data = 50
+        restaurant_form.covid_measures.data = "We can survive_{}".format(randrange(10000))
+        restaurant_form.cuisine.data = ["Italian food"]
+        restaurant_form.open_days.data = ["0"]
+        restaurant_form.open_lunch.data = "12:00"
+        restaurant_form.close_lunch.data = "15:00"
+        restaurant_form.open_dinner.data = "18:00"
+        restaurant_form.close_dinner.data = "00:00"
         response = register_restaurant(client, restaurant_form)
         assert response.status_code == 200  ## Regirect to /
         # assert restaurant_form.name in response.data.decode("utf-8")
         assert "logged_test" in response.data.decode("utf-8")
         # test if the db is clean
         list_rest = db.session.query(Restaurant).all()
-        assert len(list_rest) == 2
+        assert len(list_rest) == 1
         # assert response.status_code == 200
         # assert "create_rest_test" not in response.data.decode("utf-8")
 
-        rest = get_rest_with_name(restaurant_form.name)
+        rest = RestaurantServices.get_restaurants_by_keyword(restaurant_form.name.data)
         assert rest is not None
 
         response = logout(client)
@@ -142,14 +151,14 @@ class Test_GoOutSafeForm:
         assert "not_logged_test" not in response.data.decode("utf-8")
 
         response = client.get("/")  ## get index
-        assert restaurant_form.name in response.data.decode("utf-8")
+        assert restaurant_form.name.data in response.data.decode("utf-8")
 
         response = logout(client)
         assert response.status_code == 200
         assert "not_logged_test" not in response.data.decode("utf-8")
 
-        rest = get_rest_with_name(restaurant_form.name)
-        del_restaurant_on_db(rest.id)
+        result = RestaurantServices.delete_restaurant(restaurant_form.name.data, restaurant_form.phone.data)
+        assert result is True
 
     def test_register_new_restaurant_ko(self, client):
         """

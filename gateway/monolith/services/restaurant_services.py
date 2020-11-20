@@ -461,3 +461,11 @@ class RestaurantServices:
         if status_code == 200:
             return True
         return None
+
+    @staticmethod
+    def delete_restaurant(name: str, phone: str) -> bool:
+        """
+        This method perform the request to microservices to delete the restaurants
+        :return true or false
+        """
+        return False

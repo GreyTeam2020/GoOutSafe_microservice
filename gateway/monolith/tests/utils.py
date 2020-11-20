@@ -31,7 +31,7 @@ def logout(client):
     return client.get("/logout", follow_redirects=True)
 
 
-def register_user(client, user: UserForm):
+def register_user(client, user: UserForm, role_id: int = 3):
     """
     This method perform the request to register a new user
     :param client: Is a flask app created inside the fixtures
@@ -39,15 +39,17 @@ def register_user(client, user: UserForm):
     :return: response from URL "/user/create_user"
     """
     data = dict(
-        email=user.email,
-        firstname=user.firstname,
-        lastname=user.lastname,
-        password=user.password,
-        dateofbirth=user.dateofbirth,
-        phone=user.phone,
+        email=user.email.data,
+        firstname=user.firstname.data,
+        lastname=user.lastname.data,
+        password=user.password.data,
+        dateofbirth=user.dateofbirth.data,
+        phone=user.phone.data,
         submit=True,
         headers={"Content-type": "application/x-www-form-urlencoded"},
     )
+    if role_id == 2:
+        return client.post("/user/create_operator", data=data, follow_redirects=True)
     return client.post("/user/create_user", data=data, follow_redirects=True)
 
 
@@ -61,18 +63,18 @@ def register_restaurant(client, restaurant: RestaurantForm):
     return client.post(
         "/restaurant/create",
         data=dict(
-            name=restaurant.name,
-            phone=restaurant.phone,
-            lat=restaurant.lat,
-            lon=restaurant.lon,
-            n_tables=restaurant.n_tables,
-            covid_measures=restaurant.covid_measures,
-            cuisine=restaurant.cuisine,
-            open_days=restaurant.open_days,
-            open_lunch=restaurant.open_lunch,
-            close_lunch=restaurant.close_lunch,
-            open_dinner=restaurant.open_dinner,
-            close_dinner=restaurant.close_dinner,
+            name=restaurant.name.data,
+            phone=restaurant.phone.data,
+            lat=restaurant.lat.data,
+            lon=restaurant.lon.data,
+            n_tables=restaurant.n_tables.data,
+            covid_measures=restaurant.covid_measures.data,
+            cuisine=restaurant.cuisine.data,
+            open_days=restaurant.open_days.data,
+            open_lunch=restaurant.open_lunch.data,
+            close_lunch=restaurant.close_lunch.data,
+            open_dinner=restaurant.open_dinner.data,
+            close_dinner=restaurant.close_dinner.data,
             submit=True,
             headers={"Content-type": "application/x-www-form-urlencoded"},
         ),
