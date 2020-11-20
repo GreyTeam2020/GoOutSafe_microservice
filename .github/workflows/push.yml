@@ -1,0 +1,15 @@
+name: docker-compose-actions-workflow
+on: push
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: 'true'
+          token: ${{ secrets.MAIN_SECRET }}
+
+      - name: GoOutSafe integration testing
+        run: |
+          docker-compose up -d
+          docker-compose exec -T gooutsafe pytest --cov-config .coveragerc --cov .
