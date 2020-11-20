@@ -114,20 +114,25 @@ class Test_UserServices:
         """
 
         form = UserForm()
-        form.firstname.data = "Vincenzo"
-        form.lastname.data = "Palazzo"
-        form.password = "Alibaba"
-        form.phone.data = "12345"
-        form.dateofbirth = "12/12/2020"
-        form.email.data = "alibaba1@alibaba.com"
-        user = User()
-        form.populate_obj(user)
-        user = UserService.create_user(user, form.password, 2)
-        assert user is not None
-        assert user.role_id is 2
-        UserService.delete_user(email=user.email)
-        user = db.session.query(User).filter_by(email=user.email).first()
-        assert user is None
+        form.firstname.data = "user_{}".format(randrange(10000))
+        form.lastname.data = "user_{}".format(randrange(10000))
+        form.password.data = "pass_{}".format(randrange(10000))
+        form.phone.data = "12345{}".format(randrange(10000))
+        form.dateofbirth.data = "1995-12-12"
+        form.email.data = "alibaba{}@alibaba.com".format(randrange(10000))
+        result = UserService.create_user(form, 2)
+        assert result is True
+        assert result < 300
+
+        user_and_code = UserService.login_user(form.email.data, form.password.data)
+        user = user_and_code[0]
+        status_code = user_and_code[1]
+        assert user.firstname == form.firstname.data
+        assert user.id is not None
+        assert status_code < 300
+
+        result_delete = UserService.delete_user(email=user.email)
+        assert result_delete is True
 
     def test_delete_user_with_id(self):
         """
@@ -140,27 +145,22 @@ class Test_UserServices:
         """
 
         form = UserForm()
-        form.firstname.data = "Vincenzo"
-        form.lastname.data = "Palazzo"
-        form.password = "Alibaba"
-        form.phone.data = "12345"
-        form.dateofbirth = "12/12/2020"
-        form.email.data = "alibaba1@alibaba.com"
-        user = User()
-        form.populate_obj(user)
-        user = UserService.create_user(user, form.password, 2)
-        assert user is not None
-        assert user.role_id is 2
-        UserService.delete_user(user_id=user.id)
-        user = db.session.query(User).filter_by(id=user.id).first()
-        assert user is None
+        form.firstname.data = "user_{}".format(randrange(10000))
+        form.lastname.data = "user_{}".format(randrange(10000))
+        form.password.data = "pass_{}".format(randrange(10000))
+        form.phone.data = "12345{}".format(randrange(10000))
+        form.dateofbirth.data = "1995-12-12"
+        form.email.data = "alibaba{}@alibaba.com".format(randrange(10000))
+        result = UserService.create_user(form, 2)
+        assert result is True
+        assert result < 300
 
-    def test_reservation_as_list(self, client):
-        """
-        Test get reservation customer list
-        """
-        user = db.session.query(User).filter_by(email="john.doe@email.com").first()
-        raw_list = db.session.query(Reservation).filter_by(customer_id=user.id).all()
-        reservations_as_list = UserService.get_customer_reservation(None, None, user.id)
+        user_and_code = UserService.login_user(form.email.data, form.password.data)
+        user = user_and_code[0]
+        status_code = user_and_code[1]
+        assert user.firstname == form.firstname.data
+        assert user.id is not None
+        assert status_code < 300
 
-        assert len(raw_list) == len(reservations_as_list)
+        result_delete = UserService.delete_user(user.id)
+        assert result_delete is True

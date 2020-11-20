@@ -197,6 +197,7 @@ class UserService:
         and make the operation to store it as persistent (e.g database).
         We can assume that by default is not possible change the password
         :param form: the user form with new data
+        :param user_id: it is used only for test because the session is not available
         :param role_id: by default is none but it is possible setup to change also the role id
         :return: the user with the change if is changed
         """
