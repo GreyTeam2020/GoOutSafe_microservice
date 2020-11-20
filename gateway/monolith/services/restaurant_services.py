@@ -274,7 +274,7 @@ class RestaurantServices:
         # TODO: qui mi serve la nuova review nella response, perchè altrimenti non ho dati che mi servono,
         # TODO: per adesso li invento
         json["id"] = 1
-        json["data"] = datetime.now().strftime("%m/%d/%Y, %H:%M:%S")
+        json["data"] = datetime.now().strftime("%Y-%m-%dT%H:%M:%SZ")
         json["restaurant_id"] = restaurant_id
         # TODO: fine dati inventati
         review.fill_from_json(json)
