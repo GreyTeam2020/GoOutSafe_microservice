@@ -389,39 +389,3 @@ class HealthyServices:
         return contact_users
 
 
-    @staticmethod
-    def unmark_positive(user_email: str, user_phone: str) -> str:
-        """
-        This method mark the a people as positive on db
-        :param user_email:
-        :param user_phone:
-        :return: return a message
-        """
-        if user_email == "" and user_phone == "":
-            return "Insert an email or a phone number"
-        
-        if user_email != "":
-                body= str({
-                    "key": "email",
-                    "value": user_email
-                })
-        else:
-            body= str({
-                    "key": "phone",
-                    "value": user_phone
-                })
-        
-        URL = USER_MICROSERVICE_URL+"/unmark"
-        
-        response = HttpUtils.make_put_request(URL, body)
-        
-        if response is None:
-            return "An error occurs"
-
-        if response[1] == 400:
-            return "An error occurs, please try again"
-
-        if response[1] == 200:
-            return response[0]["result"]
-
-        return "Erorr"
