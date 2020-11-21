@@ -188,6 +188,7 @@ class UserService:
             current_app.logger.error("Error received {}".format(response.reason))
             current_app.logger.error("Error response received {}".format(json))
             return False
+        current_app.logger.debug("User created")
         return True
 
     @staticmethod

@@ -300,7 +300,7 @@ def restaurant_review(restaurant_id):
     if request.method == "POST":
         form = ReviewForm()
         review = RestaurantServices.review_restaurant(
-            restaurant_id, current_user.id, form.data["stars"], form.data["review"]
+            restaurant_id, current_user.emai, form.data["stars"], form.data["review"]
         )
         if review is not None:
             current_app.logger.debug("Review inserted!")

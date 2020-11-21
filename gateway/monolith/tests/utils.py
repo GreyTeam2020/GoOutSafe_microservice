@@ -289,19 +289,18 @@ def get_rest_with_name(name):
     return None
 
 
-def create_user_on_db(ran: int = randrange(100000)):
+def create_user_on_db(ran: int = randrange(100000), role_id: int = 3):
     form = UserForm()
-    # form.data["email"] = "alibaba" + str(ran) + "@alibaba.com"
-    # form.data["password"] = "Alibaba"
     form.firstname.data = "User_{}".format(ran)
     form.lastname.data = "user_{}".format(ran)
-    form.password = "Alibaba{}".format(ran)
+    form.password.data = "Alibaba{}".format(ran)
     form.phone.data = "1234562344{}".format(ran)
-    form.dateofbirth = "12/12/2000"
-    form.email.data = "alibaba" + str(ran) + "@alibaba.com"
-    user = User()
-    form.populate_obj(user)
-    return UserService.create_user(user, form.password)
+    form.dateofbirth.data = "1985-12-12"
+    form.email.data = "user{}@user.edu".format(str(ran))
+    created = UserService.create_user(form, role_id)
+    if created is False:
+        return None
+    return UserService.user_is_present(form.email.data, form.phone.data)
 
 
 def create_restaurants_on_db(
@@ -324,12 +323,9 @@ def create_restaurants_on_db(
 
 
 def del_user_on_db(id):
-    q = db.session.query(User).filter_by(id=id).delete()
-    db.session.commit()
+    UserService.delete_user(user_id=id)
     delete_positive_with_user_id(id, marked=True)
     del_booking_with_user_id(id)
-    return q
-
 
 def del_restaurant_on_db(id):
     db.session.query(RestaurantTable).filter_by(restaurant_id=id).delete()
