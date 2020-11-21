@@ -27,7 +27,9 @@ def _create_generic_user(role_id: int = 3, name_on_page: str = "customer"):
     :return: response template
     """
     form = UserForm()
-    current_app.logger.debug("Create a {} with method {}".format(name_on_page, request.method))
+    current_app.logger.debug(
+        "Create a {} with method {}".format(name_on_page, request.method)
+    )
     if request.method == "POST":
         if form.validate_on_submit():
             current_app.logger.debug("Form validate")

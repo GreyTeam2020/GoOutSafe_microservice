@@ -49,12 +49,14 @@ class Test_RestaurantServices:
         assert user is not None
         assert user.role_id == 2
 
-        restaurant = RestaurantServices.create_new_restaurant(form, user.id, 6, user.email)
+        restaurant = RestaurantServices.create_new_restaurant(
+            form, user.id, 6, user.email
+        )
         assert restaurant is not None
 
         ## This call should be delete also the restaurants
         del_user_on_db(user.id)
-        RestaurantServices.delete_restaurant(restaurant.name, restaurant.phone)
+        RestaurantServices.delete_restaurant(restaurant.id)
 
     def test_all_restaurant(self):
         """
@@ -140,12 +142,17 @@ class Test_RestaurantServices:
         assert user is not None
         assert user.role_id == 2
 
-        restaurant = RestaurantServices.create_new_restaurant(form, user.id, 6, user.email)
+        restaurant = RestaurantServices.create_new_restaurant(
+            form, user.id, 6, user.email
+        )
         assert restaurant is not None
 
         reviewer = create_user_on_db(randrange(40000, 3000000), role_id=3)
         review = RestaurantServices.review_restaurant(
-            restaurant_id=restaurant.id, reviewer_email=reviewer.email, stars=5, review="test"
+            restaurant_id=restaurant.id,
+            reviewer_email=reviewer.email,
+            stars=5,
+            review="test",
         )
         assert review is not None
 
@@ -153,7 +160,7 @@ class Test_RestaurantServices:
         # At this point also the review should be killed with the restaurants
         del_user_on_db(user.id)
         del_user_on_db(reviewer.id)
-        RestaurantServices.delete_restaurant(restaurant.name, restaurant.phone)
+        RestaurantServices.delete_restaurant(restaurant.id)
 
     def test_restaurant_name(self):
         """
@@ -186,7 +193,7 @@ class Test_RestaurantServices:
         ## This call should be delete also the restaurants
         # At this point also the review should be killed with the restaurants
         del_user_on_db(user.id)
-        RestaurantServices.delete_restaurant(restaurant.name, restaurant.phone)
+        RestaurantServices.delete_restaurant(restaurant.id)
 
     def test_three_reviews(self):
         """
@@ -210,7 +217,9 @@ class Test_RestaurantServices:
         assert user is not None
         assert user.role_id == 2
 
-        restaurant = RestaurantServices.create_new_restaurant(form, user.id, 6, user.email)
+        restaurant = RestaurantServices.create_new_restaurant(
+            form, user.id, 6, user.email
+        )
         assert restaurant is not None
 
         reviewer = create_user_on_db(randrange(40000, 3000000), role_id=3)
@@ -233,7 +242,7 @@ class Test_RestaurantServices:
         # At this point also the review should be killed with the restaurants
         del_user_on_db(user.id)
         del_user_on_db(reviewer.id)
-        RestaurantServices.delete_restaurant(restaurant.name, restaurant.phone)
+        RestaurantServices.delete_restaurant(restaurant.id)
 
     def test_search_restaurant_by_key_ok_complete_name(self):
         """
@@ -258,13 +267,17 @@ class Test_RestaurantServices:
         assert user is not None
         assert user.role_id == 2
 
-        restaurant = RestaurantServices.create_new_restaurant(form, user.id, 6, user.email)
+        restaurant = RestaurantServices.create_new_restaurant(
+            form, user.id, 6, user.email
+        )
         assert restaurant is not None
-        rest_by_name = RestaurantServices.get_restaurants_by_keyword(name=restaurant.name)
+        rest_by_name = RestaurantServices.get_restaurants_by_keyword(
+            name=restaurant.name
+        )
         assert len(rest_by_name) is 1
 
         del_user_on_db(user.id)
-        RestaurantServices.delete_restaurant(restaurant.name, restaurant.phone)
+        RestaurantServices.delete_restaurant(restaurant.id)
 
     def test_search_restaurant_by_key_ok_partial_name(self):
         """
@@ -289,13 +302,17 @@ class Test_RestaurantServices:
         assert user is not None
         assert user.role_id == 2
 
-        restaurant = RestaurantServices.create_new_restaurant(form, user.id, 6, user.email)
+        restaurant = RestaurantServices.create_new_restaurant(
+            form, user.id, 6, user.email
+        )
         assert restaurant is not None
-        rest_by_name = RestaurantServices.get_restaurants_by_keyword(name=restaurant.name)
+        rest_by_name = RestaurantServices.get_restaurants_by_keyword(
+            name=restaurant.name
+        )
         assert len(rest_by_name) is 1
 
         del_user_on_db(user.id)
-        RestaurantServices.delete_restaurant(restaurant.name, restaurant.phone)
+        RestaurantServices.delete_restaurant(restaurant.id)
 
     def test_delete_dish_menu(self, client):
         """
@@ -350,25 +367,35 @@ class Test_RestaurantServices:
         owner_two = create_user_on_db(123444226, role_id=2)
         assert owner_two is not None
 
-        restaurant_one = create_restaurants_on_db(name="First", user_id=owner_one.id, user_email=owner_one.email)
+        restaurant_one = create_restaurants_on_db(
+            name="First", user_id=owner_one.id, user_email=owner_one.email
+        )
         assert restaurant_one is not None
-        restaurant_two = create_restaurants_on_db(name="Second", user_id=owner_two.id, user_email=owner_two.email)
+        restaurant_two = create_restaurants_on_db(
+            name="Second", user_id=owner_two.id, user_email=owner_two.email
+        )
         assert restaurant_two is not None
 
         start_one = 3.0
         start_two = 5.0
         review = create_review_for_restaurants(
-            starts=start_one, rest_id=restaurant_one.id, reviewer_email="user_{}@asu.edu".format(randrange(2000, 7000))
+            starts=start_one,
+            rest_id=restaurant_one.id,
+            reviewer_email="user_{}@asu.edu".format(randrange(2000, 7000)),
         )
         assert review is not None
         review = create_review_for_restaurants(
-            starts=start_two, rest_id=restaurant_one.id,  reviewer_email="user_{}@asu.edu".format(randrange(2000, 7000))
+            starts=start_two,
+            rest_id=restaurant_one.id,
+            reviewer_email="user_{}@asu.edu".format(randrange(2000, 7000)),
         )
         assert review is not None
 
         start_tree = 2.0
         review = create_review_for_restaurants(
-            starts=start_tree, rest_id=restaurant_two.id,  reviewer_email="user_{}@asu.edu".format(randrange(2000, 7000))
+            starts=start_tree,
+            rest_id=restaurant_two.id,
+            reviewer_email="user_{}@asu.edu".format(randrange(2000, 7000)),
         )
         assert review is not None
 
@@ -406,17 +433,23 @@ class Test_RestaurantServices:
         owner_one = create_user_on_db(123444223, role_id=2)
         assert owner_one is not None
 
-        restaurant_one = create_restaurants_on_db(name="First", user_id=owner_one.id, user_email=owner_one.email)
+        restaurant_one = create_restaurants_on_db(
+            name="First", user_id=owner_one.id, user_email=owner_one.email
+        )
         assert restaurant_one is not None
 
         start_one = 3.0
         start_two = 4.5
         review = create_review_for_restaurants(
-            starts=start_one, rest_id=restaurant_one.id, reviewer_email="user_{}@asu.edu".format(randrange(2000, 7000))
+            starts=start_one,
+            rest_id=restaurant_one.id,
+            reviewer_email="user_{}@asu.edu".format(randrange(2000, 7000)),
         )
         assert review is not None
         review = create_review_for_restaurants(
-            starts=start_two, rest_id=restaurant_one.id, reviewer_email="user_{}@asu.edu".format(randrange(2000, 7000))
+            starts=start_two,
+            rest_id=restaurant_one.id,
+            reviewer_email="user_{}@asu.edu".format(randrange(2000, 7000)),
         )
         assert review is not None
 
@@ -457,4 +490,3 @@ class Test_RestaurantServices:
         assert all_people[2] == 0
         del_restaurant_on_db(restaurant_one.id)
         del_user_on_db(owner_one.id)
-

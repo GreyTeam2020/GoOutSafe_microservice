@@ -29,7 +29,9 @@ class RestaurantServices:
     """
 
     @staticmethod
-    def create_new_restaurant(form: RestaurantForm, user_id: int, max_sit: int, user_email: str = None):
+    def create_new_restaurant(
+        form: RestaurantForm, user_id: int, max_sit: int, user_email: str = None
+    ):
         """
         This method contains all logic save inside the a new restaurant
         :return:
@@ -154,7 +156,6 @@ class RestaurantServices:
         if response is None:
             return None
         return response["dishes"]
-
 
     @staticmethod
     def get_menu_restaurant(restaurant_id: int):
@@ -468,7 +469,7 @@ class RestaurantServices:
         return None
 
     @staticmethod
-    def delete_restaurant(name: str, phone: str) -> bool:
+    def delete_restaurant(restaurant_id: int) -> bool:
         """
         This method perform the request to microservices to delete the restaurants
         :return true or false

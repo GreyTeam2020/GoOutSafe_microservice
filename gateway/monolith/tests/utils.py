@@ -256,11 +256,7 @@ def get_user_with_email(email):
     :param email: the email that we want use to query the user
     :return: return the user if exist otherwise None
     """
-    q = db.session.query(User).filter_by(email=email)
-    q_user = q.first()
-    if q_user is not None:
-        return q_user
-    return None
+    return UserService.user_is_present(email=email)
 
 
 def get_rest_with_name_and_phone(name, phone):
@@ -282,11 +278,7 @@ def get_rest_with_name(name):
     :param name: the email that we want use to query the user
     :return: return the user if exist otherwise None
     """
-    q = db.session.query(Restaurant).filter_by(name=name)
-    q_rest = q.first()
-    if q_rest is not None:
-        return q_rest
-    return None
+    return RestaurantServices.get_restaurant_name()
 
 
 def create_user_on_db(ran: int = randrange(100000), role_id: int = 3):
@@ -304,7 +296,10 @@ def create_user_on_db(ran: int = randrange(100000), role_id: int = 3):
 
 
 def create_restaurants_on_db(
-    name: str = "Gino Sorbillo", user_id: int = None, user_email: str = None, tables: int = 50
+    name: str = "Gino Sorbillo{}".format(randrange(1000, 50000)),
+    user_id: int = None,
+    user_email: str = None,
+    tables: int = 50,
 ):
     form = RestaurantForm()
     form.name.data = name
@@ -319,13 +314,16 @@ def create_restaurants_on_db(
     form.close_lunch.data = time(hour=15, minute=00)
     form.open_dinner.data = time(hour=19, minute=00)
     form.close_dinner.data = time(hour=22, minute=00)
-    return RestaurantServices.create_new_restaurant(form, user_id=user_id, user_email=user_email, max_sit=6)
+    return RestaurantServices.create_new_restaurant(
+        form, user_id=user_id, user_email=user_email, max_sit=6
+    )
 
 
 def del_user_on_db(id):
     UserService.delete_user(user_id=id)
     delete_positive_with_user_id(id, marked=True)
     del_booking_with_user_id(id)
+
 
 def del_restaurant_on_db(id):
     db.session.query(RestaurantTable).filter_by(restaurant_id=id).delete()
@@ -579,7 +577,12 @@ def create_review_for_restaurants(
     :param rest_id: restaurants id
     :return Review db object
     """
-    review = RestaurantServices.review_restaurant(restaurant_id=rest_id, reviewer_email=reviewer_email, stars=starts, review=comment)
+    review = RestaurantServices.review_restaurant(
+        restaurant_id=rest_id,
+        reviewer_email=reviewer_email,
+        stars=starts,
+        review=comment,
+    )
     return review
 
 
