@@ -177,7 +177,7 @@ class Test_RestaurantServices:
         assert user is not None
         assert user.role_id == 2
 
-        restaurant = RestaurantServices.create_new_restaurant(form, user.id, 6, user.email)
+        restaurant = RestaurantServices.create_new_restaurant(form, user, 6, user.email)
         assert restaurant is not None
 
         name = RestaurantServices.get_restaurant_name(restaurant.id)
@@ -216,13 +216,13 @@ class Test_RestaurantServices:
         reviewer = create_user_on_db(randrange(40000, 3000000), role_id=3)
 
         review1 = RestaurantServices.review_restaurant(
-            restaurant.id, reviewer.id, 5, "test1"
+            restaurant.id, reviewer.email, 5, "test1"
         )
         review2 = RestaurantServices.review_restaurant(
-            restaurant.id, reviewer.id, 4, "test2"
+            restaurant.id, reviewer.email, 4, "test2"
         )
         review3 = RestaurantServices.review_restaurant(
-            restaurant.id, reviewer.id, 3, "test3"
+            restaurant.id, reviewer.email, 3, "test3"
         )
 
         three_reviews = RestaurantServices.get_three_reviews(restaurant.id)
@@ -240,35 +240,62 @@ class Test_RestaurantServices:
         This test unit test the service to perform the search by keyword of the restaurants
         on persistence
         """
-        rest_by_name = RestaurantServices.get_restaurants_by_keyword(name="Trial")
+        form = RestaurantForm()
+        form.name.data = "rest_mock_{}".format(randrange(10000))
+        form.phone.data = "096321343{}".format(randrange(10000))
+        form.lat.data = 12
+        form.lon.data = 12
+        form.n_tables.data = 50
+        form.covid_measures.data = "Random comment {}".format(randrange(10000))
+        form.cuisine.data = ["Italian food"]
+        form.open_days.data = ["0"]
+        form.open_lunch.data = datetime.time(datetime(2020, 7, 1, 12, 00))
+        form.close_lunch.data = datetime.time(datetime(2020, 7, 1, 12, 00))
+        form.open_dinner.data = datetime.time(datetime(2020, 7, 1, 18, 00))
+        form.close_dinner.data = datetime.time(datetime(2020, 6, 1, 22, 00))
+
+        user = create_user_on_db(randrange(6000, 9000), role_id=2)
+        assert user is not None
+        assert user.role_id == 2
+
+        restaurant = RestaurantServices.create_new_restaurant(form, user.id, 6, user.email)
+        assert restaurant is not None
+        rest_by_name = RestaurantServices.get_restaurants_by_keyword(name=restaurant.name)
         assert len(rest_by_name) is 1
+
+        del_user_on_db(user.id)
+        RestaurantServices.delete_restaurant(restaurant.name, restaurant.phone)
 
     def test_search_restaurant_by_key_ok_partial_name(self):
         """
         This test unit test the service to perform the search by keyword of the restaurants
         on persistence
         """
-        user = create_user_on_db()
-        rest = create_restaurants_on_db("Gino Sorbillo", user.id)
-        assert rest is not None
-        rest_by_name = RestaurantServices.get_restaurants_by_keyword(name=rest.name)
-        assert len(rest_by_name) is 1
+        form = RestaurantForm()
+        form.name.data = "rest_mock_{}".format(randrange(10000))
+        form.phone.data = "096321343{}".format(randrange(10000))
+        form.lat.data = 12
+        form.lon.data = 12
+        form.n_tables.data = 50
+        form.covid_measures.data = "Random comment {}".format(randrange(10000))
+        form.cuisine.data = ["Italian food"]
+        form.open_days.data = ["0"]
+        form.open_lunch.data = datetime.time(datetime(2020, 7, 1, 12, 00))
+        form.close_lunch.data = datetime.time(datetime(2020, 7, 1, 12, 00))
+        form.open_dinner.data = datetime.time(datetime(2020, 7, 1, 18, 00))
+        form.close_dinner.data = datetime.time(datetime(2020, 6, 1, 22, 00))
 
-        rest_by_name = RestaurantServices.get_restaurants_by_keyword(name="Gino")
-        assert len(rest_by_name) is 1
+        user = create_user_on_db(randrange(6000, 9000), role_id=2)
+        assert user is not None
+        assert user.role_id == 2
 
-        rest_by_name = RestaurantServices.get_restaurants_by_keyword(name="gino")
-        assert len(rest_by_name) is 1
-
-        rest_by_name = RestaurantServices.get_restaurants_by_keyword(name="Sorbillo")
-        assert len(rest_by_name) is 1
-
-        rest_by_name = RestaurantServices.get_restaurants_by_keyword(name="sorbillo")
+        restaurant = RestaurantServices.create_new_restaurant(form, user.id, 6, user.email)
+        assert restaurant is not None
+        rest_by_name = RestaurantServices.get_restaurants_by_keyword(name=restaurant.name)
         assert len(rest_by_name) is 1
 
         del_user_on_db(user.id)
-        for rest in rest_by_name:
-            del_restaurant_on_db(rest.id)
+        RestaurantServices.delete_restaurant(restaurant.name, restaurant.phone)
 
     def test_delete_dish_menu(self, client):
         """
