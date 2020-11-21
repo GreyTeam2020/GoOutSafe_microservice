@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request
+from flask import Blueprint, render_template, request, current_app
 from monolith.forms import ReservationForm
 from monolith.auth import current_user
 from monolith.services.user_service import UserService
@@ -90,9 +90,13 @@ def update_book():
         people_number = int(request.form.get("people_number"))
         #
         reservation_id = int(request.form.get("reservation_id"))
+        restaurant_id = int(request.form.get("restaurant_id"))
+
+        current_app.logger.debug("REST_ID is {}".format(restaurant_id))
 
         new_book = BookingServices.update_book(
             reservation_id,
+            restaurant_id,
             current_user.id,
             py_datetime,
             people_number,

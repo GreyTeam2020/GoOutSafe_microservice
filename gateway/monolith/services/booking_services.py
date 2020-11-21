@@ -34,9 +34,9 @@ class BookingServices:
         return response
 
     @staticmethod
-    def update_book(reservation_id: str, user_id, py_datetime, people_number, raw_friends=""):
+    def update_book(reservation_id: str, restaurant_id, user_id, py_datetime, people_number, raw_friends=""):
         json = {
-            "reservation_id": reservation_id,
+            "restaurant_id": restaurant_id,
             "user_id": user_id,
             "datetime": py_datetime.strftime("%Y-%m-%dT%H:%M:%SZ"),
             "people_number": people_number,

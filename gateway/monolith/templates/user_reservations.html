@@ -19,12 +19,12 @@
                     <tr>
                         <td><a class="showUpdateBooking" href="#"
                                data-reservation_id="{{ reservation.id }}"
-                               data-rest_id="{{ reservation.rest_id }}"
+                               data-rest_id="{{ reservation.table.restaurant.id }}"
                                data-reservation_date="{{ my_date_formatter_iso(reservation.reservation_date) }}"
                                data-people_number="{{ reservation.people_number }}"
                         >{{ reservation.id }}</a></td>
                         <td>{{ my_date_formatter_iso(reservation.reservation_date) }}</td>
-                        <td><a href="/restaurant/{{ reservation.rest_id }}">{{ reservation.name }}</a></td>
+                        <td><a href="/restaurant/{{ reservation.table.restaurant.id }}">{{ reservation.table.restaurant.name }}</a></td>
                         <td>{{ reservation.people_number }}</td>
                         <td><button class="btn btn-primary deleteBooking" data-id="{{ reservation.id }}">Delete</button></td>
                     </tr>
@@ -48,6 +48,7 @@
           <div class="modal-body">
             <form id ="bookTableForm" action="/restaurant/book_update" method="POST">
               <dl class="center-datepicker">
+               <input type="hidden" id="restaurant_id" name="restaurant_id"/>
                {% for field in form.display %}
                    <dt>{{ form[field].label }}</dt>
                    <dd class="text-center">{{ form[field](class_="form-control", placeholder=form[field].label.text) }}</dd>

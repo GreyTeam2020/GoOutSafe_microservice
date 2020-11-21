@@ -36,6 +36,7 @@ $(document).ready(function() {
 
 
         $(".showUpdateBooking").click(function () {
+            $("#restaurant_id").val($(this).data("rest_id"));
             $("#reservation_id").val($(this).data("reservation_id"));
             $("#restaurant_id").val($(this).data("rest_id"));
             $("#reservation_date").val($(this).data("reservation_date"));
