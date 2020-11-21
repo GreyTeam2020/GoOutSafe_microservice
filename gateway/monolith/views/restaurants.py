@@ -22,7 +22,7 @@ from monolith.services import RestaurantServices
 from monolith.auth import roles_allowed
 from flask_login import current_user, login_required
 from monolith.forms import RestaurantForm, RestaurantTableForm
-from monolith.utils.formatter import my_date_formatter
+from monolith.utils.formatter import my_date_formatter_iso
 from monolith.app_constant import CALCULATE_RATING_RESTAURANT
 from monolith.services.user_service import UserService
 
@@ -149,7 +149,7 @@ def my_reservations():
         "reservations.html",
         _test="restaurant_reservations_test",
         reservations_as_list=reservations_as_list,
-        my_date_formatter=my_date_formatter,
+        my_date_formatter_iso=my_date_formatter_iso,
         reservations_n=RestaurantServices.get_restaurant_people(restaurant_id),
     )
 

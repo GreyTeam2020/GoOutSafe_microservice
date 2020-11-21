@@ -1,8 +1,8 @@
-from flask import Blueprint, render_template, request
+from flask import Blueprint, render_template, request, current_app
 from monolith.forms import ReservationForm
 from monolith.auth import current_user
 from monolith.services.user_service import UserService
-from monolith.utils.formatter import my_date_formatter
+from monolith.utils.formatter import my_date_formatter_iso
 import datetime
 
 from flask_login import login_required
@@ -65,14 +65,14 @@ def index():
             request.form.get("friends"),
         )
 
-        if book[0] is None:
-            return render_template("booking.html", success=False, error=book[1])
+        if book is None:
+            return render_template("booking.html", success=False, error="Please try again later") #TODO: display error message
         else:
             return render_template(
                 "booking.html",
                 success=True,
-                restaurant_name=book[1],
-                table_name=book[2],
+                restaurant_name=book["restaurant_name"],
+                table_name=book["table_name"],
             )
     else:
         return render_template("booking.html", success=False, error="not logged in")
@@ -90,10 +90,14 @@ def update_book():
         people_number = int(request.form.get("people_number"))
         #
         reservation_id = int(request.form.get("reservation_id"))
+        restaurant_id = int(request.form.get("restaurant_id"))
+
+        current_app.logger.debug("REST_ID is {}".format(restaurant_id))
 
         new_book = BookingServices.update_book(
             reservation_id,
-            current_user,
+            restaurant_id,
+            current_user.id,
             py_datetime,
             people_number,
             request.form.get("friends"),
@@ -106,7 +110,7 @@ def update_book():
         return render_template(
             "user_reservations.html",
             reservations_as_list=reservations_as_list,
-            my_date_formatter=my_date_formatter,
+            my_date_formatter_iso=my_date_formatter_iso,
             new_book=new_book,
             form=form,
         )
