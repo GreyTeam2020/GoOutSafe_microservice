@@ -304,7 +304,7 @@ def create_user_on_db(ran: int = randrange(100000), role_id: int = 3):
 
 
 def create_restaurants_on_db(
-    name: str = "Gino Sorbillo", user_id: int = None, tables: int = 50
+    name: str = "Gino Sorbillo", user_id: int = None, user_email: str = None, tables: int = 50
 ):
     form = RestaurantForm()
     form.name.data = name
@@ -319,7 +319,7 @@ def create_restaurants_on_db(
     form.close_lunch.data = time(hour=15, minute=00)
     form.open_dinner.data = time(hour=19, minute=00)
     form.close_dinner.data = time(hour=22, minute=00)
-    return RestaurantServices.create_new_restaurant(form, user_id, 6)
+    return RestaurantServices.create_new_restaurant(form, user_id=user_id, user_email=user_email, max_sit=6)
 
 
 def del_user_on_db(id):
@@ -568,6 +568,7 @@ def del_booking_with_user_id(user_id):
 def create_review_for_restaurants(
     starts: float,
     rest_id: int,
+    reviewer_email: str,
     comment: str = "random_coment{}".format(randrange(100000)),
 ) -> Review:
     """
@@ -578,12 +579,7 @@ def create_review_for_restaurants(
     :param rest_id: restaurants id
     :return Review db object
     """
-    review = Review()
-    review.restaurant_id = rest_id
-    review.stars = starts
-    review.review = comment
-    db.session.add(review)
-    db.session.commit()
+    review = RestaurantServices.review_restaurant(restaurant_id=rest_id, reviewer_email=reviewer_email, stars=starts, review=comment)
     return review
 
 

@@ -301,11 +301,9 @@ class Test_RestaurantServices:
         """
         check if dish get deletedS
         """
-        email = "ham.burger@email.com"
-        password = "operator"
-        response = login(client, email, password)
-        assert response.status_code == 200
-        assert "logged_test" in response.data.decode("utf-8")
+
+        user = create_user_on_db(role_id=2)
+        assert user is not None
 
         dish = MenuDish()
         dish.name = "Pearà"
@@ -347,37 +345,37 @@ class Test_RestaurantServices:
         - check on db the new rating
         - erase all data create inside the test
         """
-        owner_one = create_user_on_db(123444223)
+        owner_one = create_user_on_db(123444223, role_id=2)
         assert owner_one is not None
-        owner_two = create_user_on_db(123444226)
+        owner_two = create_user_on_db(123444226, role_id=2)
         assert owner_two is not None
 
-        restaurant_one = create_restaurants_on_db(name="First", user_id=owner_one.id)
+        restaurant_one = create_restaurants_on_db(name="First", user_id=owner_one.id, user_email=owner_one.email)
         assert restaurant_one is not None
-        restaurant_two = create_restaurants_on_db(name="Second", user_id=owner_two.id)
+        restaurant_two = create_restaurants_on_db(name="Second", user_id=owner_two.id, user_email=owner_two.email)
         assert restaurant_two is not None
 
         start_one = 3.0
         start_two = 5.0
         review = create_review_for_restaurants(
-            starts=start_one, rest_id=restaurant_one.id
+            starts=start_one, rest_id=restaurant_one.id, reviewer_email="user_{}@asu.edu".format(randrange(2000, 7000))
         )
         assert review is not None
         review = create_review_for_restaurants(
-            starts=start_two, rest_id=restaurant_one.id
+            starts=start_two, rest_id=restaurant_one.id,  reviewer_email="user_{}@asu.edu".format(randrange(2000, 7000))
         )
         assert review is not None
 
         start_tree = 2.0
         review = create_review_for_restaurants(
-            starts=start_tree, rest_id=restaurant_two.id
+            starts=start_tree, rest_id=restaurant_two.id,  reviewer_email="user_{}@asu.edu".format(randrange(2000, 7000))
         )
         assert review is not None
 
         rating_rest_one = (start_one + start_two) / 2
         rating_rest_two = start_tree
 
-        RestaurantServices.calculate_rating_for_all()
+        RestaurantServices.restaur()
 
         rest = get_rest_with_name(restaurant_one.name)
         assert rest.rating == rating_rest_one
@@ -393,6 +391,7 @@ class Test_RestaurantServices:
 
     def test_rating_single_restaurant(self):
         """
+        TODO maybe this now don't have sens
         This method test the method to calculate a rating inside a new restautants
 
         Test flow:
@@ -404,20 +403,20 @@ class Test_RestaurantServices:
         - check on bd the new rating
         - erase all data create inside the test
         """
-        owner_one = create_user_on_db(randrange(100000))
+        owner_one = create_user_on_db(123444223, role_id=2)
         assert owner_one is not None
 
-        restaurant_one = create_restaurants_on_db(name="First", user_id=owner_one.id)
+        restaurant_one = create_restaurants_on_db(name="First", user_id=owner_one.id, user_email=owner_one.email)
         assert restaurant_one is not None
 
         start_one = 3.0
         start_two = 4.5
         review = create_review_for_restaurants(
-            starts=start_one, rest_id=restaurant_one.id
+            starts=start_one, rest_id=restaurant_one.id, reviewer_email="user_{}@asu.edu".format(randrange(2000, 7000))
         )
         assert review is not None
         review = create_review_for_restaurants(
-            starts=start_two, rest_id=restaurant_one.id
+            starts=start_two, rest_id=restaurant_one.id, reviewer_email="user_{}@asu.edu".format(randrange(2000, 7000))
         )
         assert review is not None
 
@@ -459,37 +458,3 @@ class Test_RestaurantServices:
         del_restaurant_on_db(restaurant_one.id)
         del_user_on_db(owner_one.id)
 
-
-"""
-          The method test the function inside the RestaurantServices to search all the people
-        inside the restaurants, the function return an array that looks like
-        [people_to_lunch, people_to_dinner, people_checkin]
-        Test flow
-        - new restaurants
-        - new booking
-        - get all people
-        - del restaurant
-        """
-""" 
-    def test_get_restaurant_people(self):
-        
-        owner_one = create_user_on_db(randrange(100000))
-        assert owner_one is not None
-
-        restaurant_one = create_restaurants_on_db(name="First", user_id=owner_one.id)
-        assert restaurant_one is not None
-        
-        customer_one = create_user_on_db(randrange(100000))
-        customer_two = create_user_on_db(randrange(100000))
-        # TODO I missing the logic, this is possible?
-
-        # books_lunch = create_random_booking(1, rest_id=restaurant_one.id, customer_one, date_time=datetime(2020))
-
-        all_people = RestaurantServices.get_restaurant_people(restaurant_one.id)
-        assert all_people is not None
-        assert len(all_people) == 3
-        assert all_people[0] == 0
-        assert all_people[1] == 0
-        assert all_people[2] == 0
-        del_restaurant_on_db(restaurant_one.id)
-"""

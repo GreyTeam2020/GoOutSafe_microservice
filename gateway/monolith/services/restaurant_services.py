@@ -155,6 +155,7 @@ class RestaurantServices:
             return None
         return response["dishes"]
 
+
     @staticmethod
     def get_menu_restaurant(restaurant_id: int):
         """
