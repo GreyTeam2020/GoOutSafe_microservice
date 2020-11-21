@@ -12,7 +12,7 @@ from monolith.forms import ReservationForm
 from monolith.services import UserService, SendEmailService
 from monolith.services.booking_services import BookingServices
 from monolith.auth import roles_allowed
-from monolith.utils.formatter import my_date_formatter
+from monolith.utils.formatter import my_date_formatter_iso
 from monolith.model.user_model import UserModel
 from flask_login import current_user, login_user, login_required
 
@@ -134,7 +134,7 @@ def myreservation():
     return render_template(
         "user_reservations.html",
         reservations_as_list=reservations_as_list,
-        my_date_formatter=my_date_formatter,
+        my_date_formatter_iso=my_date_formatter_iso,
         form=form,
     )
 
@@ -153,7 +153,7 @@ def delete_reservation(reservation_id):
     return render_template(
         "user_reservations.html",
         reservations_as_list=reservations_as_list,
-        my_date_formatter=my_date_formatter,
+        my_date_formatter_iso=my_date_formatter_iso,
         deleted=deleted,
         _test="del_rest_test",
         form=form,

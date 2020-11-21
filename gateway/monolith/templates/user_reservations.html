@@ -20,10 +20,10 @@
                         <td><a class="showUpdateBooking" href="#"
                                data-reservation_id="{{ reservation.id }}"
                                data-rest_id="{{ reservation.rest_id }}"
-                               data-reservation_date="{{ my_date_formatter(reservation.reservation_date) }}"
+                               data-reservation_date="{{ my_date_formatter_iso(reservation.reservation_date) }}"
                                data-people_number="{{ reservation.people_number }}"
                         >{{ reservation.id }}</a></td>
-                        <td>{{ my_date_formatter(reservation.reservation_date) }}</td>
+                        <td>{{ my_date_formatter_iso(reservation.reservation_date) }}</td>
                         <td><a href="/restaurant/{{ reservation.rest_id }}">{{ reservation.name }}</a></td>
                         <td>{{ reservation.people_number }}</td>
                         <td><button class="btn btn-primary deleteBooking" data-id="{{ reservation.id }}">Delete</button></td>

@@ -2,7 +2,7 @@ from flask import Blueprint, render_template, request
 from monolith.forms import ReservationForm
 from monolith.auth import current_user
 from monolith.services.user_service import UserService
-from monolith.utils.formatter import my_date_formatter
+from monolith.utils.formatter import my_date_formatter_iso
 import datetime
 
 from flask_login import login_required
@@ -93,7 +93,7 @@ def update_book():
 
         new_book = BookingServices.update_book(
             reservation_id,
-            current_user,
+            current_user.id,
             py_datetime,
             people_number,
             request.form.get("friends"),
@@ -106,7 +106,7 @@ def update_book():
         return render_template(
             "user_reservations.html",
             reservations_as_list=reservations_as_list,
-            my_date_formatter=my_date_formatter,
+            my_date_formatter_iso=my_date_formatter_iso,
             new_book=new_book,
             form=form,
         )

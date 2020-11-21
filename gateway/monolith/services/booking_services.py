@@ -29,36 +29,31 @@ class BookingServices:
 
     @staticmethod
     def delete_book(reservation_id: str, customer_id: str):
-        response, code = HttpUtils.make_delete_request("{}/{}?user_id={}".format(BOOKING_MICROSERVICE_URL, reservation_id, customer_id))
+        response = HttpUtils.make_delete_request("{}/{}?user_id={}".format(BOOKING_MICROSERVICE_URL, reservation_id, customer_id))
 
         return response
 
     @staticmethod
-    def update_book(
-        reservation_id, current_user, py_datetime, people_number, raw_friends
-    ):
+    def update_book(reservation_id: str, user_id, py_datetime, people_number, raw_friends=""):
+        json = {
+            "reservation_id": reservation_id,
+            "user_id": user_id,
+            "datetime": py_datetime.strftime("%Y-%m-%dT%H:%M:%SZ"),
+            "people_number": people_number,
+            "raw_friends": raw_friends
+        }
+        response, code = HttpUtils.make_put_request("{}/{}".format(BOOKING_MICROSERVICE_URL, reservation_id), json)
+        return response
 
-        reservation = (
-            db.session.query(Reservation)
-            .filter_by(id=reservation_id)
-            .filter_by(customer_id=current_user.id)
-            .first()
-        )
-        if reservation is None:
-            print("Reservation not found")
-            return False, "Reservation not found"
+    @staticmethod
+    def get_single_booking(reservation_id):
+        response = HttpUtils.make_get_request(
+            "{}/{}".format(BOOKING_MICROSERVICE_URL, reservation_id))
 
-        table = (
-            db.session.query(RestaurantTable).filter_by(id=reservation.table_id).first()
-        )
+        return response
 
-        if table is None:
-            print("Table not found")
-            return False, "Table not found"
+    @staticmethod
+    def get_all_booking(reservation_id):
+        response = HttpUtils.make_get_request(BOOKING_MICROSERVICE_URL)
 
-        book = BookingServices.book(
-            table.restaurant_id, current_user, py_datetime, people_number, raw_friends
-        )
-        if book[0] is not None:
-            BookingServices.delete_book(reservation_id, current_user.id)
-        return book
+        return response
