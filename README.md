@@ -1,6 +1,6 @@
 # GoOutSafe with microservices
 
-[![Build Status](https://travis-ci.com/GreyTeam2020/GoOutSafe_microservice.svg?token=sy94HsRanu5mrpdsRQbH&branch=main)](https://travis-ci.com/GreyTeam2020/GoOutSafe_microservice)
+![GitHub Workflow Status](https://img.shields.io/github/workflow/status/GreyTeam2020/GoOutSafe_microservice/docker-compose-actions-workflow?style=for-the-badge)
 
 ## Table of Content
 
@@ -13,7 +13,7 @@
 Each microservices is a separate repository that you can clone with the following commands
 
 ```bash
-git clone https://github.com/GreyTeam2020/GoOutSafe_microservice.git && git clone --recurse-submodules --remote-submodules
+git clone --recurse-submodules https://github.com/GreyTeam2020/GoOutSafe_microservice.git
 ```
 
 [Source](https://stackoverflow.com/a/3797061/7290562)

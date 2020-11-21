@@ -10,6 +10,7 @@ class UserModel:
         self._authenticated = False
         self.is_active = True
         self.is_admin = False
+        self.is_positive = False
 
     def fill_from_json(self, json_obj):
         """
@@ -29,6 +30,8 @@ class UserModel:
         else:
             self.dateofbirth = json_obj["dateofbirth"]
         self.role_id = json_obj["role_id"]
+        if "is_positive" in json_obj:
+            self.is_positive = json_obj["is_positive"]
 
     @property
     def is_authenticated(self):

@@ -93,9 +93,11 @@ def create_restaurant():
     """
     form = RestaurantForm()
     if request.method == "POST":
-        #TODO check why it's not working this if statement below
-        #if form.validate_on_submit():
-        current_app.logger.debug("Check if user {} si present".format(current_user.email))
+        # TODO check why it's not working this if statement below
+        # if form.validate_on_submit():
+        current_app.logger.debug(
+            "Check if user {} si present".format(current_user.email)
+        )
         user = UserService.user_is_present(current_user.email)
         if user is None:
             return render_template(
@@ -162,8 +164,14 @@ def my_data():
     """
     message = None
     if request.method == "POST":
-        #update restaurant
-        restaurant_modified = RestaurantServices.update_restaurant(session["RESTAURANT_ID"], request.form.get("name"), request.form.get("lat"), request.form.get("lon"), request.form.get("covid_measures"))
+        # update restaurant
+        restaurant_modified = RestaurantServices.update_restaurant(
+            session["RESTAURANT_ID"],
+            request.form.get("name"),
+            request.form.get("lat"),
+            request.form.get("lon"),
+            request.form.get("covid_measures"),
+        )
         # if no resturant match the update query (session problem probably)
         if restaurant_modified:
             message = "Some errors occurs during modification. PLease try again later"
@@ -176,7 +184,7 @@ def my_data():
     if restaurant is not None:
         form = RestaurantForm(obj=restaurant)
         form2 = RestaurantTableForm()
-        #get all tables
+        # get all tables
         tables = RestaurantServices.get_restaurant_tables(session["RESTAURANT_ID"])
         return render_template(
             "restaurant_data.html",
