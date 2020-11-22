@@ -232,8 +232,8 @@ class HealthyServices:
             '''
         
         #API booking: get all future booking of the customer
-        URL = BOOKING_MICROSERVICE_URL + "?user_id="+str(user_id)+"&fromDate="+str(date_marking))
-        future_reservations = HttpUtils.make_get_request(URL)
+        url = "{}?user_id={}&fromDate={}".format(BOOKING_MICROSERVICE_URL, user_id, date_marking)
+        future_reservations = HttpUtils.make_get_request(url)
         
         """
         get all restaurants (API)
