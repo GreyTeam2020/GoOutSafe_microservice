@@ -25,8 +25,10 @@ class HealthyServices:
     @staticmethod
     def report_positive():
         # bind filter params...
-        url = "{}/positive".format(USER_MICROSERVICE_URL)
+        url = "{}/report_positive".format(USER_MICROSERVICE_URL)
         response = HttpUtils.make_get_request(url)
+        if response is None:
+            return []
         users = response["result"]
         list_user = []
         for user in users:
@@ -46,6 +48,11 @@ class HealthyServices:
             value = user_phone
         else:
             return None
+
+        if user_email == "" and user_phone == "":
+            return "Insert an email or a phone number"
+
+
         url = "{}/mark/{}/{}".format(USER_MICROSERVICE_URL, key, value)
 
         response = HttpUtils.make_get_request(url)
@@ -74,14 +81,13 @@ class HealthyServices:
             return "Insert an email or a phone number"
 
         if user_email != "":
-            body = str({"key": "email", "value": user_email})
+            body = {"key": "email", "value": user_email}
         else:
-            body = str({"key": "phone", "value": user_phone})
+            body = {"key": "phone", "value": user_phone}
 
         URL = USER_MICROSERVICE_URL + "/unmark"
 
         response = HttpUtils.make_put_request(URL, body)
-
         if response is None:
             return "An error occurs"
 
@@ -89,10 +95,12 @@ class HealthyServices:
             return "An error occurs, please try again"
 
         if response[1] == 404:
-            if response[0] == "User not found":
-                return "The customer is not registered"
-            elif response[0] == "User not positive":
-                return "The user is not Covid-19 positive"
+            return "The customer not registered or not positive"
+            
+            #if response[0] == "User not found":
+            #    return "The customer is not registered"
+            #else: #response[0] == "User not positive":
+            #    return "The user is not Covid-19 positive"
 
         if response[1] == 200:
             return ""
@@ -112,15 +120,18 @@ class HealthyServices:
         # check if the user exists
         # check if the user is positive (get also date of marking) (API)
         response = HttpUtils.make_get_request(URL)
+        
         if response is None:
-            return "Error, please try again"
-
+            return "The customer not registered or not positive"
+        
+        """
         if response == "User not found":
             return "The customer is not registered"
         elif response == "Information not found":
             return "The user is not Covid-19 positive"
         elif response == "Bad Request":
-            return "Error"
+            return "Error here"
+        """
 
         contact_users_GUI = []
 
