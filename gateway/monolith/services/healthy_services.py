@@ -232,7 +232,14 @@ class HealthyServices:
                 for one_reservation in all_reservations:
 
                     '''
-                    check if it's contact
+                    WHAT FOR PRENOTATION ON TWO DAYS (NIGHT)?
+
+                    check if it's contact -> iff
+                    - same restaurant (same ids)
+                    - same day dd-mm-yyyy
+                    - same time -> having start and end. not same time iff
+                        - s1 and e1 < start or 
+                        - s1 and e1 > end
                     find in all reservations all res with same day and time
                     get user id of reservation (contact)
                     API: get user email and name of the contact
