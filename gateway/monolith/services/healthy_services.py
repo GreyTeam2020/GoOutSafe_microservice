@@ -216,38 +216,63 @@ class HealthyServices:
             URL = BOOKING_MICROSERVICE_URL + "?&fromDate="+str(date_marking)+"&toDate="+str(date_marking - timedelta(days=14))
             all_reservations = HttpUtils.make_get_request(URL)
         
-            '''
+            
             for reservation in reservations_customer:
 
-                
+                '''
+                RSERVATION DOESN'T RETURN EMAIL OF FRIENDS
+
                 get friend's email of the positive customer
                 SEND EMAIL (ADD TO JSON)
+                '''
 
-                find in all reservations all res with same day and time
-                get user id of reservation (contact)
-                API: get user email and name of the contact
-                get friend of the contact
-                SEND EMAIL (ADD TO JSON)
+                start =  datetime.strptime(reservation["reservation_date"], "%Y-%m-%dT%H:%M:%SZ")
+                end = datetime.strptime(reservation["reservation_end"], "%Y-%m-%dT%H:%M:%SZ")
 
-                restaurant_id = reservation["qualcosa"]
+                for one_reservation in all_reservations:
+
+                    '''
+                    check if it's contact
+                    find in all reservations all res with same day and time
+                    get user id of reservation (contact)
+                    API: get user email and name of the contact
+                    '''
+
+                    '''
+                    get friend of the contact
+                    SEND EMAIL (ADD TO JSON)
+                    '''
+                restaurant_id = reservation["table"]["restaurant"]["id"]
 
                 URL = RESTAURANTS_MICROSERVICE_URL + "/" + str(restaurant_id)
                 restaurant = HttpUtils.make_get_request(URL)
                 if restaurant is not None:
-                    past_restaurants.add(restaurant["owner_email"])
+                    past_restaurants.add({
+                        "email" : restaurant["owner_email"]
+                        "name" : restaurant["name"]
+                        "date" : start
+                    })
 
-            '''
+            
         
         #API booking: get all future booking of the customer
         URL = BOOKING_MICROSERVICE_URL + "?user_id="+str(user_id)+"&fromDate="+str(date_marking))
         future_reservations = HttpUtils.make_get_request(URL)
         
-        """
-        get all restaurants (API)
-        for each future reservation
-            use restaurant.id to get owner_email from list of restaurants
-            SEND EMAIL (ADD TO JSON)
-        """
+        for future_reservation in future_reservations:
+
+            start =  datetime.strptime(reservation["reservation_date"], "%Y-%m-%dT%H:%M:%SZ")   
+
+            restaurant_id = future_reservation["table"]["restaurant"]["id"]
+            URL = RESTAURANTS_MICROSERVICE_URL + "/" + str(restaurant_id)
+            restaurant = HttpUtils.make_get_request(URL)
+            if restaurant is not None:
+                future_restaurants.add({
+                    "email" : restaurant["owner_email"]
+                    "name" : restaurant["name"]
+                    "date" : start
+                })
+
 
         return {
            "friends": friends,
