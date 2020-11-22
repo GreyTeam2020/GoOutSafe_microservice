@@ -231,7 +231,9 @@ class Test_GoOutSafeForm:
         owner = create_user_on_db(randrange(100000))
         assert owner is not None
 
-        restaurant = create_restaurants_on_db(name="First", user_id=owner.id, user_email=owner.email)
+        restaurant = create_restaurants_on_db(
+            name="First", user_id=owner.id, user_email=owner.email
+        )
         assert restaurant is not None
 
         response = research_restaurant(client, restaurant.name)
@@ -256,7 +258,9 @@ class Test_GoOutSafeForm:
         owner = create_user_on_db(randrange(100000))
         assert owner is not None
 
-        restaurant = create_restaurants_on_db(name="First", user_id=owner.id, user_email=owner.email)
+        restaurant = create_restaurants_on_db(
+            name="First", user_id=owner.id, user_email=owner.email
+        )
         assert restaurant is not None
 
         response = research_restaurant(client=client, name=restaurant.name)

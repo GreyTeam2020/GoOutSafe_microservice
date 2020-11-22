@@ -4,7 +4,11 @@ from flask_login import current_user, login_user
 
 from monolith.database import db, Positive
 from monolith.forms import UserForm, LoginForm
-from monolith.app_constant import USER_MICROSERVICE_URL, RESTAURANTS_MICROSERVICE_URL, BOOKING_MICROSERVICE_URL
+from monolith.app_constant import (
+    USER_MICROSERVICE_URL,
+    RESTAURANTS_MICROSERVICE_URL,
+    BOOKING_MICROSERVICE_URL,
+)
 from monolith.utils.http_utils import HttpUtils
 from monolith.model import RestaurantModel
 from monolith.model import UserModel
@@ -293,8 +297,10 @@ class UserService:
             "join restaurant rest on rest.id = tab.restaurant_id "
             "where cust.id = :customer_id"
         )
-        current_app.logger.debug("Filtering by: {}".format([fromDate, toDate, customer_id]))
-        #stmt = db.text(queryString)
+        current_app.logger.debug(
+            "Filtering by: {}".format([fromDate, toDate, customer_id])
+        )
+        # stmt = db.text(queryString)
 
         # bind filter params...
         url = "{}?user_id={}".format(BOOKING_MICROSERVICE_URL, customer_id)
@@ -307,9 +313,9 @@ class UserService:
         return response
 
         # execute and retrive results...
-        #result = db.engine.execute(stmt, params)
-        #reservations_as_list = result.fetchall()
-        #return reservations_as_list
+        # result = db.engine.execute(stmt, params)
+        # reservations_as_list = result.fetchall()
+        # return reservations_as_list
 
     @staticmethod
     def user_login(form: LoginForm):

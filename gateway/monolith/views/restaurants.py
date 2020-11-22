@@ -310,7 +310,8 @@ def restaurant_review(restaurant_id):
                 restaurant_name=RestaurantServices.get_restaurant_name(restaurant_id),
                 review=review,
             )
-        DispatcherMessage.send_message(CALCULATE_RATING_RESTAURANT, [restaurant_id])
+        # TODO create a call to refresh the ration of this restautats
+        # DispatcherMessage.send_message(CALCULATE_RATING_RESTAURANT, [restaurant_id])
         current_app.logger.debug("New rating event ran")
     return render_template(
         "review.html",

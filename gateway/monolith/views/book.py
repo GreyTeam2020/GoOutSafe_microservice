@@ -20,10 +20,8 @@ book = Blueprint("book", __name__)
 def index():
     if current_user is not None and hasattr(current_user, "id"):
         # check on the inputs
-        if (
-            request.form.get("reservation_date") is None
-            or request.form.get("reservation_date") == ""
-        ):
+        book_date = request.form.get("reservation_date")
+        if book_date is None or book_date == "":
             return render_template(
                 "booking.html",
                 success=False,
@@ -31,25 +29,19 @@ def index():
             )
         # the date and time come as string, so I have to parse them and transform them in python datetime
         #
-        py_datetime = datetime.datetime.strptime(
-            request.form.get("reservation_date"), "%d/%m/%Y %H:%M"
-        )
+        py_datetime = datetime.datetime.strptime(book_date, "%d/%m/%Y %H:%M")
 
         # check on people number
-        if (
-            request.form.get("people_number") is None
-            or request.form.get("people_number") == ""
-        ):
+        people_number = request.form.get("people_number")
+        if people_number is None or people_number == "":
             return render_template(
                 "booking.html", success=False, error="You have to specify people number"
             )
-        people_number = int(request.form.get("people_number"))
+        people_number = int(people_number)
 
         # check on restaurant_id (hidden field)
-        if (
-            request.form.get("restaurant_id") is None
-            or request.form.get("restaurant_id") == ""
-        ):
+        rest_id = request.form.get("restaurant_id")
+        if rest_id is None or rest_id == "":
             return render_template(
                 "booking.html",
                 success=False,
@@ -66,7 +58,9 @@ def index():
         )
 
         if book is None:
-            return render_template("booking.html", success=False, error="Please try again later") #TODO: display error message
+            return render_template(
+                "booking.html", success=False, error="Please try again later"
+            )  # TODO: display error message
         else:
             return render_template(
                 "booking.html",
