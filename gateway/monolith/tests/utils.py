@@ -303,11 +303,11 @@ def create_restaurants_on_db(
 ):
     form = RestaurantForm()
     form.name.data = name
-    form.phone.data = "1234"
+    form.phone.data = "1234{}".format(randrange(1000, 50000))
     form.lat.data = 183
     form.lon.data = 134
     form.n_tables.data = tables
-    form.covid_measures.data = "We can survive"
+    form.covid_measures.data = "We can survive{}".format(randrange(1000, 50000))
     form.cuisine.data = ["Italian food"]
     form.open_days.data = ["0"]
     form.open_lunch.data = time(hour=12, minute=00)

@@ -474,4 +474,7 @@ class RestaurantServices:
         This method perform the request to microservices to delete the restaurants
         :return true or false
         """
-        return False
+        url = "{}/delele/{}".format(RESTAURANTS_MICROSERVICE_URL, restaurant_id)
+        current_app.logger.debug("URL to microservice is {}".format(url))
+        response = HttpUtils.make_put_request(url, {})
+        return response is not None

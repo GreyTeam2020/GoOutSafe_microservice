@@ -163,7 +163,7 @@ class Test_GoOutSafeForm:
         assert "not_logged_test" not in response.data.decode("utf-8")
 
         result = RestaurantServices.delete_restaurant(
-            restaurant_form.name.data, restaurant_form.phone.data
+            rest[0].id
         )
         assert result is True
 
