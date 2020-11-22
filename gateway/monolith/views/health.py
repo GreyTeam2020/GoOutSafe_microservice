@@ -53,40 +53,30 @@ def search_contacts():
                     message="Insert an email or a phone number".format(form.email.data),
                 )
 
-            # filtering by email
-            if form.email.data != "":
-                q_user = db.session.query(User).filter_by(email=form.email.data)
-            else:
-                q_user = db.session.query(User).filter_by(phone=form.phone.data)
+            contacts = HealthyServices.search_contacts(form.email.data, form.phone.data)
 
-            if q_user.first() is None:
+            if type(contacts) == "<class 'list'>":
+
                 return render_template(
-                    "search_contacts.html",
-                    _test="search_contact_not_registered",
-                    form=form,
-                    message="The user is not registered".format(form.email.data),
+                    "list_contacts.html", _test="list_page", contacts=contacts
                 )
 
-            q_already_positive = (
-                db.session.query(Positive)
-                .filter_by(user_id=q_user.first().id, marked=True)
-                .first()
-            )
-            if q_already_positive is None:
+            elif type(contacts) == "<class 'str'>":
+
                 return render_template(
                     "search_contacts.html",
                     _test="search_contacts_no_positive",
                     form=form,
-                    message="The user is not a covid-19 positive".format(
-                        form.email.data
-                    ),
+                    message=contacts,
+                )
+            else:
+                return render_template(
+                    "search_contacts.html",
+                    _test="search_contacts_no_positive",
+                    form=form,
+                    message="Error",
                 )
 
-            contacts = HealthyServices.search_contacts(q_user.first().id)
-
-            return render_template(
-                "list_contacts.html", _test="list_page", contacts=contacts
-            )
     return render_template("/search_contacts.html", form=form)
 
 

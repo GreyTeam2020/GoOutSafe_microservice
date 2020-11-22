@@ -29,7 +29,9 @@ class RestaurantServices:
     """
 
     @staticmethod
-    def create_new_restaurant(form: RestaurantForm, user_id: int, max_sit: int):
+    def create_new_restaurant(
+        form: RestaurantForm, user_id: int, max_sit: int, user_email: str = None
+    ):
         """
         This method contains all logic save inside the a new restaurant
         :return:
@@ -48,12 +50,16 @@ class RestaurantServices:
         current_app.logger.debug("Phone is: {}".format(phone_rest))
         covid_measures = form.covid_measures.data
         current_app.logger.debug("Covid Measures is: {}".format(covid_measures))
-        owner_email = current_user.email
+        if user_email is not None:
+            owner_email = user_email
+        else:
+            owner_email = current_user.email
         current_app.logger.debug("owner_email is {}".format(owner_email))
         try:
             lat_rest = float(form.lat.data)
             lon_rest = float(form.lon.data)
-        except:
+        except Exception as e:
+            current_app.logger.error("Wrong lat/ton format\n{}".format(e))
             return None
         current_app.logger.debug(
             "Restaurant position is lat={} lon={}".format(lat_rest, lon_rest)
@@ -61,7 +67,7 @@ class RestaurantServices:
         restaurant_json = {
             "name": name_rest,
             "covid_measures": covid_measures,
-            "owner_email": current_user.email,
+            "owner_email": owner_email,
             "phone": phone_rest,
             "lat": lat_rest,
             "lon": lon_rest,
@@ -253,7 +259,7 @@ class RestaurantServices:
         return list_reservation
 
     @staticmethod
-    def review_restaurant(restaurant_id, reviewer_id, stars, review):
+    def review_restaurant(restaurant_id, reviewer_email, stars, review):
         """
         This method insert a review to the specified restaurant
         """
@@ -262,7 +268,7 @@ class RestaurantServices:
         if stars < 0 or stars > 5:
             return None
 
-        json = {"stars": stars, "review": review, "reviewer_email": current_user.email}
+        json = {"stars": stars, "review": review, "reviewer_email": reviewer_email}
         url = "{}/{}/reviews".format(RESTAURANTS_MICROSERVICE_URL, restaurant_id)
         current_app.logger.debug("URL to microservices: {}".format(url))
         response = HttpUtils.make_post_request(url, json)
@@ -463,9 +469,12 @@ class RestaurantServices:
         return None
 
     @staticmethod
-    def delete_restaurant(name: str, phone: str) -> bool:
+    def delete_restaurant(restaurant_id: int) -> bool:
         """
         This method perform the request to microservices to delete the restaurants
         :return true or false
         """
-        return False
+        url = "{}/delele/{}".format(RESTAURANTS_MICROSERVICE_URL, restaurant_id)
+        current_app.logger.debug("URL to microservice is {}".format(url))
+        response = HttpUtils.make_put_request(url, {})
+        return response is not None

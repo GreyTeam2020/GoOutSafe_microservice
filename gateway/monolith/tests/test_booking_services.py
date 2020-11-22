@@ -1,7 +1,5 @@
 from random import randrange
 
-import pytest
-
 import datetime
 from monolith.database import db, User, Restaurant, Reservation, Positive
 from monolith.services import BookingServices
@@ -40,8 +38,13 @@ class Test_BookServices:
         """
 
         user = create_user_on_db(randrange(100000))
-        rest_owner = create_user_on_db(ran=2)
-        restaurant = create_restaurants_on_db(user_id=rest_owner.id)
+        assert user is not None
+        rest_owner = create_user_on_db(ran=randrange(100000, 200000), role_id=3)
+        assert rest_owner is not None
+        restaurant = create_restaurants_on_db(
+            user_id=rest_owner.id, user_email=rest_owner.email
+        )
+        assert restaurant is not None
 
         book = BookingServices.book(
             restaurant.id,
@@ -59,17 +62,22 @@ class Test_BookServices:
             "a@a.com;b@b.com;c@c.com;d@d.com;e@e.com",
         )
 
-        assert book[0] is not None
-        assert book2[0] is not None
+        assert "restaurant_name" in book
+        assert book["restaurant_name"] == restaurant.name
+        assert "restaurant_name" in book2
+        assert book2["restaurant_name"] == restaurant.name
 
         # delete friends
+        """ 
         del_friends_of_reservation(book[0].id)
         del_friends_of_reservation(book2[0].id)
 
         # delete reservations
         del_booking_services(book[0].id)
         del_booking_services(book2[0].id)
-
+        """
+        del_booking_services(book["id"], user.id)
+        del_booking_services(book2["id"], user.id)
         # delete restaurants (so also tables)
         del_restaurant_on_db(restaurant.id)
 
@@ -85,9 +93,13 @@ class Test_BookServices:
         """
         No more tables available
         """
-        user = create_user_on_db()
-        rest_owner = create_user_on_db(ran=2)
-        restaurant = create_restaurants_on_db(user_id=rest_owner.id, tables=1)
+        user = create_user_on_db(randrange(100000))
+        assert user is not None
+        rest_owner = create_user_on_db(ran=randrange(100000, 200000), role_id=3)
+        assert rest_owner is not None
+        restaurant = create_restaurants_on_db(
+            user_id=rest_owner.id, user_email=rest_owner.email, tables=1
+        )
 
         book = BookingServices.book(
             restaurant.id,
@@ -105,14 +117,15 @@ class Test_BookServices:
             "a@a.com;b@b.com;c@c.com;d@d.com;e@e.com",
         )
 
-        assert book[0] is not None
-        assert book2[0] is None
+        assert "restaurant_name" in book
+        assert book["restaurant_name"] == restaurant.name
+        assert book2 is None
 
         # delete friends
-        del_friends_of_reservation(book[0].id)
+        del_friends_of_reservation(book["id"])
 
         # delete reservations
-        del_booking_services(book[0].id)
+        del_booking_services(book["id"], user.id)
 
         # delete restaurants (so also tables)
         del_restaurant_on_db(restaurant.id)
@@ -121,17 +134,17 @@ class Test_BookServices:
         del_user_on_db(user.id)
         del_user_on_db(rest_owner.id)
 
-        # AT THE END THERE MUST TO BE ONLY ONE RESERVATION
-        q = db.session.query(func.count(Reservation.id)).scalar()
-        assert q == 1
-
     def test_new_booking_closed(self):
         """
         restaurant closed
         """
-        user = create_user_on_db()
-        rest_owner = create_user_on_db(ran=2)
-        restaurant = create_restaurants_on_db(user_id=rest_owner.id, tables=1)
+        user = create_user_on_db(randrange(100000))
+        assert user is not None
+        rest_owner = create_user_on_db(ran=randrange(100000, 200000), role_id=3)
+        assert rest_owner is not None
+        restaurant = create_restaurants_on_db(
+            user_id=rest_owner.id, user_email=rest_owner.email, tables=1
+        )
 
         book = BookingServices.book(
             restaurant.id,
@@ -141,7 +154,7 @@ class Test_BookServices:
             "a@a.com;b@b.com;c@c.com",
         )
 
-        assert book[0] is None
+        assert book is None
 
         # delete restaurants (so also tables)
         del_restaurant_on_db(restaurant.id)
@@ -159,9 +172,13 @@ class Test_BookServices:
         overlapped reservations
         """
 
-        user = create_user_on_db()
-        rest_owner = create_user_on_db(ran=2)
-        restaurant = create_restaurants_on_db(user_id=rest_owner.id, tables=1)
+        user = create_user_on_db(randrange(100000))
+        assert user is not None
+        rest_owner = create_user_on_db(ran=randrange(100000, 200000), role_id=3)
+        assert rest_owner is not None
+        restaurant = create_restaurants_on_db(
+            user_id=rest_owner.id, user_email=rest_owner.email, tables=1
+        )
 
         book = BookingServices.book(
             restaurant.id,
@@ -179,14 +196,15 @@ class Test_BookServices:
             "a@a.com;b@b.com;c@c.com;d@d.com;e@e.com",
         )
 
-        assert book[0] is not None
-        assert book2[0] is None
+        assert "restaurant_name" in book
+        assert book["restaurant_name"] == restaurant.name
+        assert book2 is None
 
         # delete friends
-        del_friends_of_reservation(book[0].id)
+        del_friends_of_reservation(book["id"])
 
         # delete reservations
-        del_booking_services(book[0].id)
+        del_booking_services(book["id"], user.id)
 
         # delete restaurants (so also tables)
         del_restaurant_on_db(restaurant.id)
@@ -206,9 +224,13 @@ class Test_BookServices:
         """
         restaurant closed
         """
-        user = create_user_on_db()
-        rest_owner = create_user_on_db(ran=2)
-        restaurant = create_restaurants_on_db(user_id=rest_owner.id, tables=1)
+        user = create_user_on_db(randrange(100000))
+        assert user is not None
+        rest_owner = create_user_on_db(ran=randrange(100000, 200000), role_id=3)
+        assert rest_owner is not None
+        restaurant = create_restaurants_on_db(
+            user_id=rest_owner.id, user_email=rest_owner.email, tables=1
+        )
 
         book = BookingServices.book(
             restaurant.id,
@@ -218,7 +240,7 @@ class Test_BookServices:
             "a@a.com;b@b.com;c@c.com",
         )
 
-        assert book[0] is None
+        assert book is None
 
         # delete restaurants (so also tables)
         del_restaurant_on_db(restaurant.id)
@@ -236,9 +258,13 @@ class Test_BookServices:
         test for deletion
         """
 
-        user = create_user_on_db()
-        rest_owner = create_user_on_db(ran=2)
-        restaurant = create_restaurants_on_db(user_id=rest_owner.id)
+        user = create_user_on_db(randrange(100000))
+        assert user is not None
+        rest_owner = create_user_on_db(ran=randrange(100000, 200000), role_id=3)
+        assert rest_owner is not None
+        restaurant = create_restaurants_on_db(
+            user_id=rest_owner.id, user_email=rest_owner.email
+        )
 
         book = BookingServices.book(
             restaurant.id,
@@ -248,10 +274,11 @@ class Test_BookServices:
             "a@a.com;b@b.com;c@c.com;d@d.com;e@e.com",
         )
 
-        assert book[0] is not None
+        assert "restaurant_name" in book
+        assert book["restaurant_name"] == restaurant.name
 
         # delete the reservation
-        BookingServices.delete_book(book[0].id, user.id)
+        BookingServices.delete_book(book["id"], user.id)
         # check how many reservations
         q = db.session.query(func.count(Reservation.id)).scalar()
         assert q == 1
@@ -267,9 +294,13 @@ class Test_BookServices:
         """
         this test insert two reservation that should be ok
         """
-        user = create_user_on_db()
-        rest_owner = create_user_on_db(ran=2)
-        restaurant = create_restaurants_on_db(user_id=rest_owner.id)
+        user = create_user_on_db(randrange(100000))
+        assert user is not None
+        rest_owner = create_user_on_db(ran=randrange(100000, 200000), role_id=3)
+        assert rest_owner is not None
+        restaurant = create_restaurants_on_db(
+            user_id=rest_owner.id, user_email=rest_owner.email
+        )
 
         book = BookingServices.book(
             restaurant.id,
@@ -279,22 +310,25 @@ class Test_BookServices:
             "a@a.com;b@b.com;c@c.com",
         )
 
-        assert book[0] is not None
+        assert "restaurant_name" in book
+        assert book["restaurant_name"] == restaurant.name
 
         book = BookingServices.update_book(
-            book[0].id,
-            user,
+            book["id"],
+            restaurant.id,
+            user.id,
             datetime.datetime(year=2120, month=11, day=25, hour=14),
             2,
             "a@a.com",
         )
-        assert book[0] is not None
+        assert "restaurant_name" in book
+        assert book["restaurant_name"] == restaurant.name
 
         # delete friends
-        del_friends_of_reservation(book[0].id)
+        del_friends_of_reservation(book["id"])
 
         # delete reservations
-        del_booking_services(book[0].id)
+        del_booking_services(book["id"], user.id)
 
         # delete restaurants (so also tables)
         del_restaurant_on_db(restaurant.id)
