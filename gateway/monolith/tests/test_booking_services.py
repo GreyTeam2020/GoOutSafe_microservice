@@ -41,7 +41,9 @@ class Test_BookServices:
         assert user is not None
         rest_owner = create_user_on_db(ran=randrange(100000, 200000), role_id=3)
         assert rest_owner is not None
-        restaurant = create_restaurants_on_db(user_id=rest_owner.id, user_email=rest_owner.email)
+        restaurant = create_restaurants_on_db(
+            user_id=rest_owner.id, user_email=rest_owner.email
+        )
         assert restaurant is not None
 
         book = BookingServices.book(
@@ -95,7 +97,9 @@ class Test_BookServices:
         assert user is not None
         rest_owner = create_user_on_db(ran=randrange(100000, 200000), role_id=3)
         assert rest_owner is not None
-        restaurant = create_restaurants_on_db(user_id=rest_owner.id, user_email=rest_owner.email, tables=1)
+        restaurant = create_restaurants_on_db(
+            user_id=rest_owner.id, user_email=rest_owner.email, tables=1
+        )
 
         book = BookingServices.book(
             restaurant.id,
@@ -138,7 +142,9 @@ class Test_BookServices:
         assert user is not None
         rest_owner = create_user_on_db(ran=randrange(100000, 200000), role_id=3)
         assert rest_owner is not None
-        restaurant = create_restaurants_on_db(user_id=rest_owner.id, user_email=rest_owner.email, tables=1)
+        restaurant = create_restaurants_on_db(
+            user_id=rest_owner.id, user_email=rest_owner.email, tables=1
+        )
 
         book = BookingServices.book(
             restaurant.id,
@@ -170,7 +176,9 @@ class Test_BookServices:
         assert user is not None
         rest_owner = create_user_on_db(ran=randrange(100000, 200000), role_id=3)
         assert rest_owner is not None
-        restaurant = create_restaurants_on_db(user_id=rest_owner.id, user_email=rest_owner.email, tables=1)
+        restaurant = create_restaurants_on_db(
+            user_id=rest_owner.id, user_email=rest_owner.email, tables=1
+        )
 
         book = BookingServices.book(
             restaurant.id,
@@ -220,7 +228,9 @@ class Test_BookServices:
         assert user is not None
         rest_owner = create_user_on_db(ran=randrange(100000, 200000), role_id=3)
         assert rest_owner is not None
-        restaurant = create_restaurants_on_db(user_id=rest_owner.id, user_email=rest_owner.email, tables=1)
+        restaurant = create_restaurants_on_db(
+            user_id=rest_owner.id, user_email=rest_owner.email, tables=1
+        )
 
         book = BookingServices.book(
             restaurant.id,
@@ -252,7 +262,9 @@ class Test_BookServices:
         assert user is not None
         rest_owner = create_user_on_db(ran=randrange(100000, 200000), role_id=3)
         assert rest_owner is not None
-        restaurant = create_restaurants_on_db(user_id=rest_owner.id, user_email=rest_owner.email)
+        restaurant = create_restaurants_on_db(
+            user_id=rest_owner.id, user_email=rest_owner.email
+        )
 
         book = BookingServices.book(
             restaurant.id,
@@ -286,7 +298,9 @@ class Test_BookServices:
         assert user is not None
         rest_owner = create_user_on_db(ran=randrange(100000, 200000), role_id=3)
         assert rest_owner is not None
-        restaurant = create_restaurants_on_db(user_id=rest_owner.id, user_email=rest_owner.email)
+        restaurant = create_restaurants_on_db(
+            user_id=rest_owner.id, user_email=rest_owner.email
+        )
 
         book = BookingServices.book(
             restaurant.id,

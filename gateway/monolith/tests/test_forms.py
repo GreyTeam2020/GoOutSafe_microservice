@@ -162,9 +162,7 @@ class Test_GoOutSafeForm:
         assert response.status_code == 200
         assert "not_logged_test" not in response.data.decode("utf-8")
 
-        result = RestaurantServices.delete_restaurant(
-            rest[0].id
-        )
+        result = RestaurantServices.delete_restaurant(rest[0].id)
         assert result is True
 
     def test_register_new_restaurant_ko(self, client):
