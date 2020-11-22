@@ -289,33 +289,19 @@ class UserService:
 
     @staticmethod
     def get_customer_reservation(fromDate: str, toDate: str, customer_id: str):
-        queryString = (
-            "select reserv.id, reserv.reservation_date, reserv.people_number, tab.id as id_table, rest.name, rest.id as rest_id "
-            "from reservation reserv "
-            "join user cust on cust.id = reserv.customer_id "
-            "join restaurant_table tab on reserv.table_id = tab.id "
-            "join restaurant rest on rest.id = tab.restaurant_id "
-            "where cust.id = :customer_id"
-        )
         current_app.logger.debug(
             "Filtering by: {}".format([fromDate, toDate, customer_id])
         )
-        # stmt = db.text(queryString)
 
         # bind filter params...
         url = "{}?user_id={}".format(BOOKING_MICROSERVICE_URL, customer_id)
         if fromDate:
-            url = url + "?fromDate={}".format(fromDate)
+            url = HttpUtils.append_query(url, "fromDate", fromDate)
         if toDate:
-            url = url + "?toDate={}".format(toDate)
+            url = HttpUtils.append_query(url, "toDate", toDate)
 
         response = HttpUtils.make_get_request(url)
         return response
-
-        # execute and retrive results...
-        # result = db.engine.execute(stmt, params)
-        # reservations_as_list = result.fetchall()
-        # return reservations_as_list
 
     @staticmethod
     def user_login(form: LoginForm):

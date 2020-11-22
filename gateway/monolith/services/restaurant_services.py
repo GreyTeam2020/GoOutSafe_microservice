@@ -21,6 +21,8 @@ from monolith.utils.http_utils import HttpUtils
 
 from monolith.model.review_model import ReviewModel
 
+from monolith.app_constant import BOOKING_MICROSERVICE_URL
+
 
 class RestaurantServices:
     """
@@ -224,39 +226,17 @@ class RestaurantServices:
         with the filter on the date
         """
 
-        queryString = (
-            "select reserv.id, reserv.reservation_date, reserv.people_number, tab.id as id_table, cust.firstname, cust.lastname, cust.email, cust.phone, reserv.checkin from reservation reserv "
-            "join user cust on cust.id = reserv.customer_id "
-            "join restaurant_table tab on reserv.table_id = tab.id "
-            "join restaurant rest on rest.id = tab.restaurant_id "
-            "where rest.owner_id = :owner_id "
-            "and rest.id = :restaurant_id "
-        )
-
+        url = "{}?restaurant_id={}".format(BOOKING_MICROSERVICE_URL, restaurant_id)
         # add filters...
         if from_date:
-            queryString = queryString + " and  reserv.reservation_date > :fromDate"
+            url = HttpUtils.append_query(url, "fromDate", from_date)
         if to_date:
-            queryString = queryString + " and  reserv.reservation_date < :toDate"
+            url = HttpUtils.append_query(url, "toDate", to_date)
         if email:
-            queryString = queryString + " and  cust.email = :email"
-        queryString = queryString + " order by reserv.reservation_date desc"
+            url = HttpUtils.append_query(url, "email", email)
 
-        stmt = db.text(queryString)
-
-        # bind filter params...
-        params = {"owner_id": owner_id, "restaurant_id": restaurant_id}
-        if from_date:
-            params["fromDate"] = from_date + " 00:00:00.000"
-        if to_date:
-            params["toDate"] = to_date + " 23:59:59.999"
-        if email:
-            params["email"] = email
-
-        # execute and retrive results...
-        result = db.engine.execute(stmt, params)
-        list_reservation = result.fetchall()
-        return list_reservation
+        response = HttpUtils.make_get_request(url)
+        return response
 
     @staticmethod
     def review_restaurant(restaurant_id, reviewer_email, stars, review):
