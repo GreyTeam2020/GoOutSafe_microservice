@@ -4,6 +4,7 @@ from monolith.database import db, User, Restaurant, Review, MenuDish, Reservatio
 from monolith.forms import RestaurantForm
 from monolith.services.restaurant_services import RestaurantServices
 from datetime import datetime
+from monolith.tests.utils import create_user_on_db
 
 from monolith.tests.utils import (
     get_user_with_email,
@@ -31,24 +32,31 @@ class Test_RestaurantServices:
         :return:
         """
         form = RestaurantForm()
-        form.name = "Gino Sorbillo"
-        form.phone = "096321343"
-        form.lat = 12
-        form.lon = 12
+        form.name.data = "rest_mock_{}".format(randrange(10000))
+        form.phone.data = "096321343{}".format(randrange(10000))
+        form.lat.data = 12
+        form.lon.data = 12
         form.n_tables.data = 50
-        form.covid_measures.data = "We can survive"
+        form.covid_measures.data = "Random comment {}".format(randrange(10000))
         form.cuisine.data = ["Italian food"]
         form.open_days.data = ["0"]
         form.open_lunch.data = datetime.time(datetime(2020, 7, 1, 12, 00))
         form.close_lunch.data = datetime.time(datetime(2020, 7, 1, 12, 00))
         form.open_dinner.data = datetime.time(datetime(2020, 7, 1, 18, 00))
         form.close_dinner.data = datetime.time(datetime(2020, 6, 1, 22, 00))
-        q_user = db.session.query(User).filter_by(email="ham.burger@email.com").first()
-        assert q_user is not None
-        restaurant = RestaurantServices.create_new_restaurant(form, q_user.id, 6)
+
+        user = create_user_on_db(role_id=2)
+        assert user is not None
+        assert user.role_id == 2
+
+        restaurant = RestaurantServices.create_new_restaurant(
+            form, user.id, 6, user.email
+        )
         assert restaurant is not None
 
-        del_restaurant_on_db(restaurant.id)
+        ## This call should be delete also the restaurants
+        del_user_on_db(user.id)
+        RestaurantServices.delete_restaurant(restaurant.id)
 
     def test_all_restaurant(self):
         """
@@ -56,7 +64,7 @@ class Test_RestaurantServices:
         :return:
         """
         all_restauirants = RestaurantServices.get_all_restaurants()
-        assert len(all_restauirants) == 1
+        assert len(all_restauirants) > 0
 
     def test_reservation_local_ko_by_email(self):
         """
@@ -116,111 +124,203 @@ class Test_RestaurantServices:
         """
         test for the new review function
         """
-        restaurant = (
-            db.session.query(Restaurant.id)
-            .filter(Restaurant.name == "Trial Restaurant")
-            .first()
+        form = RestaurantForm()
+        form.name.data = "rest_mock_{}".format(randrange(10000))
+        form.phone.data = "096321343{}".format(randrange(10000))
+        form.lat.data = 12
+        form.lon.data = 12
+        form.n_tables.data = 50
+        form.covid_measures.data = "Random comment {}".format(randrange(10000))
+        form.cuisine.data = ["Italian food"]
+        form.open_days.data = ["0"]
+        form.open_lunch.data = datetime.time(datetime(2020, 7, 1, 12, 00))
+        form.close_lunch.data = datetime.time(datetime(2020, 7, 1, 12, 00))
+        form.open_dinner.data = datetime.time(datetime(2020, 7, 1, 18, 00))
+        form.close_dinner.data = datetime.time(datetime(2020, 6, 1, 22, 00))
+
+        user = create_user_on_db(role_id=2)
+        assert user is not None
+        assert user.role_id == 2
+
+        restaurant = RestaurantServices.create_new_restaurant(
+            form, user.id, 6, user.email
         )
-        reviewer = (
-            db.session.query(User.id).filter(User.email == "john.doe@email.com").first()
-        )
+        assert restaurant is not None
+
+        reviewer = create_user_on_db(randrange(40000, 3000000), role_id=3)
         review = RestaurantServices.review_restaurant(
-            restaurant.id, reviewer.id, 5, "test"
+            restaurant_id=restaurant.id,
+            reviewer_email=reviewer.email,
+            stars=5,
+            review="test",
         )
         assert review is not None
 
-        db.session.query(Review).filter_by(id=review.id).delete()
-        db.session.commit()
+        ## This call should be delete also the restaurants
+        # At this point also the review should be killed with the restaurants
+        del_user_on_db(user.id)
+        del_user_on_db(reviewer.id)
+        RestaurantServices.delete_restaurant(restaurant.id)
 
     def test_restaurant_name(self):
         """
         check the function that return the restaurant name
         """
-        restaurant = (
-            db.session.query(Restaurant)
-            .filter(Restaurant.name == "Trial Restaurant")
-            .first()
-        )
+        form = RestaurantForm()
+        form.name.data = "rest_mock_{}".format(randrange(10000))
+        form.phone.data = "096321343{}".format(randrange(10000))
+        form.lat.data = 12
+        form.lon.data = 12
+        form.n_tables.data = 50
+        form.covid_measures.data = "Random comment {}".format(randrange(10000))
+        form.cuisine.data = ["Italian food"]
+        form.open_days.data = ["0"]
+        form.open_lunch.data = datetime.time(datetime(2020, 7, 1, 12, 00))
+        form.close_lunch.data = datetime.time(datetime(2020, 7, 1, 12, 00))
+        form.open_dinner.data = datetime.time(datetime(2020, 7, 1, 18, 00))
+        form.close_dinner.data = datetime.time(datetime(2020, 6, 1, 22, 00))
+
+        user = create_user_on_db(role_id=2)
+        assert user is not None
+        assert user.role_id == 2
+
+        restaurant = RestaurantServices.create_new_restaurant(form, user, 6, user.email)
+        assert restaurant is not None
+
         name = RestaurantServices.get_restaurant_name(restaurant.id)
         assert restaurant.name == name
+
+        ## This call should be delete also the restaurants
+        # At this point also the review should be killed with the restaurants
+        del_user_on_db(user.id)
+        RestaurantServices.delete_restaurant(restaurant.id)
 
     def test_three_reviews(self):
         """
         check the three reviews fetcher
         """
+        form = RestaurantForm()
+        form.name.data = "rest_mock_{}".format(randrange(10000))
+        form.phone.data = "096321343{}".format(randrange(10000))
+        form.lat.data = 12
+        form.lon.data = 12
+        form.n_tables.data = 50
+        form.covid_measures.data = "Random comment {}".format(randrange(10000))
+        form.cuisine.data = ["Italian food"]
+        form.open_days.data = ["0"]
+        form.open_lunch.data = datetime.time(datetime(2020, 7, 1, 12, 00))
+        form.close_lunch.data = datetime.time(datetime(2020, 7, 1, 12, 00))
+        form.open_dinner.data = datetime.time(datetime(2020, 7, 1, 18, 00))
+        form.close_dinner.data = datetime.time(datetime(2020, 6, 1, 22, 00))
 
-        restaurant = (
-            db.session.query(Restaurant.id)
-            .filter(Restaurant.name == "Trial Restaurant")
-            .first()
+        user = create_user_on_db(role_id=2)
+        assert user is not None
+        assert user.role_id == 2
+
+        restaurant = RestaurantServices.create_new_restaurant(
+            form, user.id, 6, user.email
         )
-        reviewer = (
-            db.session.query(User.id).filter(User.email == "john.doe@email.com").first()
-        )
+        assert restaurant is not None
+
+        reviewer = create_user_on_db(randrange(40000, 3000000), role_id=3)
+
         review1 = RestaurantServices.review_restaurant(
-            restaurant.id, reviewer.id, 5, "test1"
+            restaurant.id, reviewer.email, 5, "test1"
         )
         review2 = RestaurantServices.review_restaurant(
-            restaurant.id, reviewer.id, 4, "test2"
+            restaurant.id, reviewer.email, 4, "test2"
         )
         review3 = RestaurantServices.review_restaurant(
-            restaurant.id, reviewer.id, 3, "test3"
+            restaurant.id, reviewer.email, 3, "test3"
         )
 
         three_reviews = RestaurantServices.get_three_reviews(restaurant.id)
         assert three_reviews is not None
         assert len(three_reviews) == 3
 
-        db.session.query(Review).filter_by(id=review1.id).delete()
-        db.session.query(Review).filter_by(id=review2.id).delete()
-        db.session.query(Review).filter_by(id=review3.id).delete()
-
-        db.session.commit()
+        ## This call should be delete also the restaurants
+        # At this point also the review should be killed with the restaurants
+        del_user_on_db(user.id)
+        del_user_on_db(reviewer.id)
+        RestaurantServices.delete_restaurant(restaurant.id)
 
     def test_search_restaurant_by_key_ok_complete_name(self):
         """
         This test unit test the service to perform the search by keyword of the restaurants
         on persistence
         """
-        rest_by_name = RestaurantServices.get_restaurants_by_keyword(name="Trial")
+        form = RestaurantForm()
+        form.name.data = "rest_mock_{}".format(randrange(10000))
+        form.phone.data = "096321343{}".format(randrange(10000))
+        form.lat.data = 12
+        form.lon.data = 12
+        form.n_tables.data = 50
+        form.covid_measures.data = "Random comment {}".format(randrange(10000))
+        form.cuisine.data = ["Italian food"]
+        form.open_days.data = ["0"]
+        form.open_lunch.data = datetime.time(datetime(2020, 7, 1, 12, 00))
+        form.close_lunch.data = datetime.time(datetime(2020, 7, 1, 12, 00))
+        form.open_dinner.data = datetime.time(datetime(2020, 7, 1, 18, 00))
+        form.close_dinner.data = datetime.time(datetime(2020, 6, 1, 22, 00))
+
+        user = create_user_on_db(randrange(6000, 9000), role_id=2)
+        assert user is not None
+        assert user.role_id == 2
+
+        restaurant = RestaurantServices.create_new_restaurant(
+            form, user.id, 6, user.email
+        )
+        assert restaurant is not None
+        rest_by_name = RestaurantServices.get_restaurants_by_keyword(
+            name=restaurant.name
+        )
         assert len(rest_by_name) is 1
+
+        del_user_on_db(user.id)
+        RestaurantServices.delete_restaurant(restaurant.id)
 
     def test_search_restaurant_by_key_ok_partial_name(self):
         """
         This test unit test the service to perform the search by keyword of the restaurants
         on persistence
         """
-        user = create_user_on_db()
-        rest = create_restaurants_on_db("Gino Sorbillo", user.id)
-        assert rest is not None
-        rest_by_name = RestaurantServices.get_restaurants_by_keyword(name=rest.name)
-        assert len(rest_by_name) is 1
+        form = RestaurantForm()
+        form.name.data = "rest_mock_{}".format(randrange(10000))
+        form.phone.data = "096321343{}".format(randrange(10000))
+        form.lat.data = 12
+        form.lon.data = 12
+        form.n_tables.data = 50
+        form.covid_measures.data = "Random comment {}".format(randrange(10000))
+        form.cuisine.data = ["Italian food"]
+        form.open_days.data = ["0"]
+        form.open_lunch.data = datetime.time(datetime(2020, 7, 1, 12, 00))
+        form.close_lunch.data = datetime.time(datetime(2020, 7, 1, 12, 00))
+        form.open_dinner.data = datetime.time(datetime(2020, 7, 1, 18, 00))
+        form.close_dinner.data = datetime.time(datetime(2020, 6, 1, 22, 00))
 
-        rest_by_name = RestaurantServices.get_restaurants_by_keyword(name="Gino")
-        assert len(rest_by_name) is 1
+        user = create_user_on_db(randrange(6000, 9000), role_id=2)
+        assert user is not None
+        assert user.role_id == 2
 
-        rest_by_name = RestaurantServices.get_restaurants_by_keyword(name="gino")
-        assert len(rest_by_name) is 1
-
-        rest_by_name = RestaurantServices.get_restaurants_by_keyword(name="Sorbillo")
-        assert len(rest_by_name) is 1
-
-        rest_by_name = RestaurantServices.get_restaurants_by_keyword(name="sorbillo")
+        restaurant = RestaurantServices.create_new_restaurant(
+            form, user.id, 6, user.email
+        )
+        assert restaurant is not None
+        rest_by_name = RestaurantServices.get_restaurants_by_keyword(
+            name=restaurant.name
+        )
         assert len(rest_by_name) is 1
 
         del_user_on_db(user.id)
-        for rest in rest_by_name:
-            del_restaurant_on_db(rest.id)
+        RestaurantServices.delete_restaurant(restaurant.id)
 
     def test_delete_dish_menu(self, client):
         """
         check if dish get deletedS
         """
-        email = "ham.burger@email.com"
-        password = "operator"
-        response = login(client, email, password)
-        assert response.status_code == 200
-        assert "logged_test" in response.data.decode("utf-8")
+
+        user = create_user_on_db(role_id=2)
+        assert user is not None
 
         dish = MenuDish()
         dish.name = "Pearà"
@@ -262,37 +362,47 @@ class Test_RestaurantServices:
         - check on db the new rating
         - erase all data create inside the test
         """
-        owner_one = create_user_on_db(123444223)
+        owner_one = create_user_on_db(123444223, role_id=2)
         assert owner_one is not None
-        owner_two = create_user_on_db(123444226)
+        owner_two = create_user_on_db(123444226, role_id=2)
         assert owner_two is not None
 
-        restaurant_one = create_restaurants_on_db(name="First", user_id=owner_one.id)
+        restaurant_one = create_restaurants_on_db(
+            name="First", user_id=owner_one.id, user_email=owner_one.email
+        )
         assert restaurant_one is not None
-        restaurant_two = create_restaurants_on_db(name="Second", user_id=owner_two.id)
+        restaurant_two = create_restaurants_on_db(
+            name="Second", user_id=owner_two.id, user_email=owner_two.email
+        )
         assert restaurant_two is not None
 
         start_one = 3.0
         start_two = 5.0
         review = create_review_for_restaurants(
-            starts=start_one, rest_id=restaurant_one.id
+            starts=start_one,
+            rest_id=restaurant_one.id,
+            reviewer_email="user_{}@asu.edu".format(randrange(2000, 7000)),
         )
         assert review is not None
         review = create_review_for_restaurants(
-            starts=start_two, rest_id=restaurant_one.id
+            starts=start_two,
+            rest_id=restaurant_one.id,
+            reviewer_email="user_{}@asu.edu".format(randrange(2000, 7000)),
         )
         assert review is not None
 
         start_tree = 2.0
         review = create_review_for_restaurants(
-            starts=start_tree, rest_id=restaurant_two.id
+            starts=start_tree,
+            rest_id=restaurant_two.id,
+            reviewer_email="user_{}@asu.edu".format(randrange(2000, 7000)),
         )
         assert review is not None
 
         rating_rest_one = (start_one + start_two) / 2
         rating_rest_two = start_tree
 
-        RestaurantServices.calculate_rating_for_all()
+        RestaurantServices.restaur()
 
         rest = get_rest_with_name(restaurant_one.name)
         assert rest.rating == rating_rest_one
@@ -308,6 +418,7 @@ class Test_RestaurantServices:
 
     def test_rating_single_restaurant(self):
         """
+        TODO maybe this now don't have sens
         This method test the method to calculate a rating inside a new restautants
 
         Test flow:
@@ -319,20 +430,26 @@ class Test_RestaurantServices:
         - check on bd the new rating
         - erase all data create inside the test
         """
-        owner_one = create_user_on_db(randrange(100000))
+        owner_one = create_user_on_db(123444223, role_id=2)
         assert owner_one is not None
 
-        restaurant_one = create_restaurants_on_db(name="First", user_id=owner_one.id)
+        restaurant_one = create_restaurants_on_db(
+            name="First", user_id=owner_one.id, user_email=owner_one.email
+        )
         assert restaurant_one is not None
 
         start_one = 3.0
         start_two = 4.5
         review = create_review_for_restaurants(
-            starts=start_one, rest_id=restaurant_one.id
+            starts=start_one,
+            rest_id=restaurant_one.id,
+            reviewer_email="user_{}@asu.edu".format(randrange(2000, 7000)),
         )
         assert review is not None
         review = create_review_for_restaurants(
-            starts=start_two, rest_id=restaurant_one.id
+            starts=start_two,
+            rest_id=restaurant_one.id,
+            reviewer_email="user_{}@asu.edu".format(randrange(2000, 7000)),
         )
         assert review is not None
 
@@ -373,38 +490,3 @@ class Test_RestaurantServices:
         assert all_people[2] == 0
         del_restaurant_on_db(restaurant_one.id)
         del_user_on_db(owner_one.id)
-
-
-"""
-          The method test the function inside the RestaurantServices to search all the people
-        inside the restaurants, the function return an array that looks like
-        [people_to_lunch, people_to_dinner, people_checkin]
-        Test flow
-        - new restaurants
-        - new booking
-        - get all people
-        - del restaurant
-        """
-""" 
-    def test_get_restaurant_people(self):
-        
-        owner_one = create_user_on_db(randrange(100000))
-        assert owner_one is not None
-
-        restaurant_one = create_restaurants_on_db(name="First", user_id=owner_one.id)
-        assert restaurant_one is not None
-        
-        customer_one = create_user_on_db(randrange(100000))
-        customer_two = create_user_on_db(randrange(100000))
-        # TODO I missing the logic, this is possible?
-
-        # books_lunch = create_random_booking(1, rest_id=restaurant_one.id, customer_one, date_time=datetime(2020))
-
-        all_people = RestaurantServices.get_restaurant_people(restaurant_one.id)
-        assert all_people is not None
-        assert len(all_people) == 3
-        assert all_people[0] == 0
-        assert all_people[1] == 0
-        assert all_people[2] == 0
-        del_restaurant_on_db(restaurant_one.id)
-"""

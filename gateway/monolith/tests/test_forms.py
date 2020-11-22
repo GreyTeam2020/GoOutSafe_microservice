@@ -106,27 +106,32 @@ class Test_GoOutSafeForm:
 
         :param client:
         """
-        user_form = UserForm()
-        user_form.firstname.data = "user_{}".format(randrange(10000))
-        user_form.lastname.data = "user_{}".format(randrange(10000))
-        user_form.password.data = "pass_{}".format(randrange(10000))
-        user_form.phone.data = "12345{}".format(randrange(10000))
-        user_form.dateofbirth.data = "12/12/1995"
-        user_form.email.data = "alibaba{}@alibaba.com".format(randrange(10000))
-        response = register_user(client, user_form, 2)
-        assert response.status_code == 200
-        assert "logged_test" in response.data.decode("utf-8")
 
-        user = UserService.user_is_present(user_form.email.data, user_form.phone.data)
+        form = UserForm()
+        rand = randrange(100000)
+        form.firstname.data = "User_{}".format(rand)
+        form.lastname.data = "user_{}".format(rand)
+        form.password.data = "Alibaba{}".format(rand)
+        form.phone.data = "1234562344{}".format(rand)
+        form.dateofbirth.data = "1985-12-12"
+        form.email.data = "user{}@user.edu".format(str(rand))
+        created = UserService.create_user(form, 2)
+        assert created is True
+        user = UserService.user_is_present(form.email.data, form.phone.data)
         assert user is not None
 
+        response = login(client, user.email, form.password.data)
+        assert response.status_code == 200
+
         restaurant_form = RestaurantForm()
-        restaurant_form.name.data = "Gino Sorbillo_{}".format(randrange(10000))
+        restaurant_form.name.data = "rest_rand_{}".format(randrange(10000))
         restaurant_form.phone.data = "096321343_{}".format(randrange(10000))
         restaurant_form.lat.data = 12
         restaurant_form.lon.data = 12
         restaurant_form.n_tables.data = 50
-        restaurant_form.covid_measures.data = "We can survive_{}".format(randrange(10000))
+        restaurant_form.covid_measures.data = "Random comment_{}".format(
+            randrange(10000)
+        )
         restaurant_form.cuisine.data = ["Italian food"]
         restaurant_form.open_days.data = ["0"]
         restaurant_form.open_lunch.data = "12:00"
@@ -157,7 +162,9 @@ class Test_GoOutSafeForm:
         assert response.status_code == 200
         assert "not_logged_test" not in response.data.decode("utf-8")
 
-        result = RestaurantServices.delete_restaurant(restaurant_form.name.data, restaurant_form.phone.data)
+        result = RestaurantServices.delete_restaurant(
+            rest[0].id
+        )
         assert result is True
 
     def test_register_new_restaurant_ko(self, client):
@@ -172,47 +179,47 @@ class Test_GoOutSafeForm:
 
         :param client:
         """
-        email = "alibaba@gmail.com"
-        password = "alibaba"
-        user_form = UserForm()
-        user_form.email = email
-        user_form.firstname = "alibaba"
-        user_form.lastname = "alibaba"
-        user_form.dateofbirth = "12/12/2020"
-        user_form.password = password
-        response = register_user(client, user_form)
-        assert response.status_code == 200
-        response = login(client, user_form.email, user_form.password)
-        assert "logged_test" in response.data.decode("utf-8")
+        form = UserForm()
+        rand = randrange(100000)
+        form.firstname.data = "User_{}".format(rand)
+        form.lastname.data = "user_{}".format(rand)
+        form.password.data = "Alibaba{}".format(rand)
+        form.phone.data = "1234562344{}".format(rand)
+        form.dateofbirth.data = "1985-12-12"
+        form.email.data = "user{}@user.edu".format(str(rand))
+        created = UserService.create_user(form, 3)
+        assert created is True
+        user = UserService.user_is_present(form.email.data, form.phone.data)
+        assert user is not None
 
-        user = get_user_with_email(user_form.email)
+        response = login(client, user.email, form.password.data)
+        assert response.status_code == 200
+
+        user = get_user_with_email(user.email)
         assert user is not None
         assert user.role_id == 3  ## Customer
 
-        # login(client, email, password)
         restaurant_form = RestaurantForm()
-        restaurant_form.name = "Gino Sorbillo"
-        restaurant_form.phone = "096321343"
-        restaurant_form.lat = 12
-        restaurant_form.lon = 12
-        restaurant_form.n_tables = 50
-        restaurant_form.covid_measures = "We can survive"
-        restaurant_form.cuisine = ["Italian food"]
-        restaurant_form.open_days = ["0"]
-        restaurant_form.open_lunch = "12:00"
-        restaurant_form.close_lunch = "15:00"
-        restaurant_form.open_dinner = "18:00"
-        restaurant_form.close_dinner = "00:00"
+        restaurant_form.name.data = "rest_rand_{}".format(randrange(10000))
+        restaurant_form.phone.data = "096321343_{}".format(randrange(10000))
+        restaurant_form.lat.data = 12
+        restaurant_form.lon.data = 12
+        restaurant_form.n_tables.data = 50
+        restaurant_form.covid_measures.data = "Random comment_{}".format(
+            randrange(10000)
+        )
+        restaurant_form.cuisine.data = ["Italian food"]
+        restaurant_form.open_days.data = ["0"]
+        restaurant_form.open_lunch.data = "12:00"
+        restaurant_form.close_lunch.data = "15:00"
+        restaurant_form.open_dinner.data = "18:00"
+        restaurant_form.close_dinner.data = "00:00"
         response = register_restaurant(client, restaurant_form)
         assert response.status_code == 401
-        rest = get_rest_with_name(restaurant_form.name)
-        assert rest is None
 
         response = logout(client)
         assert response.status_code == 200
         assert "not_logged_test" not in response.data.decode("utf-8")
-
-        del_user_on_db(user.id)
 
     def test_research_restaurant_by_name(self, client):
         """
@@ -221,15 +228,15 @@ class Test_GoOutSafeForm:
         :param client:
         :return:
         """
-        email = "ham.burger@email.com"
-        password = "operator"
-        response = login(client, email, password)
-        user = get_user_with_email(email)
-        rest = create_restaurants_on_db(user_id=user.id)
-        assert "logged_test" in response.data.decode("utf-8")
-        assert rest is not None
+        owner = create_user_on_db(randrange(100000))
+        assert owner is not None
 
-        response = research_restaurant(client, rest.name)
+        restaurant = create_restaurants_on_db(
+            name="First", user_id=owner.id, user_email=owner.email
+        )
+        assert restaurant is not None
+
+        response = research_restaurant(client, restaurant.name)
         assert response.status_code is 200
         assert "rest_search_test" in response.data.decode("utf-8")
 
@@ -237,7 +244,9 @@ class Test_GoOutSafeForm:
         assert response.status_code == 200
         assert "not_logged_test" not in response.data.decode("utf-8")
 
-        del_restaurant_on_db(rest.id)
+        del_user_on_db(owner.id)
+        result = RestaurantServices.delete_restaurant(restaurant.id)
+        assert result is True
 
     def test_research_restaurant_by_name_ok_with_anonymus(self, client):
         """
@@ -246,14 +255,21 @@ class Test_GoOutSafeForm:
         :param client:
         :return:
         """
-        email = "ham.burger@email.com"
-        user = get_user_with_email(email)
-        rest = create_restaurants_on_db(user_id=user.id)
-        assert rest is not None
-        response = research_restaurant(client=client, name=rest.name)
+        owner = create_user_on_db(randrange(100000))
+        assert owner is not None
+
+        restaurant = create_restaurants_on_db(
+            name="First", user_id=owner.id, user_email=owner.email
+        )
+        assert restaurant is not None
+
+        response = research_restaurant(client=client, name=restaurant.name)
         assert response.status_code is 200
         assert "rest_search_test" in response.data.decode("utf-8")
-        del_restaurant_on_db(rest.id)
+
+        del_user_on_db(owner.id)
+        result = RestaurantServices.delete_restaurant(restaurant.id)
+        assert result is True
 
     def test_open_photo_view_ok(self, client):
         """
