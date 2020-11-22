@@ -47,71 +47,20 @@ class HealthyServices:
         else:
             return None
         url = "{}/mark/{}/{}".format(USER_MICROSERVICE_URL, key, value)
+
         response = HttpUtils.make_get_request(url)
 
-        """
-        chiamata contact        
-        la risposta viene mandata come request body al email_microservice per notificare i contatti 
-        il servizio prende le 4 liste, per ognuna cicla ed invia una mail ad ogni indirizzo
-        """
-        contacts = HealthyServices.contact(user_email, user_phone)
-        URL = EMAIL_MICROSERVICE_URL + "/sendcontact"
-        response = HttpUtils.make_post_request(URL, contacts)
-        """
-        chiamata API email_microservice per invio email
-        """
+        if response is True:
+            """
+            call for API email_microservice
+            """
+            contacts = HealthyServices.search_contacts_for_email(user_email, user_phone)
+            url = EMAIL_MICROSERVICE_URL + "/sendcontact"
+            HttpUtils.make_post_request(url, contacts)
+            return ""
+        else:
+            return "An error occurs, please try again"
 
-        """
-        ELEIMINARE, SONO LE VECCHIE CHIAMATE PER INVIO EMAIL, VENGONO MESSE IN email_microservice
-         DispatcherMessage.send_message(
-                    NEW_COVID_TO_RESTAURANT_BOOKING,
-                    [
-                        q_owner.email,
-                        q_owner.firstname,
-                        q_user.email,
-                        restaurant.name,
-                    ],
-                )
-        
-
-         DispatcherMessage.send_message(
-            NEW_POSITIVE_WAS_IN_RESTAURANT,
-            [
-                owner.email,
-                owner.firstname,
-                str(reservation.reservation_date),
-                restaurant.name,
-            ],
-        )
-
-
-         DispatcherMessage.send_message(
-            EMAIL_TO_FRIEND,
-            [friend, str(reservation.reservation_date), restaurant.name],
-        )
-
-        DispatcherMessage.send_message(
-            NEW_POSITIVE_CONTACT,
-            [
-                thisuser.email,
-                thisuser.firstname,
-                contact.reservation_date,
-                restaurant.name,
-            ],
-        )
-
-
-         DispatcherMessage.send_message(
-            EMAIL_TO_FRIEND,
-            [
-                friend,
-                str(contact.reservation_date),
-                restaurant.name,
-            ],
-        )
-        """
-
-        return response
 
     @staticmethod
     def unmark_positive(user_email: str, user_phone: str) -> str:
