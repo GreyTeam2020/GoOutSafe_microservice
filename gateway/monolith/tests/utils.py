@@ -296,7 +296,7 @@ def create_user_on_db(ran: int = randrange(100000), role_id: int = 3):
 
 
 def create_restaurants_on_db(
-    name: str = "Gino Sorbillo{}".format(randrange(1000, 50000)),
+    name: str = "mock_rest{}".format(randrange(1000, 50000)),
     user_id: int = None,
     user_email: str = None,
     tables: int = 50,

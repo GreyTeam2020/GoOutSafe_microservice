@@ -1,7 +1,5 @@
 from random import randrange
 
-import pytest
-
 import datetime
 from monolith.database import db, User, Restaurant, Reservation, Positive
 from monolith.services import BookingServices
@@ -41,9 +39,9 @@ class Test_BookServices:
 
         user = create_user_on_db(randrange(100000))
         assert user is not None
-        rest_owner = create_user_on_db(ran=2)
+        rest_owner = create_user_on_db(ran=randrange(100000, 200000), role_id=3)
         assert rest_owner is not None
-        restaurant = create_restaurants_on_db(user_id=rest_owner.id)
+        restaurant = create_restaurants_on_db(user_id=rest_owner.id, user_email=rest_owner.email)
         assert restaurant is not None
 
         book = BookingServices.book(
@@ -88,9 +86,11 @@ class Test_BookServices:
         """
         No more tables available
         """
-        user = create_user_on_db()
-        rest_owner = create_user_on_db(ran=2)
-        restaurant = create_restaurants_on_db(user_id=rest_owner.id, tables=1)
+        user = create_user_on_db(randrange(100000))
+        assert user is not None
+        rest_owner = create_user_on_db(ran=randrange(100000, 200000), role_id=3)
+        assert rest_owner is not None
+        restaurant = create_restaurants_on_db(user_id=rest_owner.id, user_email=rest_owner.email)
 
         book = BookingServices.book(
             restaurant.id,
@@ -132,9 +132,11 @@ class Test_BookServices:
         """
         restaurant closed
         """
-        user = create_user_on_db()
-        rest_owner = create_user_on_db(ran=2)
-        restaurant = create_restaurants_on_db(user_id=rest_owner.id, tables=1)
+        user = create_user_on_db(randrange(100000))
+        assert user is not None
+        rest_owner = create_user_on_db(ran=randrange(100000, 200000), role_id=3)
+        assert rest_owner is not None
+        restaurant = create_restaurants_on_db(user_id=rest_owner.id, user_email=rest_owner.email, tables=1)
 
         book = BookingServices.book(
             restaurant.id,
@@ -162,9 +164,11 @@ class Test_BookServices:
         overlapped reservations
         """
 
-        user = create_user_on_db()
-        rest_owner = create_user_on_db(ran=2)
-        restaurant = create_restaurants_on_db(user_id=rest_owner.id, tables=1)
+        user = create_user_on_db(randrange(100000))
+        assert user is not None
+        rest_owner = create_user_on_db(ran=randrange(100000, 200000), role_id=3)
+        assert rest_owner is not None
+        restaurant = create_restaurants_on_db(user_id=rest_owner.id, user_email=rest_owner.email, tables=1)
 
         book = BookingServices.book(
             restaurant.id,
@@ -209,9 +213,11 @@ class Test_BookServices:
         """
         restaurant closed
         """
-        user = create_user_on_db()
-        rest_owner = create_user_on_db(ran=2)
-        restaurant = create_restaurants_on_db(user_id=rest_owner.id, tables=1)
+        user = create_user_on_db(randrange(100000))
+        assert user is not None
+        rest_owner = create_user_on_db(ran=randrange(100000, 200000), role_id=3)
+        assert rest_owner is not None
+        restaurant = create_restaurants_on_db(user_id=rest_owner.id, user_email=rest_owner.email, tables=1)
 
         book = BookingServices.book(
             restaurant.id,
@@ -239,9 +245,11 @@ class Test_BookServices:
         test for deletion
         """
 
-        user = create_user_on_db()
-        rest_owner = create_user_on_db(ran=2)
-        restaurant = create_restaurants_on_db(user_id=rest_owner.id)
+        user = create_user_on_db(randrange(100000))
+        assert user is not None
+        rest_owner = create_user_on_db(ran=randrange(100000, 200000), role_id=3)
+        assert rest_owner is not None
+        restaurant = create_restaurants_on_db(user_id=rest_owner.id, user_email=rest_owner.email)
 
         book = BookingServices.book(
             restaurant.id,
@@ -270,9 +278,11 @@ class Test_BookServices:
         """
         this test insert two reservation that should be ok
         """
-        user = create_user_on_db()
-        rest_owner = create_user_on_db(ran=2)
-        restaurant = create_restaurants_on_db(user_id=rest_owner.id)
+        user = create_user_on_db(randrange(100000))
+        assert user is not None
+        rest_owner = create_user_on_db(ran=randrange(100000, 200000), role_id=3)
+        assert rest_owner is not None
+        restaurant = create_restaurants_on_db(user_id=rest_owner.id, user_email=rest_owner.email)
 
         book = BookingServices.book(
             restaurant.id,
