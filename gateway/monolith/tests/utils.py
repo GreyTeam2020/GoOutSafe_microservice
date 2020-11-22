@@ -11,6 +11,7 @@ from monolith.forms import (
     PhotoGalleryForm,
     UserForm,
 )
+from monolith.model import UserModel
 from monolith.services import *
 from monolith.services.booking_services import BookingServices
 
@@ -522,7 +523,7 @@ def register_operator(client, user: UserForm):
     return client.post("/user/create_operator", data=data, follow_redirects=True)
 
 
-def create_random_booking(num: int, rest_id: int, user: User, date_time, friends):
+def create_random_booking(num: int, rest_id: int, user: UserModel, date_time, friends):
     """
     Function to make
     :param num:
