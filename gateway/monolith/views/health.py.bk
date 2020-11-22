@@ -11,7 +11,16 @@ health = Blueprint("health", __name__)
 
 @health.route("/health/report_positive")
 def report_positive():
-    users = HealthyServices.report_positive()
+    users = (
+        db.session.query(User)
+        .filter(
+            User.email != "admin@gooutsafe.com",
+            User.email != "health_authority@gov.com",
+            User.id == Positive.user_id,
+            Positive.marked == True,
+        )
+        .all()
+    )
     n = list(range(len(users)))
     return render_template("report_positive.html", n=n, users=users)
 

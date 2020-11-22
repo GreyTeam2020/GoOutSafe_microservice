@@ -25,7 +25,7 @@
           <div class="toast show" role="alert" aria-live="assertive" aria-atomic="true">
             <div class="toast-header">
               <div class="ratingStats mr-auto" data-rating="{{ review.stars }}"></div>
-              <small>{{ review.data.strftime("%d/%m/%Y %H:%M") }}</small>
+              <small>{{ review.date.strftime("%d/%m/%Y %H:%M") }}</small>
             </div>
             <div class="toast-body">
               {{ review.review }}
