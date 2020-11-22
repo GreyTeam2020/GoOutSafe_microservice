@@ -352,12 +352,8 @@ class HealthyServices:
                         }
                     )
 
-                """
-                RSERVATION DOESN'T RETURN EMAIL OF FRIENDS
 
-                get friend's email of the positive customer
-                SEND EMAIL (ADD TO JSON)
-                """
+                friends = friends + reservation["people"]               
 
                 start = datetime.strptime(
                     reservation["reservation_date"], "%Y-%m-%dT%H:%M:%SZ"
@@ -465,10 +461,7 @@ class HealthyServices:
                                 }
                             )
 
-                            """
-                            get friend of the contact
-                            SEND EMAIL (ADD TO JSON)
-                            """
+                            friends = friends + one_reservation["people"] 
 
         if user_email != "":
             customer_email = user_email
