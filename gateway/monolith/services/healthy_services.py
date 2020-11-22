@@ -44,7 +44,7 @@ class HealthyServices:
         url = "{}/mark/{}/{}".format(USER_MICROSERVICE_URL, key, value)
         response = HttpUtils.make_get_request(url)
 
-        '''
+        """
         TODO: chiamata contact
         esempio risposta API contact
         {
@@ -103,10 +103,9 @@ class HealthyServices:
                 restaurant.name,
             ],
         )
-        '''
+        """
 
         return response
-
 
     @staticmethod
     def unmark_positive(user_email: str, user_phone: str) -> str:
@@ -120,15 +119,9 @@ class HealthyServices:
             return "Insert an email or a phone number"
 
         if user_email != "":
-            body = str({
-                "key": "email",
-                "value": user_email
-            })
+            body = str({"key": "email", "value": user_email})
         else:
-            body = str({
-                "key": "phone",
-                "value": user_phone
-            })
+            body = str({"key": "phone", "value": user_phone})
 
         URL = USER_MICROSERVICE_URL + "/unmark"
 

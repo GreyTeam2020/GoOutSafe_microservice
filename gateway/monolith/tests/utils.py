@@ -12,6 +12,7 @@ from monolith.forms import (
     UserForm,
 )
 from monolith.services import *
+from monolith.services.booking_services import BookingServices
 
 
 def login(client, username, password):
@@ -256,11 +257,7 @@ def get_user_with_email(email):
     :param email: the email that we want use to query the user
     :return: return the user if exist otherwise None
     """
-    q = db.session.query(User).filter_by(email=email)
-    q_user = q.first()
-    if q_user is not None:
-        return q_user
-    return None
+    return UserService.user_is_present(email=email)
 
 
 def get_rest_with_name_and_phone(name, phone):
@@ -282,65 +279,65 @@ def get_rest_with_name(name):
     :param name: the email that we want use to query the user
     :return: return the user if exist otherwise None
     """
-    q = db.session.query(Restaurant).filter_by(name=name)
-    q_rest = q.first()
-    if q_rest is not None:
-        return q_rest
-    return None
+    return RestaurantServices.get_restaurant_name()
 
 
-def create_user_on_db(ran: int = randrange(100000)):
+def create_user_on_db(ran: int = randrange(100000), role_id: int = 3):
     form = UserForm()
-    # form.data["email"] = "alibaba" + str(ran) + "@alibaba.com"
-    # form.data["password"] = "Alibaba"
     form.firstname.data = "User_{}".format(ran)
     form.lastname.data = "user_{}".format(ran)
-    form.password = "Alibaba{}".format(ran)
+    form.password.data = "Alibaba{}".format(ran)
     form.phone.data = "1234562344{}".format(ran)
-    form.dateofbirth = "12/12/2000"
-    form.email.data = "alibaba" + str(ran) + "@alibaba.com"
-    user = User()
-    form.populate_obj(user)
-    return UserService.create_user(user, form.password)
+    form.dateofbirth.data = "1985-12-12"
+    form.email.data = "user{}@user.edu".format(str(ran))
+    created = UserService.create_user(form, role_id)
+    if created is False:
+        return None
+    return UserService.user_is_present(form.email.data, form.phone.data)
 
 
 def create_restaurants_on_db(
-    name: str = "Gino Sorbillo", user_id: int = None, tables: int = 50
+    name: str = "mock_rest{}".format(randrange(1000, 50000)),
+    user_id: int = None,
+    user_email: str = None,
+    tables: int = 50,
 ):
     form = RestaurantForm()
     form.name.data = name
-    form.phone.data = "1234"
+    form.phone.data = "1234{}".format(randrange(1000, 50000))
     form.lat.data = 183
     form.lon.data = 134
     form.n_tables.data = tables
-    form.covid_measures.data = "We can survive"
+    form.covid_measures.data = "We can survive{}".format(randrange(1000, 50000))
     form.cuisine.data = ["Italian food"]
-    form.open_days.data = ["0"]
+    form.open_days.data = ["0", "1", "2", "3", "4", "5", "6"]
     form.open_lunch.data = time(hour=12, minute=00)
     form.close_lunch.data = time(hour=15, minute=00)
     form.open_dinner.data = time(hour=19, minute=00)
     form.close_dinner.data = time(hour=22, minute=00)
-    return RestaurantServices.create_new_restaurant(form, user_id, 6)
+    return RestaurantServices.create_new_restaurant(
+        form, user_id=user_id, user_email=user_email, max_sit=6
+    )
 
 
 def del_user_on_db(id):
-    q = db.session.query(User).filter_by(id=id).delete()
-    db.session.commit()
+    UserService.delete_user(user_id=id)
+    """
     delete_positive_with_user_id(id, marked=True)
     del_booking_with_user_id(id)
-    return q
+    """
 
 
 def del_restaurant_on_db(id):
-    db.session.query(RestaurantTable).filter_by(restaurant_id=id).delete()
-    db.session.commit()
+    RestaurantServices.delete_restaurant(id)
+    """
     db.session.query(OpeningHours).filter_by(restaurant_id=id).delete()
     db.session.commit()
     q = db.session.query(Restaurant).filter_by(id=id).delete()
     db.session.commit()
     db.session.query(Menu).filter_by(restaurant_id=id).delete()
     db.session.commit()
-    return q
+    """
 
 
 def del_time_for_rest(id):
@@ -350,19 +347,19 @@ def del_time_for_rest(id):
 
 
 def del_friends_of_reservation(id):
+    """
     q = db.session.query(Friend).filter_by(reservation_id=id).delete()
     db.session.commit()
-    return q
-
-
-def del_booking_services(id: int):
     """
-    code to delete the booking from the databse
-    :param id_restaurants:
+    pass
+
+
+def del_booking_services(id: int, user_id: int):
+    """
+    :param id: reservation is:
     :return:
     """
-    db.session.query(Reservation).filter_by(id=id).delete()
-    db.session.commit()
+    BookingServices.delete_book(id, user_id)
 
 
 def get_last_booking():
@@ -572,6 +569,7 @@ def del_booking_with_user_id(user_id):
 def create_review_for_restaurants(
     starts: float,
     rest_id: int,
+    reviewer_email: str,
     comment: str = "random_coment{}".format(randrange(100000)),
 ) -> Review:
     """
@@ -582,12 +580,12 @@ def create_review_for_restaurants(
     :param rest_id: restaurants id
     :return Review db object
     """
-    review = Review()
-    review.restaurant_id = rest_id
-    review.stars = starts
-    review.review = comment
-    db.session.add(review)
-    db.session.commit()
+    review = RestaurantServices.review_restaurant(
+        restaurant_id=rest_id,
+        reviewer_email=reviewer_email,
+        stars=starts,
+        review=comment,
+    )
     return review
 
 
