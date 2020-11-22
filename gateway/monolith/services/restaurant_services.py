@@ -392,11 +392,7 @@ class RestaurantServices:
 
     @staticmethod
     def checkin_reservations(reservation_id: int):
-        reservation = db.session.query(Reservation).filter_by(id=reservation_id)
-        if reservation:
-            reservation.update({Reservation.checkin: True})
-            db.session.commit()
-            db.session.flush()
+        HttpUtils.make_get_request("{}/{}/checkin".format(BOOKING_MICROSERVICE_URL, reservation_id))
 
     @staticmethod
     def get_all_restaurants_info(restaurant_id: int):
