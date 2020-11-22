@@ -1,6 +1,6 @@
 from flask import current_app
 from monolith.utils.http_utils import HttpUtils
-from monolith.app_constant import USER_MICROSERVICE_URL, EMAIL_MICROSERVICE_URL
+from monolith.app_constant import USER_MICROSERVICE_URL, EMAIL_MICROSERVICE_URL, BOOKING_MICROSERVICE_URL
 from monolith.model import UserModel
 
 from datetime import datetime, timedelta
@@ -136,26 +136,119 @@ class HealthyServices:
 
         response = HttpUtils.make_put_request(URL, body)
 
-        if response is None:
+        if response is None or :
             return "An error occurs"
 
         if response[1] == 400:
             return "An error occurs, please try again"
 
+        if response[1] == 404:
+            if response[0] == "User not found":
+                return "The customer is not registered"
+            elif response[0] == "User not positive":
+                return "The user is not Covid-19 positive"
+
         if response[1] == 200:
-            return response[0]["result"]
+            return ""
 
         return "Error"
 
-    @staticmethod
-    def search_contacts(user_email: str, user_phone: str):
-        '''
-        esempio risposta contact
-        {
+
+
+
+
+    def search_contacts_for_email(user_email: str, user_phone: str):
+
+        contact_users_GUI = []
+        """
+            per contatti non ancora positivi:
+            contact_users_GUI.append(
+                [
+                    user.id,
+                    user.firstname + " " + user.lastname,
+                    str(user.dateofbirth).split()[0],
+                    user.email,
+                    user.phone,
+                ]
+            )
+        """
+
+        pass
+
+
+
+    def search_contacts_for_email(user_email: str, user_phone: str):
+        '''{
            "friends":["aaa@aaa.it","bbbb@bbb.it","bbbb@bbb.it"],
            "contacts":["","",""],
            "past_restaurants":["","",""],
            "reservation_restaurants":["","",""]
-        }
-        '''
-        pass
+        }'''
+
+        if user_email == "" and user_phone == "":
+            return "Insert an email or a phone number"
+
+        friends = []
+        contacts = []
+        past_restaurants = []
+        future_restaurants = []
+
+        if user_email != "":
+            URL = USER_MICROSERVICE_URL + "/positiveinfo/email/"+str(user_email)
+        else:
+            URL = USER_MICROSERVICE_URL + "/positiveinfo/phone/"+str(user_phone)
+
+        #check if the user exists
+        #check if the user is positive (get also date of marking) (API)
+        response = HttpUtils.make_get_request(URL)
+        if response is None:
+            return "Error, please try again"
+
+        if response == "User not found":
+            return "The customer is not registered"
+        elif response == "Information not found":
+            return "The user is not Covid-19 positive"
+        elif response == "Bad Request":
+            return "Error"
+
+        #now we have the information about the positivity of the user in response
+        date_marking = response["from_date"]
+        user_id = response["user_id"]
+
+        #start to check contacts
+        #API: get all reservation of the customer between date_marking and date_marking -14
+        URL = BOOKING_MICROSERVICE_URL + "?user_id="+str(user_id)+"&fromDate="+str(date_marking)+"&toDate="+str(date_marking - timedelta(days=14))
+        reservations_customer = HttpUtils.make_get_request(URL)
+
+        if reservations_customer != "No Reservations":
+
+            #API: get all reservations between date_marking and date_m -14
+            URL = BOOKING_MICROSERVICE_URL + "?&fromDate="+str(date_marking)+"&toDate="+str(date_marking - timedelta(days=14))
+            all_reservations = HttpUtils.make_get_request(URL)
+
+            '''
+            for each reservation of the client
+            get friend's email of the positive customer
+            SEND EMAIL (ADD TO JSON)
+
+            find in all reservations all res with same day and time
+            get user id of reservation (contact)
+            API: get user email and name of the contact
+            get friend of the contact
+            SEND EMAIL (ADD TO JSON)
+
+            get restaurant id of the reservation
+            API restaurant: get info (owner_email) of the restaurant
+            SEND EMAIL (ADD TO JSON)
+            '''
+
+        #API booking: get all future booking of the customer
+        URL = BOOKING_MICROSERVICE_URL + "?user_id="+str(user_id)+"&fromDate="+str(date_marking))
+        future_reservations = HttpUtils.make_get_request(URL)
+
+        """
+        get all restaurants (API)
+        for each future reservation
+            use restaurant.id to get owner_email from list of restaurants
+            SEND EMAIL (ADD TO JSON)
+        """
