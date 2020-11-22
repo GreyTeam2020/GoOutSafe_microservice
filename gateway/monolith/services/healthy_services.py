@@ -174,12 +174,6 @@ class HealthyServices:
 
 
     def search_contacts_for_email(user_email: str, user_phone: str):
-        '''{
-           "friends":["aaa@aaa.it","bbbb@bbb.it","bbbb@bbb.it"],
-           "contacts":["","",""],
-           "past_restaurants":["","",""],
-           "reservation_restaurants":["","",""]
-        }'''
 
         if user_email == "" and user_phone == "":
             return "Insert an email or a phone number"
@@ -223,19 +217,25 @@ class HealthyServices:
             all_reservations = HttpUtils.make_get_request(URL)
         
             '''
-            for each reservation of the client
-            get friend's email of the positive customer
-            SEND EMAIL (ADD TO JSON)
+            for reservation in reservations_customer:
 
-            find in all reservations all res with same day and time
-            get user id of reservation (contact)
-            API: get user email and name of the contact
-            get friend of the contact
-            SEND EMAIL (ADD TO JSON)
+                
+                get friend's email of the positive customer
+                SEND EMAIL (ADD TO JSON)
 
-            get restaurant id of the reservation
-            API restaurant: get info (owner_email) of the restaurant
-            SEND EMAIL (ADD TO JSON)
+                find in all reservations all res with same day and time
+                get user id of reservation (contact)
+                API: get user email and name of the contact
+                get friend of the contact
+                SEND EMAIL (ADD TO JSON)
+
+                restaurant_id = reservation["qualcosa"]
+
+                URL = RESTAURANTS_MICROSERVICE_URL + "/" + str(restaurant_id)
+                restaurant = HttpUtils.make_get_request(URL)
+                if restaurant is not None:
+                    past_restaurants.add(restaurant["owner_email"])
+
             '''
         
         #API booking: get all future booking of the customer
@@ -248,3 +248,10 @@ class HealthyServices:
             use restaurant.id to get owner_email from list of restaurants
             SEND EMAIL (ADD TO JSON)
         """
+
+        return {
+           "friends": friends,
+           "contacts": contacts,
+           "past_restaurants":past_restaurants,
+           "reservation_restaurants":future_restaurants
+        } 
