@@ -127,7 +127,7 @@ class HealthyServices:
 
         response = HttpUtils.make_put_request(URL, body)
 
-        if response is None or :
+        if response is None:
             return "An error occurs"
 
         if response[1] == 400:
