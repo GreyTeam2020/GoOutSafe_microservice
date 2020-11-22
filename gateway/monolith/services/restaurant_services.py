@@ -271,18 +271,15 @@ class RestaurantServices:
         json = {"stars": stars, "review": review, "reviewer_email": reviewer_email}
         url = "{}/{}/reviews".format(RESTAURANTS_MICROSERVICE_URL, restaurant_id)
         current_app.logger.debug("URL to microservices: {}".format(url))
-        response = HttpUtils.make_post_request(url, json)
+        response, code = HttpUtils.make_post_request(url, json)
 
         if response is None:
             return None
 
         review = ReviewModel()
-        # TODO: qui mi serve la nuova review nella response, perchè altrimenti non ho dati che mi servono,
-        # TODO: per adesso li invento
-        json["id"] = 1
-        json["data"] = datetime.now().strftime("%Y-%m-%dT%H:%M:%SZ")
+        json["id"] = response["id"]
+        json["date"] = response["date"]
         json["restaurant_id"] = restaurant_id
-        # TODO: fine dati inventati
         review.fill_from_json(json)
         return review
 
