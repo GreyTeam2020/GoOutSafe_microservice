@@ -1,15 +1,3 @@
-import datetime
-from sqlalchemy import or_
-
-from monolith.database import (
-    db,
-    RestaurantTable,
-    Reservation,
-    Restaurant,
-    OpeningHours,
-    Positive,
-    Friend,
-)
 from monolith.app_constant import BOOKING_MICROSERVICE_URL
 from monolith.utils import HttpUtils
 

@@ -12,6 +12,7 @@ from monolith.forms import (
     UserForm,
 )
 from monolith.services import *
+from monolith.services.booking_services import BookingServices
 
 
 def login(client, username, password):
@@ -309,7 +310,7 @@ def create_restaurants_on_db(
     form.n_tables.data = tables
     form.covid_measures.data = "We can survive{}".format(randrange(1000, 50000))
     form.cuisine.data = ["Italian food"]
-    form.open_days.data = ["0"]
+    form.open_days.data = ["0", "1", "2", "3", "4", "5", "6"]
     form.open_lunch.data = time(hour=12, minute=00)
     form.close_lunch.data = time(hour=15, minute=00)
     form.open_dinner.data = time(hour=19, minute=00)
@@ -321,20 +322,22 @@ def create_restaurants_on_db(
 
 def del_user_on_db(id):
     UserService.delete_user(user_id=id)
+    """
     delete_positive_with_user_id(id, marked=True)
     del_booking_with_user_id(id)
+    """
 
 
 def del_restaurant_on_db(id):
-    db.session.query(RestaurantTable).filter_by(restaurant_id=id).delete()
-    db.session.commit()
+    RestaurantServices.delete_restaurant(id)
+    """
     db.session.query(OpeningHours).filter_by(restaurant_id=id).delete()
     db.session.commit()
     q = db.session.query(Restaurant).filter_by(id=id).delete()
     db.session.commit()
     db.session.query(Menu).filter_by(restaurant_id=id).delete()
     db.session.commit()
-    return q
+    """
 
 
 def del_time_for_rest(id):
@@ -344,19 +347,19 @@ def del_time_for_rest(id):
 
 
 def del_friends_of_reservation(id):
+    """
     q = db.session.query(Friend).filter_by(reservation_id=id).delete()
     db.session.commit()
-    return q
-
-
-def del_booking_services(id: int):
     """
-    code to delete the booking from the databse
-    :param id_restaurants:
+    pass
+
+
+def del_booking_services(id: int, user_id: int):
+    """
+    :param id: reservation is:
     :return:
     """
-    db.session.query(Reservation).filter_by(id=id).delete()
-    db.session.commit()
+    BookingServices.delete_book(id, user_id)
 
 
 def get_last_booking():

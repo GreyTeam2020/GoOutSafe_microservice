@@ -60,17 +60,22 @@ class Test_BookServices:
             "a@a.com;b@b.com;c@c.com;d@d.com;e@e.com",
         )
 
-        assert book[0] is not None
-        assert book2[0] is not None
+        assert "restaurant_name" in book
+        assert book["restaurant_name"] == restaurant.name
+        assert "restaurant_name" in book2
+        assert book2["restaurant_name"] == restaurant.name
 
         # delete friends
+        """ 
         del_friends_of_reservation(book[0].id)
         del_friends_of_reservation(book2[0].id)
 
         # delete reservations
         del_booking_services(book[0].id)
         del_booking_services(book2[0].id)
-
+        """
+        del_booking_services(book["id"], user.id)
+        del_booking_services(book2["id"], user.id)
         # delete restaurants (so also tables)
         del_restaurant_on_db(restaurant.id)
 
@@ -90,7 +95,7 @@ class Test_BookServices:
         assert user is not None
         rest_owner = create_user_on_db(ran=randrange(100000, 200000), role_id=3)
         assert rest_owner is not None
-        restaurant = create_restaurants_on_db(user_id=rest_owner.id, user_email=rest_owner.email)
+        restaurant = create_restaurants_on_db(user_id=rest_owner.id, user_email=rest_owner.email, tables=1)
 
         book = BookingServices.book(
             restaurant.id,
@@ -108,14 +113,15 @@ class Test_BookServices:
             "a@a.com;b@b.com;c@c.com;d@d.com;e@e.com",
         )
 
-        assert book[0] is not None
-        assert book2[0] is None
+        assert "restaurant_name" in book
+        assert book["restaurant_name"] == restaurant.name
+        assert book2 is None
 
         # delete friends
-        del_friends_of_reservation(book[0].id)
+        del_friends_of_reservation(book["id"])
 
         # delete reservations
-        del_booking_services(book[0].id)
+        del_booking_services(book["id"], user.id)
 
         # delete restaurants (so also tables)
         del_restaurant_on_db(restaurant.id)
@@ -123,10 +129,6 @@ class Test_BookServices:
         # delete users
         del_user_on_db(user.id)
         del_user_on_db(rest_owner.id)
-
-        # AT THE END THERE MUST TO BE ONLY ONE RESERVATION
-        q = db.session.query(func.count(Reservation.id)).scalar()
-        assert q == 1
 
     def test_new_booking_closed(self):
         """
@@ -146,7 +148,7 @@ class Test_BookServices:
             "a@a.com;b@b.com;c@c.com",
         )
 
-        assert book[0] is None
+        assert "restaurant_name" not in book
 
         # delete restaurants (so also tables)
         del_restaurant_on_db(restaurant.id)
@@ -186,14 +188,15 @@ class Test_BookServices:
             "a@a.com;b@b.com;c@c.com;d@d.com;e@e.com",
         )
 
-        assert book[0] is not None
-        assert book2[0] is None
+        assert "restaurant_name" in book
+        assert book["restaurant_name"] == restaurant.name
+        assert "restaurant_name" not in book2
 
         # delete friends
-        del_friends_of_reservation(book[0].id)
+        del_friends_of_reservation(book["id"])
 
         # delete reservations
-        del_booking_services(book[0].id)
+        del_booking_services(book["id"])
 
         # delete restaurants (so also tables)
         del_restaurant_on_db(restaurant.id)
@@ -227,7 +230,7 @@ class Test_BookServices:
             "a@a.com;b@b.com;c@c.com",
         )
 
-        assert book[0] is None
+        assert "restaurant_name" not in book
 
         # delete restaurants (so also tables)
         del_restaurant_on_db(restaurant.id)
@@ -259,10 +262,10 @@ class Test_BookServices:
             "a@a.com;b@b.com;c@c.com;d@d.com;e@e.com",
         )
 
-        assert book[0] is not None
+        assert "restaurant_name" not in book
 
         # delete the reservation
-        BookingServices.delete_book(book[0].id, user.id)
+        BookingServices.delete_book(book["id"], user.id)
         # check how many reservations
         q = db.session.query(func.count(Reservation.id)).scalar()
         assert q == 1
@@ -292,7 +295,8 @@ class Test_BookServices:
             "a@a.com;b@b.com;c@c.com",
         )
 
-        assert book[0] is not None
+        assert "restaurant_name" in book
+        assert book["restaurant_name"] == restaurant.name
 
         book = BookingServices.update_book(
             book[0].id,
@@ -301,7 +305,8 @@ class Test_BookServices:
             2,
             "a@a.com",
         )
-        assert book[0] is not None
+        assert "restaurant_name" in book
+        assert book["restaurant_name"] == restaurant.name
 
         # delete friends
         del_friends_of_reservation(book[0].id)
