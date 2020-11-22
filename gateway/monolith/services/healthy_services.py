@@ -272,10 +272,10 @@ class HealthyServices:
 
                     for opening in openings["openings"]:
                         if opening["week_day"] == dayNumber:
-                            restaurant_hours.append(opening["open_lunch"])
-                            restaurant_hours.append(opening["close_lunch"])
-                            restaurant_hours.append(opening["open_dinner"])
-                            restaurant_hours.append(opening["close_dinner"])
+                            restaurant_hours.append(datetime.strptime(opening["open_lunch"], "%H:%M"))
+                            restaurant_hours.append(datetime.strptime(opening["close_lunch"], "%H:%M"))
+                            restaurant_hours.append(datetime.strptime(opening["open_dinner"], "%H:%M"))
+                            restaurant_hours.append(datetime.strptime(opening["close_dinner"], "%H:%M"))
 
                     #if people are in the restaurant at lunch or dinner
                     if (
