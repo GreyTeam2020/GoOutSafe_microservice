@@ -74,7 +74,7 @@ def search_contacts():
                     "search_contacts.html",
                     _test="search_contacts_no_positive",
                     form=form,
-                    message=contacts
+                    message="Error"
                 )
 
     return render_template("/search_contacts.html", form=form)
