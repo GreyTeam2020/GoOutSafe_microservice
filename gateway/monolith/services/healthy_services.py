@@ -134,7 +134,7 @@ class HealthyServices:
 
         response = HttpUtils.make_put_request(URL, body)
 
-        if response is None or :
+        if response is None :
             return "An error occurs"
 
         if response[1] == 400:
@@ -219,36 +219,6 @@ class HealthyServices:
             
             for reservation in reservations_customer:
 
-                '''
-                RSERVATION DOESN'T RETURN EMAIL OF FRIENDS
-
-                get friend's email of the positive customer
-                SEND EMAIL (ADD TO JSON)
-                '''
-
-                start =  datetime.strptime(reservation["reservation_date"], "%Y-%m-%dT%H:%M:%SZ")
-                end = datetime.strptime(reservation["reservation_end"], "%Y-%m-%dT%H:%M:%SZ")
-
-                for one_reservation in all_reservations:
-
-                    '''
-                    WHAT FOR PRENOTATION ON TWO DAYS (NIGHT)?
-
-                    check if it's contact -> iff
-                    - same restaurant (same ids)
-                    - same day dd-mm-yyyy
-                    - same time -> having start and end. not same time iff
-                        - s1 and e1 < start or 
-                        - s1 and e1 > end
-                    find in all reservations all res with same day and time
-                    get user id of reservation (contact)
-                    API: get user email and name of the contact
-                    '''
-
-                    '''
-                    get friend of the contact
-                    SEND EMAIL (ADD TO JSON)
-                    '''
                 restaurant_id = reservation["table"]["restaurant"]["id"]
 
                 URL = RESTAURANTS_MICROSERVICE_URL + "/" + str(restaurant_id)
@@ -260,24 +230,135 @@ class HealthyServices:
                         "date" : start
                     })
 
-            
+                '''
+                RSERVATION DOESN'T RETURN EMAIL OF FRIENDS
+
+                get friend's email of the positive customer
+                SEND EMAIL (ADD TO JSON)
+                '''
+
+                start =  datetime.strptime(reservation["reservation_date"], "%Y-%m-%dT%H:%M:%SZ")
+                end = datetime.strptime(reservation["reservation_end"], "%Y-%m-%dT%H:%M:%SZ")
+
+                for one_reservation in all_reservations:
+                    
+                    restaurant_id_contact = one_reservation["table"]["restaurant"]["id"]
+
+                    if restaurant_id_contact != restaurant_id:
+                        #are not in the same restaurant
+                        continue
+
+                    start_contact =  datetime.strptime(one_reservation["reservation_date"], "%Y-%m-%dT%H:%M:%SZ")
+                    end_contact = datetime.strptime(one_reservation["reservation_end"], "%Y-%m-%dT%H:%M:%SZ")
+
+
+                    #if people are in the same restaurant in the same day
+                    if(
+                        (
+                            start.year != start_contact.year or
+                            start.month != start_contact.month or
+                            start.day != start_contact.day 
+                    ):
+                        continue
+
+                    URL = RESTAURANTS_MICROSERVICE_URL + "/" + str(restaurant_id)+ "/openings"
+                    openings = HttpUtils.make_get_request(URL)
+
+                    if start.weekday() == 0:
+                        dayNumber = 6
+                    else:
+                        dayNumber = start.weekday()-1
+
+                    restaurant_hours = []
+
+                    for opening in openings["openings"]:
+                        if opening["week_day"] == dayNumber:
+                            restaurant_hours.append(opening["open_lunch"])
+                            restaurant_hours.append(opening["close_lunch"])
+                            restaurant_hours.append(opening["open_dinner"])
+                            restaurant_hours.append(opening["close_dinner"])
+
+                    #if people are in the restaurant at lunch or dinner
+                    if (
+                        (
+                            restaurant_hours[0].hour <= start.hour and
+                            restaurant_hours[0].hour <= start_contact.hour and
+                            restaurant_hours[0].minute <= start.minute and
+                            restaurant_hours[0].minute <= start_contact.minute and
+
+                            restaurant_hours[1].hour >= end.hour and
+                            restaurant_hours[1].hour >= end_contact.hour and
+                            restaurant_hours[1].minute >= end.minute and
+                            restaurant_hours[1].minute >= end_contact.minute 
+                        ) or (
+                            restaurant_hours[2].hour <= start.hour and
+                            restaurant_hours[2].hour <= start_contact.hour and
+                            restaurant_hours[2].minute <= start.minute and
+                            restaurant_hours[2].minute <= start_contact.minute and
+
+                            restaurant_hours[3].hour >= end.hour and
+                            restaurant_hours[3].hour >= end_contact.hour and
+                            restaurant_hours[3].minute >= end.minute and
+                            restaurant_hours[3].minute >= end_contact.minute 
+
+                        )
+
+                    ):
+                        #people are in the same restaurant at lunch
+
+                        #if they are in the same time 
+                        if not ( 
+                            (
+                                start_contact < start and 
+                                end_contact < start
+                            ) or (
+                                start_contact > end and 
+                                end_contact > end
+                            )
+                        ):
+                            #they are contacts!
+
+                            #API: get user email and name of the contact
+                            URL = USER_MICROSERVICE_URL +"/"+str(one_reservation["customer_id"])
+                            user = HttpUtils.make_get_request(URL)
+                             
+                            contacts.append({
+                                "email" : user["email"]
+                                "name" : user["firstname"]
+                                "restaurant_name" : restaurant["name"]
+                                "date" : start
+                            })
+
+                            '''
+                            get friend of the contact
+                            SEND EMAIL (ADD TO JSON)
+                            '''
+
+                
+        if user_email != "":
+            customer_email = user_email
+        else:
+            URL = USER_MICROSERVICE_URL +"/"+str(user_id)
+            user = HttpUtils.make_get_request(URL)
+            customer_email = user["email"]
         
+
         #API booking: get all future booking of the customer
-        URL = BOOKING_MICROSERVICE_URL + "?user_id="+str(user_id)+"&fromDate="+str(date_marking))
+        URL = BOOKING_MICROSERVICE_URL + "?user_id="+str(user_id)+"&fromDate="+str(date_marking)
         future_reservations = HttpUtils.make_get_request(URL)
         
         for future_reservation in future_reservations:
-
-            start =  datetime.strptime(reservation["reservation_date"], "%Y-%m-%dT%H:%M:%SZ")   
+            date =  datetime.strptime(reservation["reservation_date"], "%Y-%m-%dT%H:%M:%SZ")   
 
             restaurant_id = future_reservation["table"]["restaurant"]["id"]
             URL = RESTAURANTS_MICROSERVICE_URL + "/" + str(restaurant_id)
             restaurant = HttpUtils.make_get_request(URL)
             if restaurant is not None:
-                future_restaurants.add({
+                future_restaurants.append({
                     "email" : restaurant["owner_email"]
                     "name" : restaurant["name"]
-                    "date" : start
+                    "date" : date
+                    "customer_email" : customer_email
                 })
 
 
