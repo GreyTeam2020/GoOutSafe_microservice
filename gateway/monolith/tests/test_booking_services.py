@@ -148,7 +148,7 @@ class Test_BookServices:
             "a@a.com;b@b.com;c@c.com",
         )
 
-        assert "restaurant_name" not in book
+        assert book is None
 
         # delete restaurants (so also tables)
         del_restaurant_on_db(restaurant.id)
@@ -190,13 +190,13 @@ class Test_BookServices:
 
         assert "restaurant_name" in book
         assert book["restaurant_name"] == restaurant.name
-        assert "restaurant_name" not in book2
+        assert book2 is None
 
         # delete friends
         del_friends_of_reservation(book["id"])
 
         # delete reservations
-        del_booking_services(book["id"])
+        del_booking_services(book["id"], user.id)
 
         # delete restaurants (so also tables)
         del_restaurant_on_db(restaurant.id)
@@ -230,7 +230,7 @@ class Test_BookServices:
             "a@a.com;b@b.com;c@c.com",
         )
 
-        assert "restaurant_name" not in book
+        assert book is None
 
         # delete restaurants (so also tables)
         del_restaurant_on_db(restaurant.id)
@@ -262,7 +262,8 @@ class Test_BookServices:
             "a@a.com;b@b.com;c@c.com;d@d.com;e@e.com",
         )
 
-        assert "restaurant_name" not in book
+        assert "restaurant_name" in book
+        assert book["restaurant_name"] == restaurant.name
 
         # delete the reservation
         BookingServices.delete_book(book["id"], user.id)
@@ -299,8 +300,9 @@ class Test_BookServices:
         assert book["restaurant_name"] == restaurant.name
 
         book = BookingServices.update_book(
-            book[0].id,
-            user,
+            book["id"],
+            restaurant.id,
+            user.id,
             datetime.datetime(year=2120, month=11, day=25, hour=14),
             2,
             "a@a.com",
@@ -309,10 +311,10 @@ class Test_BookServices:
         assert book["restaurant_name"] == restaurant.name
 
         # delete friends
-        del_friends_of_reservation(book[0].id)
+        del_friends_of_reservation(book["id"])
 
         # delete reservations
-        del_booking_services(book[0].id)
+        del_booking_services(book["id"], user.id)
 
         # delete restaurants (so also tables)
         del_restaurant_on_db(restaurant.id)
