@@ -40,8 +40,11 @@ class Test_BookServices:
         """
 
         user = create_user_on_db(randrange(100000))
+        assert user is not None
         rest_owner = create_user_on_db(ran=2)
+        assert rest_owner is not None
         restaurant = create_restaurants_on_db(user_id=rest_owner.id)
+        assert restaurant is not None
 
         book = BookingServices.book(
             restaurant.id,
