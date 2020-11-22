@@ -153,24 +153,148 @@ class HealthyServices:
 
 
     
-    def search_contacts_for_email(user_email: str, user_phone: str):
+    def search_contacts(user_email: str, user_phone: str):
+
+        if user_email == "" and user_phone == "":
+            return "Insert an email or a phone number"
+
+        if user_email != "":
+            URL = USER_MICROSERVICE_URL + "/positiveinfo/email/"+str(user_email)
+        else:
+            URL = USER_MICROSERVICE_URL + "/positiveinfo/phone/"+str(user_phone)
+
+        #check if the user exists
+        #check if the user is positive (get also date of marking) (API)
+        response = HttpUtils.make_get_request(URL)
+        if response is None:
+            return "Error, please try again"
+
+        if response == "User not found":
+            return "The customer is not registered"
+        elif response == "Information not found":
+            return "The user is not Covid-19 positive"
+        elif response == "Bad Request":
+            return "Error"
 
         contact_users_GUI = []
-        """
-            per contatti non ancora positivi:
-            contact_users_GUI.append(
-                [
-                    user.id,
-                    user.firstname + " " + user.lastname,
-                    str(user.dateofbirth).split()[0],
-                    user.email,
-                    user.phone,
-                ]
-            )
-        """
 
-        pass
+        #now we have the information about the positivity of the user in response
+        date_marking = response["from_date"]
+        user_id = response["user_id"]
+        
+        #start to check contacts
+        #API: get all reservation of the customer between date_marking and date_marking -14
+        URL = BOOKING_MICROSERVICE_URL + "?user_id="+str(user_id)+"&fromDate="+str(date_marking)+"&toDate="+str(date_marking - timedelta(days=14))
+        reservations_customer = HttpUtils.make_get_request(URL)
+        
+        i=1
 
+        if reservations_customer != "No Reservations":
+            
+            #API: get all reservations between date_marking and date_m -14
+            URL = BOOKING_MICROSERVICE_URL + "?&fromDate="+str(date_marking)+"&toDate="+str(date_marking - timedelta(days=14))
+            all_reservations = HttpUtils.make_get_request(URL)
+            
+            for reservation in reservations_customer:
+
+                restaurant_id = reservation["table"]["restaurant"]["id"]
+
+                start =  datetime.strptime(reservation["reservation_date"], "%Y-%m-%dT%H:%M:%SZ")
+                end = datetime.strptime(reservation["reservation_end"], "%Y-%m-%dT%H:%M:%SZ")
+
+                for one_reservation in all_reservations:
+                    
+                    restaurant_id_contact = one_reservation["table"]["restaurant"]["id"]
+
+                    if restaurant_id_contact != restaurant_id:
+                        #are not in the same restaurant
+                        continue
+
+                    start_contact =  datetime.strptime(one_reservation["reservation_date"], "%Y-%m-%dT%H:%M:%SZ")
+                    end_contact = datetime.strptime(one_reservation["reservation_end"], "%Y-%m-%dT%H:%M:%SZ")
+
+
+                    #if people are in the same restaurant in the same day
+                    if(
+                        start.year != start_contact.year or
+                        start.month != start_contact.month or
+                        start.day != start_contact.day 
+                    ):
+                        continue
+
+                    URL = RESTAURANTS_MICROSERVICE_URL + "/" + str(restaurant_id)+ "/openings"
+                    openings = HttpUtils.make_get_request(URL)
+
+                    if start.weekday() == 0:
+                        dayNumber = 6
+                    else:
+                        dayNumber = start.weekday()-1
+
+                    restaurant_hours = []
+
+                    for opening in openings["openings"]:
+                        if opening["week_day"] == dayNumber:
+                            restaurant_hours.append(datetime.strptime(opening["open_lunch"], "%H:%M"))
+                            restaurant_hours.append(datetime.strptime(opening["close_lunch"], "%H:%M"))
+                            restaurant_hours.append(datetime.strptime(opening["open_dinner"], "%H:%M"))
+                            restaurant_hours.append(datetime.strptime(opening["close_dinner"], "%H:%M"))
+
+                    #if people are in the restaurant at lunch or dinner
+                    if (
+                        (
+                            restaurant_hours[0].hour <= start.hour and
+                            restaurant_hours[0].hour <= start_contact.hour and
+                            restaurant_hours[0].minute <= start.minute and
+                            restaurant_hours[0].minute <= start_contact.minute and
+
+                            restaurant_hours[1].hour >= end.hour and
+                            restaurant_hours[1].hour >= end_contact.hour and
+                            restaurant_hours[1].minute >= end.minute and
+                            restaurant_hours[1].minute >= end_contact.minute 
+                        ) or (
+                            restaurant_hours[2].hour <= start.hour and
+                            restaurant_hours[2].hour <= start_contact.hour and
+                            restaurant_hours[2].minute <= start.minute and
+                            restaurant_hours[2].minute <= start_contact.minute and
+
+                            restaurant_hours[3].hour >= end.hour and
+                            restaurant_hours[3].hour >= end_contact.hour and
+                            restaurant_hours[3].minute >= end.minute and
+                            restaurant_hours[3].minute >= end_contact.minute 
+
+                        )
+
+                    ):
+                        #people are in the same restaurant at lunch
+
+                        #if they are in the same time 
+                        if not ( 
+                            (
+                                start_contact < start and 
+                                end_contact < start
+                            ) or (
+                                start_contact > end and 
+                                end_contact > end
+                            )
+                        ):
+                            #they are contacts!
+
+                            #API: get user email and name of the contact
+                            URL = USER_MICROSERVICE_URL +"/"+str(one_reservation["customer_id"])
+                            user = HttpUtils.make_get_request(URL)
+                             
+                            contact_users_GUI.append(
+                                [
+                                    i,
+                                    user["firstname"] + " " + user["lastname"],
+                                    user["dateofbirth"],
+                                    user["email"],
+                                    user["phone"]
+                                ]
+                            )
+                            i += 1
+
+        return contact_users_GUI
 
 
     def search_contacts_for_email(user_email: str, user_phone: str):
