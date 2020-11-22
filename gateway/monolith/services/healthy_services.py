@@ -225,8 +225,8 @@ class HealthyServices:
                 restaurant = HttpUtils.make_get_request(URL)
                 if restaurant is not None:
                     past_restaurants.add({
-                        "email" : restaurant["owner_email"]
-                        "name" : restaurant["name"]
+                        "email" : restaurant["owner_email"],
+                        "name" : restaurant["name"],
                         "date" : start
                     })
 
@@ -254,10 +254,9 @@ class HealthyServices:
 
                     #if people are in the same restaurant in the same day
                     if(
-                        (
-                            start.year != start_contact.year or
-                            start.month != start_contact.month or
-                            start.day != start_contact.day 
+                        start.year != start_contact.year or
+                        start.month != start_contact.month or
+                        start.day != start_contact.day 
                     ):
                         continue
 
@@ -323,9 +322,9 @@ class HealthyServices:
                             user = HttpUtils.make_get_request(URL)
                              
                             contacts.append({
-                                "email" : user["email"]
-                                "name" : user["firstname"]
-                                "restaurant_name" : restaurant["name"]
+                                "email" : user["email"],
+                                "name" : user["firstname"],
+                                "restaurant_name" : restaurant["name"],
                                 "date" : start
                             })
 
@@ -355,9 +354,9 @@ class HealthyServices:
             restaurant = HttpUtils.make_get_request(URL)
             if restaurant is not None:
                 future_restaurants.append({
-                    "email" : restaurant["owner_email"]
-                    "name" : restaurant["name"]
-                    "date" : date
+                    "email" : restaurant["owner_email"],
+                    "name" : restaurant["name"],
+                    "date" : date,
                     "customer_email" : customer_email
                 })
 
