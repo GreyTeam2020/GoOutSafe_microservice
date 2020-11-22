@@ -74,16 +74,16 @@ class Test_RestaurantServices:
         http://localhost:5000/my_reservations?fromDate=2013-10-07&toDate=2014-10-07&email=john.doe@email.com
         :return:
         """
-        email = "ham.burger@email.com"
-        user = get_user_with_email(email)
-        from_date = "2013-10-07"
-        to_date = "2014-10-07"
+        user = create_user_on_db(role_id=2)
         assert user is not None
 
-        def_rest = db.session.query(Restaurant).all()[0]
+        from_date = "2013-10-07"
+        to_date = "2014-10-07"
+
+        def_rest = RestaurantServices.get_all_restaurants()[0]
         assert def_rest is not None
         all_reservation = RestaurantServices.get_reservation_rest(
-            def_rest.owner_id, def_rest.id, from_date, to_date, email
+            def_rest.owner_id, def_rest.id, from_date, to_date, user.email
         )
         assert len(all_reservation) == 0
 
@@ -95,16 +95,16 @@ class Test_RestaurantServices:
         http://localhost:5000/my_reservations?fromDate=2013-10-07&toDate=2014-10-07&email=john.doe@email.com
         :return:
         """
-        owner = create_user_on_db(12345543234)
+        owner = create_user_on_db(role_id=2)
         assert owner is not None
 
-        rest = create_restaurants_on_db(user_id=owner.id)
+        rest = create_restaurants_on_db(user_id=owner.id, user_email=owner.email)
         assert rest is not None
 
-        user = create_user_on_db(123455432332)
+        user = create_user_on_db()
         assert user is not None
 
-        date_time = datetime(2020, 10, 28, 21, 30)
+        date_time = datetime(2022, 10, 28, 21, 30)
 
         books = create_random_booking(1, rest.id, user, date_time, "a@a.com")
         assert len(books) == 1
