@@ -1,6 +1,6 @@
 from flask import current_app
 from monolith.utils.http_utils import HttpUtils
-from monolith.app_constant import USER_MICROSERVICE_URL
+from monolith.app_constant import USER_MICROSERVICE_URL, EMAIL_MICROSERVICE_URL
 from monolith.model import UserModel
 
 from datetime import datetime, timedelta
@@ -45,17 +45,19 @@ class HealthyServices:
         response = HttpUtils.make_get_request(url)
 
         '''
-        TODO: chiamata contact
-        esempio risposta API contact
-        {
-           "friends":["aaa@aaa.it","bbbb@bbb.it","bbbb@bbb.it"],
-           "contacts":["","",""],
-           "past_restaurants":["","",""],
-           "reservation_restaurants":["","",""]
-        }
+        chiamata contact        
         la risposta viene mandata come request body al email_microservice per notificare i contatti 
         il servizio prende le 4 liste, per ognuna cicla ed invia una mail ad ogni indirizzo
-        
+        '''
+        contacts = HealthyServices.contact(user_email, user_phone)
+        URL = EMAIL_MICROSERVICE_URL + "/sendcontact"
+        response = HttpUtils.make_post_request(URL, contacts)
+        '''
+        chiamata API email_microservice per invio email
+        '''
+
+
+        '''
         ELEIMINARE, SONO LE VECCHIE CHIAMATE PER INVIO EMAIL, VENGONO MESSE IN email_microservice
          DispatcherMessage.send_message(
                     NEW_COVID_TO_RESTAURANT_BOOKING,
@@ -144,3 +146,16 @@ class HealthyServices:
             return response[0]["result"]
 
         return "Error"
+
+    @staticmethod
+    def search_contacts(user_email: str, user_phone: str):
+        '''
+        esempio risposta contact
+        {
+           "friends":["aaa@aaa.it","bbbb@bbb.it","bbbb@bbb.it"],
+           "contacts":["","",""],
+           "past_restaurants":["","",""],
+           "reservation_restaurants":["","",""]
+        }
+        '''
+        pass
