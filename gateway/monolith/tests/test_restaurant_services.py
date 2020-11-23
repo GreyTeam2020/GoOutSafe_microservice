@@ -74,11 +74,11 @@ class Test_RestaurantServices:
         http://localhost:5000/my_reservations?fromDate=2013-10-07&toDate=2014-10-07&email=john.doe@email.com
         :return:
         """
-        user = create_user_on_db(role_id=2)
+        user = create_user_on_db(randrange(1, 500000), role_id=2)
         assert user is not None
 
-        from_date = "2013-10-07"
-        to_date = "2014-10-07"
+        from_date = datetime(2013, 10, 7)
+        to_date = datetime(2014, 10, 7)
 
         def_rest = RestaurantServices.get_all_restaurants()[0]
         assert def_rest is not None
@@ -95,13 +95,13 @@ class Test_RestaurantServices:
         http://localhost:5000/my_reservations?fromDate=2013-10-07&toDate=2014-10-07&email=john.doe@email.com
         :return:
         """
-        owner = create_user_on_db(role_id=2)
+        owner = create_user_on_db(randrange(1, 500000), role_id=2)
         assert owner is not None
 
         rest = create_restaurants_on_db(user_id=owner.id, user_email=owner.email)
         assert rest is not None
 
-        user = create_user_on_db()
+        user = create_user_on_db(randrange(1, 500000), )
         assert user is not None
 
         date_time = datetime(2022, 10, 28, 21, 30)
@@ -147,7 +147,7 @@ class Test_RestaurantServices:
         )
         assert restaurant is not None
 
-        reviewer = create_user_on_db(randrange(40000, 3000000), role_id=3)
+        reviewer = create_user_on_db(randrange(1, 3000000), role_id=3)
         review = RestaurantServices.review_restaurant(
             restaurant_id=restaurant.id,
             reviewer_email=reviewer.email,
@@ -433,7 +433,7 @@ class Test_RestaurantServices:
         owner_one = create_user_on_db(randrange(10, 50000), role_id=2)
         assert owner_one is not None
 
-        restaurant_one = create_restaurants_on_db(name="First", user_id=owner_one.id)
+        restaurant_one = create_restaurants_on_db(name="First", user_id=owner_one.id, user_email=owner_one.email)
         assert restaurant_one is not None
 
         all_people = RestaurantServices.get_restaurant_people(restaurant_one.id)

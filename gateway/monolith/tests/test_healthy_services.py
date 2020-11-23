@@ -7,8 +7,6 @@ from monolith.tests.utils import (
     create_user_on_db,
     del_user_on_db,
     positive_with_user_id,
-    delete_positive_with_user_id,
-    delete_was_positive_with_user_id,
     get_user_with_email,
     create_random_booking,
     create_restaurants_on_db,
@@ -33,7 +31,6 @@ class Test_HealthyServices:
         assert user.role_id is 3
         positive = positive_with_user_id(user.id, marked=True)
         assert positive is None
-        delete_positive_with_user_id(user.id)
         del_user_on_db(user.id)
 
     def test_mark_positive_ok(self):
@@ -49,7 +46,6 @@ class Test_HealthyServices:
         assert positive is None
         message = HealthyServices.mark_positive(user.email, user.phone)
         assert len(message) is 0
-        delete_positive_with_user_id(user.id)
         del_user_on_db(user.id)
 
     def test_mark_positive_already_covid(self):
@@ -68,7 +64,6 @@ class Test_HealthyServices:
         assert message == "User with email {} already Covid-19 positive".format(
             user.email
         )
-        delete_positive_with_user_id(user.id)
         del_user_on_db(user.id)
 
     def test_mark_positive_user_not_exist(self):
@@ -102,7 +97,6 @@ class Test_HealthyServices:
         assert positive is None
         message = HealthyServices.mark_positive(user.email, "")
         assert len(message) is 0
-        delete_positive_with_user_id(user.id)
         del_user_on_db(user.id)
 
     def test_mark_positive_user_by_phone(self):
@@ -116,7 +110,6 @@ class Test_HealthyServices:
         assert positive is None
         message = HealthyServices.mark_positive("", user.phone)
         assert len(message) is 0
-        delete_positive_with_user_id(user.id)
         del_user_on_db(user.id)
 
     def test_unmark_positive_ok(self):
@@ -135,7 +128,6 @@ class Test_HealthyServices:
         message = HealthyServices.unmark_positive(user.email, user.phone)
         assert len(message) is 0
 
-        delete_was_positive_with_user_id(user.id)
         del_user_on_db(user.id)
 
     def test_unmark_user_not_positive(self):
@@ -152,7 +144,6 @@ class Test_HealthyServices:
             user.email
         )
 
-        delete_positive_with_user_id(user.id)
         del_user_on_db(user.id)
 
     def test_unmark_user_not_in_app(self):
@@ -187,7 +178,6 @@ class Test_HealthyServices:
         message = HealthyServices.unmark_positive(user.email, "")
         assert len(message) is 0
 
-        delete_was_positive_with_user_id(user.id)
         del_user_on_db(user.id)
 
     def test_mark_positive_user_by_phone(self):
@@ -206,7 +196,6 @@ class Test_HealthyServices:
         message = HealthyServices.unmark_positive("", user.phone)
         assert len(message) is 0
 
-        delete_was_positive_with_user_id(user.id)
         del_user_on_db(user.id)
 
     def test_search_contacts_user_with_no_booking(self):
@@ -228,7 +217,6 @@ class Test_HealthyServices:
         message = HealthyServices.unmark_positive("", user.phone)
         assert len(message) is 0
 
-        delete_was_positive_with_user_id(user.id)
         del_user_on_db(user.id)
 
     def test_search_contacts_user_with_booking_only_one_user(self):
@@ -249,8 +237,6 @@ class Test_HealthyServices:
 
         message = HealthyServices.unmark_positive("", user.phone)
         assert len(message) == 0
-
-        delete_was_positive_with_user_id(user.id)
 
     def test_search_contacts_user_with_booking(self):
         """
@@ -313,4 +299,3 @@ class Test_HealthyServices:
         del_user_on_db(customer1.id)
         del_user_on_db(customer2.id)
         del_restaurant_on_db(restaurant.id)
-        ## TODO

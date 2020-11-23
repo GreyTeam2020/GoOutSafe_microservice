@@ -130,8 +130,7 @@ class RestaurantServices:
         if response is None:
             current_app.logger.error("Microservices error")
             return []
-        all_restaurants = response["restaurants"]
-        return all_restaurants
+        return response["restaurants"]
 
     @staticmethod
     def get_rest_by_id(id: int):
@@ -282,7 +281,6 @@ class RestaurantServices:
         """
 
         url = "{}/list/{}".format(BOOKING_MICROSERVICE_URL, restaurant_id)
-        # add filters...
         if from_date:
             url = HttpUtils.append_query(url, "fromDate", from_date)
         if to_date:

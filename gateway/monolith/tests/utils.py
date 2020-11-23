@@ -391,23 +391,6 @@ def positive_with_user_id(user_id: int = None, marked: bool = True):
             return user
     return None
 
-
-def delete_positive_with_user_id(user_id: int, marked: bool = True):
-    """
-    This method is an util function to search inside the positive user
-    """
-    db.session.query(Positive).filter_by(user_id=user_id, marked=marked).delete()
-    db.session.commit()
-
-
-def delete_was_positive_with_user_id(user_id: int, marked: bool = True):
-    """
-    This delete a row of a previous positive person
-    """
-    db.session.query(Positive).filter_by(user_id=user_id).delete()
-    db.session.commit()
-
-
 def unmark_people_for_covid19(client, form: SearchUserForm):
     """
     This method perform the request to mark a people as not positive
