@@ -1,4 +1,6 @@
 from datetime import datetime, timedelta
+from random import randrange
+
 from monolith.database import db, Positive
 from monolith.services import HealthyServices
 from monolith.tests.utils import (
@@ -55,7 +57,7 @@ class Test_HealthyServices:
         It tests that a customer can't be marked as covid-19 positive if
         he is already covid-19 positive
         """
-        user = create_user_on_db()
+        user = create_user_on_db(randrange(1, 7000))
         assert user is not None
         assert user.role_id is 3
         positive = positive_with_user_id(user.id)

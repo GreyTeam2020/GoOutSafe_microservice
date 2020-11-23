@@ -280,7 +280,7 @@ def get_rest_with_name(name):
     :param name: the email that we want use to query the user
     :return: return the user if exist otherwise None
     """
-    return RestaurantServices.get_restaurant_name()
+    return RestaurantServices.get_restaurants_by_keyword(name)[0]
 
 
 def create_user_on_db(ran: int = randrange(100000), role_id: int = 3):

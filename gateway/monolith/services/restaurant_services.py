@@ -220,7 +220,7 @@ class RestaurantServices:
         return response["photos"]
 
     @staticmethod
-    def get_reservation_rest(owner_id, restaurant_id, from_date, to_date, email):
+    def get_reservation_rest(restaurant_id, from_date, to_date, email):
         """
         This method contains the logic to find all reservation in the restaurant
         with the filter on the date
@@ -330,7 +330,9 @@ class RestaurantServices:
 
     @staticmethod
     def checkin_reservations(reservation_id: int):
-        HttpUtils.make_get_request("{}/{}/checkin".format(BOOKING_MICROSERVICE_URL, reservation_id))
+        HttpUtils.make_get_request(
+            "{}/{}/checkin".format(BOOKING_MICROSERVICE_URL, reservation_id)
+        )
 
     @staticmethod
     def get_all_restaurants_info(restaurant_id: int):
@@ -389,3 +391,15 @@ class RestaurantServices:
         current_app.logger.debug("URL to microservice is {}".format(url))
         response = HttpUtils.make_put_request(url, {})
         return response is not None
+
+    @staticmethod
+    def force_reload_rating_all_restaurants():
+        """
+        This method call the restaurants api to force the microservice to recalculate
+        the rating for each restaurants
+        :return if the request is ok I rill return the request, otherwise None
+        """
+        user = "{}//restaurants/calculate_rating_for_all_restaurant".format(
+            RESTAURANTS_MICROSERVICE_URL
+        )
+        return HttpUtils.make_get_request(user)
