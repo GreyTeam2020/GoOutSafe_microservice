@@ -333,3 +333,68 @@ class UserService:
         current_app.logger.debug("Microservice response is: {}".format(response.json()))
         user.fill_from_json(response.json())
         return user
+
+    @staticmethod
+    def mark_positive(email: str = None, phone: str = None):
+        """
+        This method perform the request to user microservices to make the user positive
+        """
+        if email is not None:
+            key = "email"
+            value = email
+        elif phone is not None:
+            key = "phone"
+            value = phone
+        else:
+            return None
+        url = "{}/mark/{}/{}".format(USER_MICROSERVICE_URL, key, value)
+        return HttpUtils.make_get_request(url)
+
+    @staticmethod
+    def unmark_positive(email: str = None, phone: str = None):
+        """
+        This method perform the request to user microservices to make the user positive
+        """
+        if email is None and phone is None:
+            return "Insert an email or a phone number"
+
+        if email != "":
+            body = {"key": "email", "value": email}
+        else:
+            body = {"key": "phone", "value": phone}
+
+        url = USER_MICROSERVICE_URL + "/unmark"
+        response = HttpUtils.make_put_request(url, body)
+        return response
+
+    @staticmethod
+    def get_list_of_positive_user():
+        """
+        This method perform the request to get all positive user inside the database
+        """
+        url = "{}/report_positive".format(USER_MICROSERVICE_URL)
+        response = HttpUtils.make_get_request(url)
+        if response is None:
+            return []
+        users = response["result"]
+        list_user = []
+        for user in users:
+            new_user = UserModel()
+            new_user.fill_from_json(user)
+            list_user.append(new_user)
+        return list_user
+
+    @staticmethod
+    def search_possible_contacts(email: str = None, phone: str = None):
+        """
+        Search all possible contact for the user with email of phone
+        """
+        if email is not None:
+            url = USER_MICROSERVICE_URL + "/positiveinfo/email/" + str(email)
+        elif phone is not None:
+            url = USER_MICROSERVICE_URL + "/positiveinfo/phone/" + str(phone)
+        else:
+            return None
+        # check if the user exists (ON VIEW)
+        # check if the user is positive (get also date of marking) (API) ????
+        return HttpUtils.make_get_request(url)
