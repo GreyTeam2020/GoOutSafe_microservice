@@ -140,9 +140,7 @@ class Test_HealthyServices:
         assert user.role_id is 3
 
         message = HealthyServices.unmark_positive(user.email, user.phone)
-        assert message == "User with email {} is not Covid-19 positive".format(
-            user.email
-        )
+        assert message == ""
 
         del_user_on_db(user.id)
 
