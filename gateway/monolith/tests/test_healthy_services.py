@@ -26,7 +26,7 @@ class Test_HealthyServices:
         It tests that a new user is not positive
         """
         # an operator
-        user = create_user_on_db(randrange(1, 500000))
+        user = create_user_on_db(randrange(1, 50000000))
         assert user is not None
         assert user.role_id is 3
         positive = positive_with_user_id(user.id, marked=True)
@@ -39,7 +39,7 @@ class Test_HealthyServices:
         health authority
         """
         # an operator
-        user = create_user_on_db(randrange(1, 500000))
+        user = create_user_on_db(randrange(1, 50000000))
         assert user is not None
         assert user.role_id is 3
         positive = positive_with_user_id(user.id)
@@ -89,7 +89,7 @@ class Test_HealthyServices:
         It tests that health authority can mark a customer as covid-19
         positive using only the customer's email
         """
-        user = create_user_on_db()
+        user = create_user_on_db(randrange(1, 50000000))
         assert user is not None
         assert user.role_id is 3
         assert user is not None
@@ -104,7 +104,7 @@ class Test_HealthyServices:
         It tests that health authority can mark a customer as covid-19
         positive using only the customer's phone number
         """
-        user = create_user_on_db()
+        user = create_user_on_db(randrange(1, 50000000))
         assert user is not None
         positive = positive_with_user_id(user.id)
         assert positive is None
@@ -117,7 +117,7 @@ class Test_HealthyServices:
         It tests that health authority can mark a customer as healed
         using customer's email and phone number
         """
-        user = create_user_on_db()
+        user = create_user_on_db(randrange(1, 50000000))
         assert user is not None
         assert user.role_id is 3
         positive = positive_with_user_id(user.id)
@@ -135,7 +135,7 @@ class Test_HealthyServices:
         It tests that health authority cannot mark a customer as healed
         if the customer is not covid-19 positive
         """
-        user = create_user_on_db()
+        user = create_user_on_db(randrange(1, 50000000))
         assert user is not None
         assert user.role_id is 3
 
@@ -159,7 +159,7 @@ class Test_HealthyServices:
         It tests that health authority cannot mark a customer as healed
         without insert neither customer's email nor customer's phone number
         """
-        message = HealthyServices.mark_positive("", "")
+        message = HealthyServices.mark_positive()
         assert message == "Insert an email or a phone number"
 
     def test_unmark_positive_user_by_email(self):
@@ -167,7 +167,7 @@ class Test_HealthyServices:
         It tests that health authority can mark a customer as healed
         using only customer's email
         """
-        user = create_user_on_db()
+        user = create_user_on_db(randrange(1, 50000000))
         assert user is not None
         assert user.role_id is 3
         positive = positive_with_user_id(user.id)
@@ -185,7 +185,7 @@ class Test_HealthyServices:
         It tests that health authority can mark a customer as healed
         using only customer's phone number
         """
-        user = create_user_on_db()
+        user = create_user_on_db(randrange(1, 50000000))
         assert user is not None
         assert user.role_id is 3
         positive = positive_with_user_id(user.id)
@@ -203,7 +203,7 @@ class Test_HealthyServices:
         Searching for list of contacts of a covid-19 positive
         customer with no bookings
         """
-        user = create_user_on_db()
+        user = create_user_on_db(randrange(1, 50000000))
         assert user is not None
         assert user.role_id is 3
         positive = positive_with_user_id(user.id)
