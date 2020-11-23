@@ -339,10 +339,11 @@ class UserService:
         """
         This method perform the request to user microservices to make the user positive
         """
-        if email is not None:
+        current_app.logger.debug("Asking to mark. Called with: {} , {}".format(email, phone))
+        if email is not None and email is not "":
             key = "email"
             value = email
-        elif phone is not None:
+        elif phone is not None and phone is not "":
             key = "phone"
             value = phone
         else:
