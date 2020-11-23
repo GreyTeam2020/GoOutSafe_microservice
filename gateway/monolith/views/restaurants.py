@@ -138,15 +138,19 @@ def my_reservations():
     owner_id = current_user.id
     restaurant_id = session["RESTAURANT_ID"]
 
+
     # filter params
     fromDate = request.args.get("fromDate", type=str)
     toDate = request.args.get("toDate", type=str)
     email = request.args.get("email", type=str)
 
+
     reservations_as_list = RestaurantServices.get_reservation_rest(
-        owner_id, restaurant_id, fromDate, toDate, email
+        restaurant_id, fromDate, toDate, email
     )
-    print(RestaurantServices.get_restaurant_people(restaurant_id))
+    if reservations_as_list is None:
+        reservations_as_list =[]
+
     return render_template(
         "reservations.html",
         _test="restaurant_reservations_test",
