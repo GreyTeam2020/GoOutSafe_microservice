@@ -209,14 +209,16 @@ class Test_HealthyServices:
         customer with bookings
         """
 
-        user = get_user_with_email("john.doe@email.com")
+        user = create_user_on_db(randrange(1, 50000000))
+        assert user is not None
+        assert user.role_id is 3
 
         positive = positive_with_user_id(user.id)
         assert positive is None
         message = HealthyServices.mark_positive("", user.phone)
         assert len(message) == 0
 
-        contacts = HealthyServices.search_contacts(user.id)
+        contacts = HealthyServices.search_contacts(user.email, "")
         assert len(contacts) == 0
 
         message = HealthyServices.unmark_positive("", user.phone)
