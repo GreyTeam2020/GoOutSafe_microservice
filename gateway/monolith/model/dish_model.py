@@ -11,3 +11,6 @@ class DishModel:
         self.name = json_obj["name"]
         self.price = json_obj["price"]
         self.restaurant_id = json_obj["restaurant_id"]
+
+    def serialize(self):
+        return dict([(k, v) for k, v in self.__dict__.items() if k[0] != "_"])

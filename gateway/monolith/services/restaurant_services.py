@@ -16,6 +16,7 @@ from monolith.database import db
 from sqlalchemy.sql.expression import func, extract
 from monolith.model.restaurant_model import RestaurantModel
 from monolith.model.table_model import TableModel
+from monolith.model.dish_model import DishModel
 from monolith.app_constant import RESTAURANTS_MICROSERVICE_URL
 from monolith.utils.http_utils import HttpUtils
 
@@ -157,7 +158,14 @@ class RestaurantServices:
         response = HttpUtils.make_get_request(url)
         if response is None:
             return None
-        return response["dishes"]
+        dishes = []
+        json_dishes = response["dishes"]
+        for json_dish in json_dishes:
+            new_dish = DishModel()
+            new_dish.fill_from_json(json_dish)
+            dishes.append(new_dish)
+
+        return dishes
 
     @staticmethod
     def get_menu_restaurant(restaurant_id: int):
@@ -357,7 +365,8 @@ class RestaurantServices:
         dishes = RestaurantServices.get_dishes_restaurant(restaurant_id)
         if dishes is None:
             return None
-        model.bind_dish(dishes)
+        #it's already a model
+        #model.bind_dish(dishes)
 
         q_hours = RestaurantServices.get_opening_hours_restaurant(restaurant_id)
         if q_hours is None:
@@ -382,6 +391,18 @@ class RestaurantServices:
         return None
 
     @staticmethod
+    def insert_dish(dish):
+        """
+        This method insert the dish in the system
+        :param dish: DishModel of the dish
+        """
+        url = "{}/{}/dishes".format(RESTAURANTS_MICROSERVICE_URL, dish.restaurant_id)
+        response, code =  HttpUtils.make_post_request(url, dish.serialize())
+        if response is None:
+            return None
+        else:
+            return response
+    @staticmethod
     def delete_restaurant(restaurant_id: int) -> bool:
         """
         This method perform the request to microservices to delete the restaurants
@@ -391,6 +412,16 @@ class RestaurantServices:
         current_app.logger.debug("URL to microservice is {}".format(url))
         response = HttpUtils.make_put_request(url, {})
         return response is not None
+
+    @staticmethod
+    def delete_dish(dish_id):
+        """
+        This method delete a dish
+        :param dish_id: dish id
+        """
+        url = "{}/menu/{}".format(RESTAURANTS_MICROSERVICE_URL, dish_id)
+        response = HttpUtils.make_delete_request(url)
+        return response
 
     @staticmethod
     def force_reload_rating_all_restaurants():

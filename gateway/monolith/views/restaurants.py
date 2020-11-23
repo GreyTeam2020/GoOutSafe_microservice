@@ -25,6 +25,7 @@ from monolith.forms import RestaurantForm, RestaurantTableForm
 from monolith.utils.formatter import my_date_formatter_iso
 from monolith.app_constant import CALCULATE_RATING_RESTAURANT
 from monolith.services.user_service import UserService
+from monolith.model.dish_model import DishModel
 
 restaurants = Blueprint("restaurants", __name__)
 
@@ -225,7 +226,13 @@ def my_tables():
 @roles_allowed(roles=["OPERATOR"])
 def my_menu():
     if "RESTAURANT_ID" in session:
-        dishes = MenuDish.query.filter_by(restaurant_id=session["RESTAURANT_ID"]).all()
+        #get all dishes
+        #dishes = MenuDish.query.filter_by(restaurant_id=session["RESTAURANT_ID"]).all()
+        dishes = RestaurantServices.get_dishes_restaurant(session["RESTAURANT_ID"])
+        if dishes is None:
+            return render_template("generic_error.html",
+                                   message="An error occured accessing data. Please try again later.")
+
     else:
         dishes = []
     _test = "menu_view_test"
@@ -233,14 +240,23 @@ def my_menu():
         form = DishForm()
         # add dish to the db
         if form.validate_on_submit():
-            dish = MenuDish()
+            dish = DishModel()
             dish.name = form.data["name"]
             dish.price = form.data["price"]
             dish.restaurant_id = session["RESTAURANT_ID"]
-            db.session.add(dish)
-            db.session.commit()
-            dishes.append(dish)
+            result = RestaurantServices.insert_dish(dish)
             _test = "menu_ok_test"
+            if result is None:
+                return render_template(
+                    "restaurant_menu.html",
+                    _test=_test,
+                    form=form,
+                    dishes=dishes,
+                    error="An error occurs inserting you dish. Please try again later.",
+                )
+            else:
+                return redirect("/restaurant/menu")
+
         else:
             _test = "menu_ko_form_test"
             print(form.errors)
@@ -264,8 +280,9 @@ def my_menu():
 @login_required
 @roles_allowed(roles=["OPERATOR"])
 def delete_dish(dish_id):
-    db.session.query(MenuDish).filter_by(id=dish_id).delete()
-    db.session.commit()
+    result = RestaurantServices.delete_dish(dish_id)
+    if result is None:
+        return render_template("generic_error.html", message = "An error occured deleting your dish. Please try again later.")
     return redirect("/restaurant/menu")
 
 
