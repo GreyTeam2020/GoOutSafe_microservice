@@ -1688,7 +1688,7 @@ class Test_GoOutSafeForm:
         # a new owner of a restaurant
         owner = create_user_on_db(randrange(1, 50000), role_id=2)
         assert owner is not None
-        restaurant = create_restaurants_on_db("Pepperwood", user_id=owner.id)
+        restaurant = create_restaurants_on_db(user_id=owner.id)
         assert restaurant is not None
 
         # a new client

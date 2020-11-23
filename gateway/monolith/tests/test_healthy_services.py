@@ -2,13 +2,11 @@ from datetime import datetime, timedelta
 from random import randrange
 
 from monolith.database import db, Positive
-from monolith.services import HealthyServices
+from monolith.services import HealthyServices, UserService
 from monolith.tests.utils import (
     create_user_on_db,
     del_user_on_db,
     positive_with_user_id,
-    delete_positive_with_user_id,
-    delete_was_positive_with_user_id,
     get_user_with_email,
     create_random_booking,
     create_restaurants_on_db,
@@ -28,12 +26,11 @@ class Test_HealthyServices:
         It tests that a new user is not positive
         """
         # an operator
-        user = create_user_on_db()
+        user = create_user_on_db(randrange(1, 50000000))
         assert user is not None
         assert user.role_id is 3
         positive = positive_with_user_id(user.id, marked=True)
         assert positive is None
-        delete_positive_with_user_id(user.id)
         del_user_on_db(user.id)
 
     def test_mark_positive_ok(self):
@@ -42,14 +39,13 @@ class Test_HealthyServices:
         health authority
         """
         # an operator
-        user = create_user_on_db()
+        user = create_user_on_db(randrange(1, 50000000))
         assert user is not None
         assert user.role_id is 3
         positive = positive_with_user_id(user.id)
         assert positive is None
         message = HealthyServices.mark_positive(user.email, user.phone)
         assert len(message) is 0
-        delete_positive_with_user_id(user.id)
         del_user_on_db(user.id)
 
     def test_mark_positive_already_covid(self):
@@ -65,10 +61,7 @@ class Test_HealthyServices:
         message = HealthyServices.mark_positive(user.email, user.phone)
         assert len(message) is 0
         message = HealthyServices.mark_positive(user.email, user.phone)
-        assert message == "User with email {} already Covid-19 positive".format(
-            user.email
-        )
-        delete_positive_with_user_id(user.id)
+        assert len(message) != 0
         del_user_on_db(user.id)
 
     def test_mark_positive_user_not_exist(self):
@@ -79,14 +72,14 @@ class Test_HealthyServices:
         message = HealthyServices.mark_positive(
             user_email="alibaba@alibaba.com", user_phone="1234555"
         )
-        assert message == "The customer is not registered"
+        assert message == "An error occurs, please try again"
 
     def test_mark_positive_nan_proprieties(self):
         """
         It tests that health authority, to mark someone as covid-19
         positive, have to insert an email or a phone number
         """
-        message = HealthyServices.mark_positive("", "")
+        message = HealthyServices.mark_positive()
         assert message == "Insert an email or a phone number"
 
     def test_mark_positive_user_by_email(self):
@@ -94,7 +87,7 @@ class Test_HealthyServices:
         It tests that health authority can mark a customer as covid-19
         positive using only the customer's email
         """
-        user = create_user_on_db()
+        user = create_user_on_db(randrange(1, 50000000))
         assert user is not None
         assert user.role_id is 3
         assert user is not None
@@ -102,7 +95,6 @@ class Test_HealthyServices:
         assert positive is None
         message = HealthyServices.mark_positive(user.email, "")
         assert len(message) is 0
-        delete_positive_with_user_id(user.id)
         del_user_on_db(user.id)
 
     def test_mark_positive_user_by_phone(self):
@@ -110,13 +102,12 @@ class Test_HealthyServices:
         It tests that health authority can mark a customer as covid-19
         positive using only the customer's phone number
         """
-        user = create_user_on_db()
+        user = create_user_on_db(randrange(1, 50000000))
         assert user is not None
         positive = positive_with_user_id(user.id)
         assert positive is None
         message = HealthyServices.mark_positive("", user.phone)
         assert len(message) is 0
-        delete_positive_with_user_id(user.id)
         del_user_on_db(user.id)
 
     def test_unmark_positive_ok(self):
@@ -124,7 +115,7 @@ class Test_HealthyServices:
         It tests that health authority can mark a customer as healed
         using customer's email and phone number
         """
-        user = create_user_on_db()
+        user = create_user_on_db(randrange(1, 50000000))
         assert user is not None
         assert user.role_id is 3
         positive = positive_with_user_id(user.id)
@@ -135,7 +126,6 @@ class Test_HealthyServices:
         message = HealthyServices.unmark_positive(user.email, user.phone)
         assert len(message) is 0
 
-        delete_was_positive_with_user_id(user.id)
         del_user_on_db(user.id)
 
     def test_unmark_user_not_positive(self):
@@ -143,40 +133,21 @@ class Test_HealthyServices:
         It tests that health authority cannot mark a customer as healed
         if the customer is not covid-19 positive
         """
-        user = create_user_on_db()
+        user = create_user_on_db(randrange(1, 50000000))
         assert user is not None
         assert user.role_id is 3
 
         message = HealthyServices.unmark_positive(user.email, user.phone)
-        assert message == "User with email {} is not Covid-19 positive".format(
-            user.email
-        )
+        assert len(message) != 0
 
-        delete_positive_with_user_id(user.id)
         del_user_on_db(user.id)
-
-    def test_unmark_user_not_in_app(self):
-        """
-        It tests that health authority cannot mark a customer as healed
-        if the customer is not registered as customer
-        """
-        message = HealthyServices.unmark_positive("alibaba@alibaba.com", "")
-        assert message == "The customer is not registered"
-
-    def test_unmark_positive_nan_proprieties(self):
-        """
-        It tests that health authority cannot mark a customer as healed
-        without insert neither customer's email nor customer's phone number
-        """
-        message = HealthyServices.mark_positive("", "")
-        assert message == "Insert an email or a phone number"
 
     def test_unmark_positive_user_by_email(self):
         """
         It tests that health authority can mark a customer as healed
         using only customer's email
         """
-        user = create_user_on_db()
+        user = create_user_on_db(randrange(1, 50000000))
         assert user is not None
         assert user.role_id is 3
         positive = positive_with_user_id(user.id)
@@ -187,7 +158,6 @@ class Test_HealthyServices:
         message = HealthyServices.unmark_positive(user.email, "")
         assert len(message) is 0
 
-        delete_was_positive_with_user_id(user.id)
         del_user_on_db(user.id)
 
     def test_mark_positive_user_by_phone(self):
@@ -195,7 +165,7 @@ class Test_HealthyServices:
         It tests that health authority can mark a customer as healed
         using only customer's phone number
         """
-        user = create_user_on_db()
+        user = create_user_on_db(randrange(1, 50000000))
         assert user is not None
         assert user.role_id is 3
         positive = positive_with_user_id(user.id)
@@ -206,7 +176,6 @@ class Test_HealthyServices:
         message = HealthyServices.unmark_positive("", user.phone)
         assert len(message) is 0
 
-        delete_was_positive_with_user_id(user.id)
         del_user_on_db(user.id)
 
     def test_search_contacts_user_with_no_booking(self):
@@ -214,7 +183,7 @@ class Test_HealthyServices:
         Searching for list of contacts of a covid-19 positive
         customer with no bookings
         """
-        user = create_user_on_db()
+        user = create_user_on_db(randrange(1, 50000000))
         assert user is not None
         assert user.role_id is 3
         positive = positive_with_user_id(user.id)
@@ -222,13 +191,12 @@ class Test_HealthyServices:
         message = HealthyServices.mark_positive("", user.phone)
         assert len(message) is 0
 
-        contacts = HealthyServices.search_contacts(user.id)
+        contacts = HealthyServices.search_contacts(user.email, "")
         assert len(contacts) is 0
 
         message = HealthyServices.unmark_positive("", user.phone)
         assert len(message) is 0
 
-        delete_was_positive_with_user_id(user.id)
         del_user_on_db(user.id)
 
     def test_search_contacts_user_with_booking_only_one_user(self):
@@ -237,20 +205,20 @@ class Test_HealthyServices:
         customer with bookings
         """
 
-        user = get_user_with_email("john.doe@email.com")
+        user = create_user_on_db(randrange(1, 50000000))
+        assert user is not None
+        assert user.role_id is 3
 
         positive = positive_with_user_id(user.id)
         assert positive is None
         message = HealthyServices.mark_positive("", user.phone)
         assert len(message) == 0
 
-        contacts = HealthyServices.search_contacts(user.id)
+        contacts = HealthyServices.search_contacts(user.email, "")
         assert len(contacts) == 0
 
         message = HealthyServices.unmark_positive("", user.phone)
         assert len(message) == 0
-
-        delete_was_positive_with_user_id(user.id)
 
     def test_search_contacts_user_with_booking(self):
         """
@@ -258,12 +226,12 @@ class Test_HealthyServices:
         customer with bookings
         """
 
-        owner = create_user_on_db(787436)
+        owner = create_user_on_db(randrange(1, 50000000))
         assert owner is not None
-        restaurant = create_restaurants_on_db("Pepperwood", user_id=owner.id)
+        restaurant = create_restaurants_on_db(user_id=owner.id, user_email=owner.email)
         assert restaurant is not None
 
-        customer1 = create_user_on_db(787437)
+        customer1 = create_user_on_db(randrange(1, 50000000))
         assert customer1 is not None
 
         date_booking_1 = (
@@ -278,7 +246,7 @@ class Test_HealthyServices:
         assert len(books1) == 1
 
         # a new user that books in the same restaurant of the previous one
-        customer2 = create_user_on_db(787438)
+        customer2 = create_user_on_db(randrange(1, 50000000))
         assert customer2 is not None
 
         date_booking_2 = (
@@ -297,14 +265,10 @@ class Test_HealthyServices:
         message = HealthyServices.mark_positive(user_phone=customer1.phone)
         assert len(message) == 0
 
-        q_already_positive = (
-            db.session.query(Positive)
-            .filter_by(user_id=customer1.id, marked=True)
-            .first()
-        )
-        assert q_already_positive is not None
+        q_already_positive = UserService.get_user_by_id(customer1.id)
+        assert q_already_positive.is_positive is True
 
-        contacts = HealthyServices.search_contacts(customer1.id)
+        contacts = HealthyServices.search_contacts(customer1.email, "")
         assert len(contacts) == 1
 
         message = HealthyServices.unmark_positive("", customer1.phone)
@@ -313,4 +277,3 @@ class Test_HealthyServices:
         del_user_on_db(customer1.id)
         del_user_on_db(customer2.id)
         del_restaurant_on_db(restaurant.id)
-        ## TODO

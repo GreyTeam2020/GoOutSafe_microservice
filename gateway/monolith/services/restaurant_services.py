@@ -130,8 +130,7 @@ class RestaurantServices:
         if response is None:
             current_app.logger.error("Microservices error")
             return []
-        all_restaurants = response["restaurants"]
-        return all_restaurants
+        return response["restaurants"]
 
     @staticmethod
     def get_rest_by_id(id: int):
@@ -275,20 +274,17 @@ class RestaurantServices:
         return photo
 
     @staticmethod
-    def get_reservation_rest(restaurant_id, from_date, to_date, email):
+    def get_reservation_rest(restaurant_id, from_date, to_date):
         """
         This method contains the logic to find all reservation in the restaurant
         with the filter on the date
         """
 
         url = "{}/list/{}".format(BOOKING_MICROSERVICE_URL, restaurant_id)
-        # add filters...
         if from_date:
             url = HttpUtils.append_query(url, "fromDate", from_date)
         if to_date:
             url = HttpUtils.append_query(url, "toDate", to_date)
-        if email:
-            url = HttpUtils.append_query(url, "email", email)
 
         response = HttpUtils.make_get_request(url)
         return response
@@ -377,7 +373,9 @@ class RestaurantServices:
         """
         Given the id of the restaurant return the number of people at lunch and dinner
         """
-        response = HttpUtils.make_get_request("{}/stats/{}".format(BOOKING_MICROSERVICE_URL, restaurant_id))
+        response = HttpUtils.make_get_request(
+            "{}/stats/{}".format(BOOKING_MICROSERVICE_URL, restaurant_id)
+        )
         if response is None:
             return [0, 0, 0]
 
