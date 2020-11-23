@@ -351,7 +351,6 @@ class Test_GoOutSafeForm:
         assert response.status_code == 200
         assert "not_logged_test" not in response.data.decode("utf-8")
 
-        delete_positive_with_user_id(q_user.id)
         del_user_on_db(q_user.id)
 
     def test_mark_positive_ok(self, client):
@@ -392,7 +391,6 @@ class Test_GoOutSafeForm:
         assert response.status_code == 200
         assert "not_logged_test" not in response.data.decode("utf-8")
 
-        delete_positive_with_user_id(q_user.id)
         del_user_on_db(q_user.id)
 
     def test_see_reservation_ok(self, client):
@@ -520,7 +518,6 @@ class Test_GoOutSafeForm:
         )
         assert q_already_positive is not None
 
-        delete_positive_with_user_id(q_user.id)
         del_user_on_db(q_user.id)
 
     def test_mark_positive_ok_phone(self, client):
@@ -557,7 +554,6 @@ class Test_GoOutSafeForm:
         )
         assert q_already_positive is not None
 
-        delete_positive_with_user_id(q_user.id)
         del_user_on_db(q_user.id)
 
     def test_mark_positive_ko_user_already_positive(self, client):
@@ -593,7 +589,6 @@ class Test_GoOutSafeForm:
         assert response.status_code == 200
         assert "mark_positive_page_error_test" in response.data.decode("utf-8")
 
-        delete_positive_with_user_id(user.id)
         del_user_on_db(user.id)
 
     def test_mark_positive_ko_not_registered_user(self, client):
@@ -762,7 +757,6 @@ class Test_GoOutSafeForm:
         )
         assert q_already_positive is not None
 
-        delete_positive_with_user_id(q_user.id)
         del_user_on_db(q_user.id)
 
     def test_unmark_positive_ok(self, client):
@@ -807,7 +801,6 @@ class Test_GoOutSafeForm:
         )
         assert q_already_positive is None
 
-        delete_positive_with_user_id(q_user.id)
         del_user_on_db(q_user.id)
 
     def test_unmark_positive_email(self, client):
@@ -853,7 +846,6 @@ class Test_GoOutSafeForm:
         )
         assert q_already_positive is None
 
-        delete_positive_with_user_id(q_user.id)
         del_user_on_db(q_user.id)
 
     def test_unmark_positive_ok_phone(self, client):
@@ -899,7 +891,6 @@ class Test_GoOutSafeForm:
         )
         assert q_already_positive is None
 
-        delete_positive_with_user_id(q_user.id)
         del_user_on_db(q_user.id)
 
     def test_search_contacts_with_positive_ko(self, client):
