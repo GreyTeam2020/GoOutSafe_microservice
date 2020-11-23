@@ -193,7 +193,7 @@ class Test_HealthyServices:
         message = HealthyServices.mark_positive("", user.phone)
         assert len(message) is 0
 
-        contacts = HealthyServices.search_contacts(user.id)
+        contacts = HealthyServices.search_contacts(user.email, "")
         assert len(contacts) is 0
 
         message = HealthyServices.unmark_positive("", user.phone)
@@ -228,7 +228,7 @@ class Test_HealthyServices:
         customer with bookings
         """
 
-        owner = create_user_on_db(787436)
+        owner = create_user_on_db(randrange(1, 50000000))
         assert owner is not None
         restaurant = create_restaurants_on_db("Pepperwood", user_id=owner.id)
         assert restaurant is not None
