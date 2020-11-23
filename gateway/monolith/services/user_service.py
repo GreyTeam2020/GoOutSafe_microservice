@@ -375,7 +375,7 @@ class UserService:
         """
         url = "{}/report_positive".format(USER_MICROSERVICE_URL)
         response = HttpUtils.make_get_request(url)
-        if response is None:
+        if response is None or len(response) == 0:
             return []
         users = response["users"]
         list_user = []

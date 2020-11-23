@@ -25,7 +25,7 @@ class HealthyServices:
         if user_email is None and user_phone is None:
             return "Insert an email or a phone number"
         response = UserService.mark_positive(user_email, user_phone)
-        if response is True:
+        if response is not None:
             # call for API email_microservice
             contacts = HealthyServices.search_contacts_for_email(user_email, user_phone)
             SendEmailService.send_possible_contact(contacts)  ## We assume that is true
@@ -56,16 +56,11 @@ class HealthyServices:
     def search_contacts(user_email: str, user_phone: str):
         if user_email == "" and user_phone == "":
             return "Insert an email or a phone number"
-        # TODO(vincenzopalazzo) what is mean?
-        # check if the user exists
-        # check if the user is positive (get also date of marking) (API)
         response = UserService.search_possible_contacts(user_email, user_phone)
 
-        ## TODO(vincenzopalazzo) if the user don't exist we must not call this method
         if response is None:
             return "The customer not registered or not positive"
 
-        ## TODO(vincenzoapazzo) continuing refactoring from here
         contact_users_GUI = []
         # now we have the information about the positivity of the user in response
         date_marking = response["from_date"]
@@ -101,12 +96,6 @@ class HealthyServices:
                         openings = RestaurantServices.get_opening_hours_restaurant(restaurant_id)
 
                         dayNumber = start.weekday()
-                        """
-                        if start.weekday() == 0:
-                            dayNumber = 6
-                        else:
-                            dayNumber = start.weekday() - 1
-                        """
                         restaurant_hours = []
 
                         for opening in openings["openings"]:
@@ -164,13 +153,6 @@ class HealthyServices:
         if response is None:
             return "Error, please try again"
 
-        if response == "User not found":
-            return "The customer is not registered"
-        elif response == "Information not found":
-            return "The user is not Covid-19 positive"
-        elif response == "Bad Request":
-            return "Error"
-
         # now we have the information about the positivity of the user in response
         date_marking = response["from_date"]
         user_id = response["user_id"]
@@ -189,18 +171,18 @@ class HealthyServices:
             for reservation in reservations_customer:
                 restaurant_id = reservation["table"]["restaurant"]["id"]
                 restaurant = RestaurantServices.get_rest_by_id(restaurant_id)
-                if restaurant is not None:
-                    past_restaurants.add(
-                        {
-                            "email": restaurant["owner_email"],
-                            "name": restaurant["name"],
-                            "date": "start", #TODO WHAT
-                        }
-                    )
+                if restaurant is None:
+                    continue
                 friends = friends + reservation["people"]
                 start = datetime.strptime(reservation["reservation_date"], "%Y-%m-%dT%H:%M:%SZ")
                 end = datetime.strptime(reservation["reservation_end"], "%Y-%m-%dT%H:%M:%SZ")
-
+                past_restaurants.append(
+                        {
+                            "email": restaurant["owner_email"],
+                            "name": restaurant["name"],
+                            "date": start,
+                        }
+                )
                 for one_reservation in all_reservations:
                     restaurant_id_contact = one_reservation["table"]["restaurant"]["id"]
                     if restaurant_id_contact != restaurant_id:
@@ -214,12 +196,6 @@ class HealthyServices:
                     openings = RestaurantServices.get_opening_hours_restaurant(restaurant_id)
 
                     dayNumber = start.weekday()
-                    """ 
-                    if start.weekday() == 0:
-                        dayNumber = 6
-                    else:
-                        dayNumber = start.weekday() - 1
-                    """
                     restaurant_hours = []
                     for opening in openings["openings"]:
                         if opening["week_day"] == dayNumber:
