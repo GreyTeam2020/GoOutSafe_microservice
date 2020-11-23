@@ -4,7 +4,7 @@ from monolith.database import db, User, Restaurant, Review, MenuDish, Reservatio
 from monolith.forms import RestaurantForm
 from monolith.services.restaurant_services import RestaurantServices
 from datetime import datetime
-from monolith.tests.utils import create_user_on_db
+from monolith.services.booking_services import BookingServices
 
 from monolith.tests.utils import (
     get_user_with_email,
@@ -82,8 +82,8 @@ class Test_RestaurantServices:
 
         def_rest = RestaurantServices.get_all_restaurants()[0]
         assert def_rest is not None
-        all_reservation = RestaurantServices.get_reservation_rest(
-            def_rest["id"], from_date, to_date, user.email
+        all_reservation = BookingServices.get_reservation_by_constraint(
+            user.id, from_date, to_date, def_rest["id"],
         )
         assert len(all_reservation) == 0
 
