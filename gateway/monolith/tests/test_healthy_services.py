@@ -74,7 +74,7 @@ class Test_HealthyServices:
         message = HealthyServices.mark_positive(
             user_email="alibaba@alibaba.com", user_phone="1234555"
         )
-        assert message == "The customer is not registered"
+        assert message == "An error occurs, please try again"
 
     def test_mark_positive_nan_proprieties(self):
         """
