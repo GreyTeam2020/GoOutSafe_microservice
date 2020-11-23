@@ -274,7 +274,7 @@ class RestaurantServices:
         return photo
 
     @staticmethod
-    def get_reservation_rest(restaurant_id, from_date, to_date, email):
+    def get_reservation_rest(restaurant_id, from_date, to_date):
         """
         This method contains the logic to find all reservation in the restaurant
         with the filter on the date
@@ -285,8 +285,6 @@ class RestaurantServices:
             url = HttpUtils.append_query(url, "fromDate", from_date)
         if to_date:
             url = HttpUtils.append_query(url, "toDate", to_date)
-        if email:
-            url = HttpUtils.append_query(url, "email", email)
 
         response = HttpUtils.make_get_request(url)
         return response
