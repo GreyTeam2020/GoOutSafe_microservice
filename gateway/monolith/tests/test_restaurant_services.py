@@ -111,11 +111,13 @@ class Test_RestaurantServices:
         reservation = create_random_booking(1, rest.id, user, date_time, "a@a.com")
         assert reservation is not None
 
-        from_date = datetime(2020, 9, 28)
-        to_date = datetime(2020, 11, 28)
+        from_date = datetime(2022, 9, 28)
+        to_date = datetime(2022, 11, 28)
+
+        print (BookingServices.get_all_booking())
 
         search_reservation = BookingServices.get_reservation_by_constraint(
-            rest.id, from_date, to_date, user.id
+            user.id, from_date, to_date, rest.id
         )
         print(search_reservation)
         assert len(search_reservation) != 0
