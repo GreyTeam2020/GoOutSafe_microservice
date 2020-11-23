@@ -16,6 +16,8 @@ from monolith.database import db
 from sqlalchemy.sql.expression import func, extract
 from monolith.model.restaurant_model import RestaurantModel
 from monolith.model.table_model import TableModel
+from monolith.model.dish_model import DishModel
+from monolith.model.photo_model import PhotoModel
 from monolith.app_constant import RESTAURANTS_MICROSERVICE_URL
 from monolith.utils.http_utils import HttpUtils
 
@@ -157,7 +159,14 @@ class RestaurantServices:
         response = HttpUtils.make_get_request(url)
         if response is None:
             return None
-        return response["dishes"]
+        dishes = []
+        json_dishes = response["dishes"]
+        for json_dish in json_dishes:
+            new_dish = DishModel()
+            new_dish.fill_from_json(json_dish)
+            dishes.append(new_dish)
+
+        return dishes
 
     @staticmethod
     def get_menu_restaurant(restaurant_id: int):
@@ -208,6 +217,31 @@ class RestaurantServices:
         return all_tables
 
     @staticmethod
+    def add_table(table):
+        """
+        This method add a table to the restaurant
+        :param table: TableModel to insert
+        """
+        url = "{}/{}/tables".format(RESTAURANTS_MICROSERVICE_URL, table.restaurant_id)
+        response = HttpUtils.make_post_request(url, table.serialize())
+        if response is None:
+            return None
+        return True
+
+    @staticmethod
+    def delete_table(table_id):
+        """
+        This method remove a table from the restaurant
+        :param table: table id
+        """
+        url = "{}/table/{}".format(RESTAURANTS_MICROSERVICE_URL, table_id)
+        response = HttpUtils.make_delete_request(url)
+        if response is None:
+            return None
+        return True
+
+
+    @staticmethod
     def get_photos_restaurants(restaurant_id: int):
         """
         This method retrieval all information about the restaurants photos
@@ -217,7 +251,28 @@ class RestaurantServices:
         response = HttpUtils.make_get_request(url)
         if response is None:
             return None
-        return response["photos"]
+        photos = []
+        for json_photo in response["photos"]:
+            current_app.logger.debug(
+                "photo {}, url {}".format(json_photo["id"], json_photo["url"])
+            )
+            new_photo = PhotoModel()
+            new_photo.fill_from_json(json_photo)
+            photos.append(new_photo)
+        return photos
+
+    @staticmethod
+    def add_photo(photo):
+        """
+        This method add a photo to the restaurant photo gallery
+        :param photo: PhotoModel to insert
+        """
+        url = "{}/{}/photos".format(RESTAURANTS_MICROSERVICE_URL, photo.restaurant_id)
+        response, code = HttpUtils.make_post_request(url, photo.serialize())
+        if response is None:
+            return None
+        photo.fill_from_json(response)
+        return photo
 
     @staticmethod
     def get_reservation_rest(restaurant_id, from_date, to_date, email):
@@ -352,12 +407,16 @@ class RestaurantServices:
         photos = RestaurantServices.get_photos_restaurants(restaurant_id)
         if photos is None:
             return None
-        model.bind_photo(photos)
+        #it's already a model now
+        #model.bind_photo(photos)
+        model.photos = photos
 
         dishes = RestaurantServices.get_dishes_restaurant(restaurant_id)
         if dishes is None:
             return None
-        model.bind_dish(dishes)
+        #it's already a model now
+        #model.bind_dish(dishes)
+        model.dishes = dishes
 
         q_hours = RestaurantServices.get_opening_hours_restaurant(restaurant_id)
         if q_hours is None:
@@ -382,6 +441,18 @@ class RestaurantServices:
         return None
 
     @staticmethod
+    def insert_dish(dish):
+        """
+        This method insert the dish in the system
+        :param dish: DishModel of the dish
+        """
+        url = "{}/{}/dishes".format(RESTAURANTS_MICROSERVICE_URL, dish.restaurant_id)
+        response, code =  HttpUtils.make_post_request(url, dish.serialize())
+        if response is None:
+            return None
+        else:
+            return response
+    @staticmethod
     def delete_restaurant(restaurant_id: int) -> bool:
         """
         This method perform the request to microservices to delete the restaurants
@@ -391,6 +462,16 @@ class RestaurantServices:
         current_app.logger.debug("URL to microservice is {}".format(url))
         response = HttpUtils.make_put_request(url, {})
         return response is not None
+
+    @staticmethod
+    def delete_dish(dish_id):
+        """
+        This method delete a dish
+        :param dish_id: dish id
+        """
+        url = "{}/menu/{}".format(RESTAURANTS_MICROSERVICE_URL, dish_id)
+        response = HttpUtils.make_delete_request(url)
+        return response
 
     @staticmethod
     def force_reload_rating_all_restaurants():
