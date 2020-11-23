@@ -377,7 +377,9 @@ class RestaurantServices:
         """
         Given the id of the restaurant return the number of people at lunch and dinner
         """
-        response = HttpUtils.make_get_request("{}/stats/{}".format(BOOKING_MICROSERVICE_URL, restaurant_id))
+        response = HttpUtils.make_get_request(
+            "{}/stats/{}".format(BOOKING_MICROSERVICE_URL, restaurant_id)
+        )
         if response is None:
             return [0, 0, 0]
 

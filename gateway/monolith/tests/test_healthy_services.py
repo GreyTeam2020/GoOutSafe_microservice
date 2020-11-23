@@ -28,7 +28,7 @@ class Test_HealthyServices:
         It tests that a new user is not positive
         """
         # an operator
-        user = create_user_on_db()
+        user = create_user_on_db(randrange(1, 500000))
         assert user is not None
         assert user.role_id is 3
         positive = positive_with_user_id(user.id, marked=True)
@@ -42,7 +42,7 @@ class Test_HealthyServices:
         health authority
         """
         # an operator
-        user = create_user_on_db()
+        user = create_user_on_db(randrange(1, 500000))
         assert user is not None
         assert user.role_id is 3
         positive = positive_with_user_id(user.id)

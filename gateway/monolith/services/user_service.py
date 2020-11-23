@@ -376,7 +376,7 @@ class UserService:
         response = HttpUtils.make_get_request(url)
         if response is None:
             return []
-        users = response["result"]
+        users = response["users"]
         list_user = []
         for user in users:
             new_user = UserModel()
@@ -398,3 +398,14 @@ class UserService:
         # check if the user exists (ON VIEW)
         # check if the user is positive (get also date of marking) (API) ????
         return HttpUtils.make_get_request(url)
+
+    @staticmethod
+    def get_user_by_id(user_id):
+        """"""
+        user = "{}/{}".format(USER_MICROSERVICE_URL, user_id)
+        response = HttpUtils.make_get_request(user)
+        if response is None:
+            return None
+        user_model = UserModel()
+        user_model.fill_from_json(response)
+        return user_model

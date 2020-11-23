@@ -385,12 +385,11 @@ def positive_with_user_id(user_id: int = None, marked: bool = True):
     """
     This method is an util function to search inside the positive user
     """
-    if user_id is None:
-        return db.session.query(Positive).all()
-    else:
-        return (
-            db.session.query(Positive).filter_by(user_id=user_id, marked=marked).first()
-        )
+    users = HealthyServices.report_positive()
+    for user in users:
+        if user.id == user_id and user.is_positive is marked:
+            return user
+    return None
 
 
 def delete_positive_with_user_id(user_id: int, marked: bool = True):

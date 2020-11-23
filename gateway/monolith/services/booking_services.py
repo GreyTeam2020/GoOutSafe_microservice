@@ -50,11 +50,26 @@ class BookingServices:
         response = HttpUtils.make_get_request(
             "{}/{}".format(BOOKING_MICROSERVICE_URL, reservation_id)
         )
-
         return response
 
     @staticmethod
     def get_all_booking():
         response = HttpUtils.make_get_request(BOOKING_MICROSERVICE_URL)
+        return response
 
+    @staticmethod
+    def get_reservation_by_constraint(user_id: int = None, from_data=None, to_data=None, restaurant_id: int = None):
+        """"""
+        url = BOOKING_MICROSERVICE_URL
+        # add filters...
+        if from_data:
+            url = HttpUtils.append_query(url, "fromDate", from_data.strftime("%Y-%m-%dT%H:%M:%SZ"))
+        if to_data:
+            url = HttpUtils.append_query(url, "toDate", to_data.strftime("%Y-%m-%dT%H:%M:%SZ"))
+        if user_id:
+            url = HttpUtils.append_query(url, "user_id", user_id)
+        if restaurant_id:
+            url = HttpUtils.append_query(url, "restaurant_id", restaurant_id)
+
+        response = HttpUtils.make_get_request(url)
         return response
