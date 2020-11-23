@@ -27,6 +27,7 @@ from monolith.app_constant import CALCULATE_RATING_RESTAURANT
 from monolith.services.user_service import UserService
 from monolith.model.dish_model import DishModel
 from monolith.model.table_model import TableModel
+from monolith.model.photo_model import PhotoModel
 
 restaurants = Blueprint("restaurants", __name__)
 
@@ -54,8 +55,7 @@ def restaurant_sheet(restaurant_id):
 
     model = RestaurantServices.get_all_restaurants_info(restaurant_id)
     if model is None:
-        ##TODO FIX THIS with a message in a view
-        abort(501)
+        render_template("generic_error.html","An error occurred processing your request. Please try again later.")
 
     # q_hours = db.session.query(OpeningHours).filter_by(restaurant_id=int(restaurant_id)).all()
     # q_cuisine = db.session.query(Menu).filter_by(restaurant_id=int(restaurant_id)).all()
@@ -296,18 +296,20 @@ def my_photogallery():
         form = PhotoGalleryForm()
         # add photo to the db
         if form.validate_on_submit():
-            photo_gallery = PhotoGallery()
-            photo_gallery.caption = form.data["caption"]
-            photo_gallery.url = form.data["url"]
-            photo_gallery.restaurant_id = session["RESTAURANT_ID"]
-            db.session.add(photo_gallery)
-            db.session.commit()
+            photo = PhotoModel()
+            photo.caption = form.data["caption"]
+            photo.url = form.data["url"]
+            photo.restaurant_id = session["RESTAURANT_ID"]
+            photo = RestaurantServices.add_photo(photo)
+            if photo is None:
+                return render_template("generic_error.html", message="An error occured inserting your photo. PLease try again later.")
 
         return redirect("/restaurant/photogallery")
     else:
-        photos = PhotoGallery.query.filter_by(
-            restaurant_id=session["RESTAURANT_ID"]
-        ).all()
+        #get all photos
+        photos = RestaurantServices.get_photos_restaurants(session["RESTAURANT_ID"])
+        if photos is None:
+            return render_template("generic_error.html", "An error occurred getting all photos. Please try again later.")
         form = PhotoGalleryForm()
         return render_template("photogallery.html", form=form, photos=photos)
 

@@ -17,6 +17,7 @@ from sqlalchemy.sql.expression import func, extract
 from monolith.model.restaurant_model import RestaurantModel
 from monolith.model.table_model import TableModel
 from monolith.model.dish_model import DishModel
+from monolith.model.photo_model import PhotoModel
 from monolith.app_constant import RESTAURANTS_MICROSERVICE_URL
 from monolith.utils.http_utils import HttpUtils
 
@@ -250,7 +251,28 @@ class RestaurantServices:
         response = HttpUtils.make_get_request(url)
         if response is None:
             return None
-        return response["photos"]
+        photos = []
+        for json_photo in response["photos"]:
+            current_app.logger.debug(
+                "photo {}, url {}".format(json_photo["id"], json_photo["url"])
+            )
+            new_photo = PhotoModel()
+            new_photo.fill_from_json(json_photo)
+            photos.append(new_photo)
+        return photos
+
+    @staticmethod
+    def add_photo(photo):
+        """
+        This method add a photo to the restaurant photo gallery
+        :param photo: PhotoModel to insert
+        """
+        url = "{}/{}/photos".format(RESTAURANTS_MICROSERVICE_URL, photo.restaurant_id)
+        response, code = HttpUtils.make_post_request(url, photo.serialize())
+        if response is None:
+            return None
+        photo.fill_from_json(response)
+        return photo
 
     @staticmethod
     def get_reservation_rest(restaurant_id, from_date, to_date, email):
@@ -385,13 +407,16 @@ class RestaurantServices:
         photos = RestaurantServices.get_photos_restaurants(restaurant_id)
         if photos is None:
             return None
-        model.bind_photo(photos)
+        #it's already a model now
+        #model.bind_photo(photos)
+        model.photos = photos
 
         dishes = RestaurantServices.get_dishes_restaurant(restaurant_id)
         if dishes is None:
             return None
-        #it's already a model
+        #it's already a model now
         #model.bind_dish(dishes)
+        model.dishes = dishes
 
         q_hours = RestaurantServices.get_opening_hours_restaurant(restaurant_id)
         if q_hours is None:
