@@ -81,7 +81,7 @@ class Test_HealthyServices:
         It tests that health authority, to mark someone as covid-19
         positive, have to insert an email or a phone number
         """
-        message = HealthyServices.mark_positive("", "")
+        message = HealthyServices.mark_positive()
         assert message == "Insert an email or a phone number"
 
     def test_mark_positive_user_by_email(self):
@@ -145,22 +145,6 @@ class Test_HealthyServices:
         )
 
         del_user_on_db(user.id)
-
-    def test_unmark_user_not_in_app(self):
-        """
-        It tests that health authority cannot mark a customer as healed
-        if the customer is not registered as customer
-        """
-        message = HealthyServices.unmark_positive("alibaba@alibaba.com", "")
-        assert message == "The customer is not registered"
-
-    def test_unmark_positive_nan_proprieties(self):
-        """
-        It tests that health authority cannot mark a customer as healed
-        without insert neither customer's email nor customer's phone number
-        """
-        message = HealthyServices.mark_positive()
-        assert message == "Insert an email or a phone number"
 
     def test_unmark_positive_user_by_email(self):
         """
