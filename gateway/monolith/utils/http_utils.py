@@ -125,3 +125,9 @@ class HttpUtils:
         json = response.json()
         current_app.logger.debug("Response is: {}".format(json))
         return json
+
+    def append_query(url, query, value):
+        if "?" in url:
+            return "{}&{}={}".format(url, query, value)
+        else:
+            return "{}?{}={}".format(url, query, value)

@@ -54,7 +54,7 @@ class BookingServices:
         return response
 
     @staticmethod
-    def get_all_booking(reservation_id):
+    def get_all_booking():
         response = HttpUtils.make_get_request(BOOKING_MICROSERVICE_URL)
 
         return response

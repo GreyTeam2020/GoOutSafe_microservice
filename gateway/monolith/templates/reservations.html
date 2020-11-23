@@ -42,12 +42,12 @@
                 {% for reservation in reservations_as_list %}
                     <tr>
                         <td>{{reservation.id}}</td>
-                        <td>{{reservation.id_table}}</td>
-                        <td>{{my_date_formatter(reservation.reservation_date)}}</td>
+                        <td>{{reservation.table.name}}</td>
+                        <td>{{my_date_formatter_iso(reservation.reservation_date)}}</td>
                         <td>{{reservation.people_number}}</td>
-                        <td>{{reservation.firstname}} {{reservation.lastname}}</td>
-                        <td>{{reservation.phone}}</td>
-                        <td>{{reservation.email}}</td>
+                        <td>{{reservation.customer.firstname}} {{reservation.customer.lastname}}</td>
+                        <td>{{reservation.customer.phone}}</td>
+                        <td>{{reservation.customer.email}}</td>
                         {% if reservation.checkin %}
                             <td>Checked in</td>
                         {% else %}

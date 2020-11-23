@@ -162,9 +162,7 @@ class Test_GoOutSafeForm:
         assert response.status_code == 200
         assert "not_logged_test" not in response.data.decode("utf-8")
 
-        result = RestaurantServices.delete_restaurant(
-            rest[0].id
-        )
+        result = RestaurantServices.delete_restaurant(rest[0].id)
         assert result is True
 
     def test_register_new_restaurant_ko(self, client):
@@ -281,22 +279,28 @@ class Test_GoOutSafeForm:
         - check if the page is load correctly
         """
         user = UserForm()
-        user.email = "cr7@gmail.com"
-        user.firstname = "Cristiano"
-        user.lastname = "Ronaldo"
-        user.password = "Siii"
-        user.dateofbirth = "12/12/1975"
+        user.email.data = "cr7@gmail.com"
+        user.firstname.data = "Cristiano"
+        user.lastname.data = "Ronaldo"
+        user.password.data = "generic_pass"
+        user.dateofbirth.data = "12/12/1975"
+        user.phone.data = "123456654"
         register_user(client, user)
-        response = login(client, user.email, user.password)
+        response = login(client, user.email.data, user.password.data)
         assert response is not None
         assert "logged_test" in response.data.decode("utf-8")
 
-        restaurant = db.session.query(Restaurant).all()[0]
+        owner = create_user_on_db(randrange(100000))
+        assert owner is not None
+        restaurant = create_restaurants_on_db(
+            name="First", user_id=owner.id, user_email=owner.email
+        )
+        assert restaurant is not None
         response = visit_restaurant(client, restaurant.id)
         assert response.status_code == 200
         assert "visit_rest_test" in response.data.decode("utf-8")
 
-        user_stored = get_user_with_email(user.email)
+        user_stored = get_user_with_email(user.email.data)
         response = visit_photo_gallery(client)
         ## the user is a customer and not a operator
         assert response.status_code == 401
@@ -305,6 +309,7 @@ class Test_GoOutSafeForm:
         assert response.status_code == 200
         assert "not_logged_test" not in response.data.decode("utf-8")
 
+        del_user_on_db(id=owner.id)
         del_user_on_db(id=user_stored.id)
 
     def test_mark_positive_ko(self, client):
@@ -321,17 +326,17 @@ class Test_GoOutSafeForm:
         assert response.status_code == 200
 
         user = UserForm()
-        user.email = "messi@gmail.com"
-        user.firstname = "Messi"
-        user.lastname = "Ronaldo"
-        user.password = "messi"
-        user.phone = "32455"
-        user.dateofbirth = "12/12/1975"
+        user.email.data = "messi@gmail.com"
+        user.firstname.data = "Messi"
+        user.lastname.data = "Ronaldo"
+        user.password.data = "messi434324"
+        user.phone.data = "32343242455"
+        user.dateofbirth.data = "12/12/1975"
         register_user(client, user)
 
         mark = SearchUserForm()
-        mark.email = user.email
-        mark.phone = user.phone
+        mark.email.data = user.email
+        mark.phone.data = user.phone
         response = mark_people_for_covid19(client, mark)
         assert response.status_code == 401
 
@@ -390,44 +395,29 @@ class Test_GoOutSafeForm:
         delete_positive_with_user_id(q_user.id)
         del_user_on_db(q_user.id)
 
-    def test_see_reservation_ko(self, client):
-        """
-        This test unit test the reservation with a unauthorize user
-
-        the test flow is
-        - Login as health authority
-        - visit the reservation
-        - receive the error status
-        - logout
-        """
-        email = "health_authority@gov.com"
-        pazz = "nocovid"
-        response = login(client, email, pazz)
-        assert response.status_code == 200
-        assert "logged_test" in response.data.decode("utf-8")
-
-        response = visit_reservation(
-            client, from_date="2013-10-07", to_date="2014-10-07", email=email
-        )
-        assert response.status_code == 401
-
-        response = logout(client)
-        assert response.status_code == 200
-        assert "not_logged_test" not in response.data.decode("utf-8")
-
     def test_see_reservation_ok(self, client):
         """
         This test unit, tests the use case to perform the request to access from reservation
         as customer
         """
-        email = "ham.burger@email.com"
-        pazz = "operator"
-        response = login(client, email, pazz)
+        form = UserForm()
+        rand = randrange(100000)
+        form.firstname.data = "User_{}".format(rand)
+        form.lastname.data = "user_{}".format(rand)
+        form.password.data = "Alibaba{}".format(rand)
+        form.phone.data = "1234562344{}".format(rand)
+        form.dateofbirth.data = "1985-12-12"
+        form.email.data = "user{}@user.edu".format(str(rand))
+        created = UserService.create_user(form, 3)
+        assert created is True
+        user = UserService.user_is_present(form.email.data, form.phone.data)
+        assert user is not None
+
+        response = login(client, user.email, form.password.data)
         assert response.status_code == 200
-        assert "logged_test" in response.data.decode("utf-8")
 
         response = visit_reservation(
-            client, from_date="2013-10-07", to_date="2014-10-07", email=email
+            client, from_date="2013-10-07", to_date="2014-10-07", email=user.email
         )
         assert response.status_code == 200
         assert "restaurant_reservations_test" in response.data.decode("utf-8")
@@ -435,6 +425,7 @@ class Test_GoOutSafeForm:
         response = logout(client)
         assert response.status_code == 200
         assert "not_logged_test" not in response.data.decode("utf-8")
+        del_user_on_db(user.id)
 
     def test_make_review_ko(self, client):
         """

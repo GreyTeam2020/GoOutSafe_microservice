@@ -21,6 +21,8 @@ from monolith.utils.http_utils import HttpUtils
 
 from monolith.model.review_model import ReviewModel
 
+from monolith.app_constant import BOOKING_MICROSERVICE_URL
+
 
 class RestaurantServices:
     """
@@ -224,39 +226,17 @@ class RestaurantServices:
         with the filter on the date
         """
 
-        queryString = (
-            "select reserv.id, reserv.reservation_date, reserv.people_number, tab.id as id_table, cust.firstname, cust.lastname, cust.email, cust.phone, reserv.checkin from reservation reserv "
-            "join user cust on cust.id = reserv.customer_id "
-            "join restaurant_table tab on reserv.table_id = tab.id "
-            "join restaurant rest on rest.id = tab.restaurant_id "
-            "where rest.owner_id = :owner_id "
-            "and rest.id = :restaurant_id "
-        )
-
+        url = "{}/list/{}".format(BOOKING_MICROSERVICE_URL, restaurant_id)
         # add filters...
         if from_date:
-            queryString = queryString + " and  reserv.reservation_date > :fromDate"
+            url = HttpUtils.append_query(url, "fromDate", from_date)
         if to_date:
-            queryString = queryString + " and  reserv.reservation_date < :toDate"
+            url = HttpUtils.append_query(url, "toDate", to_date)
         if email:
-            queryString = queryString + " and  cust.email = :email"
-        queryString = queryString + " order by reserv.reservation_date desc"
+            url = HttpUtils.append_query(url, "email", email)
 
-        stmt = db.text(queryString)
-
-        # bind filter params...
-        params = {"owner_id": owner_id, "restaurant_id": restaurant_id}
-        if from_date:
-            params["fromDate"] = from_date + " 00:00:00.000"
-        if to_date:
-            params["toDate"] = to_date + " 23:59:59.999"
-        if email:
-            params["email"] = email
-
-        # execute and retrive results...
-        result = db.engine.execute(stmt, params)
-        list_reservation = result.fetchall()
-        return list_reservation
+        response = HttpUtils.make_get_request(url)
+        return response
 
     @staticmethod
     def review_restaurant(restaurant_id, reviewer_email, stars, review):
@@ -271,18 +251,15 @@ class RestaurantServices:
         json = {"stars": stars, "review": review, "reviewer_email": reviewer_email}
         url = "{}/{}/reviews".format(RESTAURANTS_MICROSERVICE_URL, restaurant_id)
         current_app.logger.debug("URL to microservices: {}".format(url))
-        response = HttpUtils.make_post_request(url, json)
+        response, code = HttpUtils.make_post_request(url, json)
 
         if response is None:
             return None
 
         review = ReviewModel()
-        # TODO: qui mi serve la nuova review nella response, perchè altrimenti non ho dati che mi servono,
-        # TODO: per adesso li invento
-        json["id"] = 1
-        json["data"] = datetime.now().strftime("%Y-%m-%dT%H:%M:%SZ")
+        json["id"] = response["id"]
+        json["date"] = response["date"]
         json["restaurant_id"] = restaurant_id
-        # TODO: fine dati inventati
         review.fill_from_json(json)
         return review
 
@@ -345,81 +322,15 @@ class RestaurantServices:
         """
         Given the id of the restaurant return the number of people at lunch and dinner
         """
-        openings = (
-            db.session.query(OpeningHours)
-            .filter(
-                OpeningHours.week_day == datetime.today().weekday(),
-                OpeningHours.restaurant_id == restaurant_id,
-            )
-            .first()
-        )
-        if openings is None:
+        response = HttpUtils.make_get_request("{}/stats/{}".format(BOOKING_MICROSERVICE_URL, restaurant_id))
+        if response is None:
             return [0, 0, 0]
 
-        tables = (
-            db.session.query(RestaurantTable)
-            .filter_by(restaurant_id=restaurant_id)
-            .all()
-        )
-        tables_id = []
-        for table in tables:
-            tables_id.append(table.id)
-
-        reservations_l = (
-            db.session.query(Reservation)
-            .filter(
-                Reservation.table_id.in_(tables_id),
-                extract("day", Reservation.reservation_date)
-                == extract("day", datetime.today()),
-                extract("month", Reservation.reservation_date)
-                == extract("month", datetime.today()),
-                extract("year", Reservation.reservation_date)
-                == extract("year", datetime.today()),
-                extract("hour", Reservation.reservation_date)
-                >= extract("hour", openings.open_lunch),
-                extract("hour", Reservation.reservation_date)
-                <= extract("hour", openings.close_lunch),
-            )
-            .all()
-        )
-
-        reservations_d = (
-            db.session.query(Reservation)
-            .filter(
-                Reservation.table_id.in_(tables_id),
-                extract("day", Reservation.reservation_date)
-                == extract("day", datetime.today()),
-                extract("month", Reservation.reservation_date)
-                == extract("month", datetime.today()),
-                extract("year", Reservation.reservation_date)
-                == extract("year", datetime.today()),
-                extract("hour", Reservation.reservation_date)
-                >= extract("hour", openings.open_dinner),
-                extract("hour", Reservation.reservation_date)
-                <= extract("hour", openings.close_dinner),
-            )
-            .all()
-        )
-
-        reservations_now = (
-            db.session.query(Reservation)
-            .filter(
-                Reservation.checkin is True,
-                Reservation.reservation_date <= datetime.now(),
-                Reservation.reservation_end >= datetime.now(),
-            )
-            .all()
-        )
-
-        return [len(reservations_l), len(reservations_d), len(reservations_now)]
+        return [response["lunch"], response["dinner"], response["now"]]
 
     @staticmethod
     def checkin_reservations(reservation_id: int):
-        reservation = db.session.query(Reservation).filter_by(id=reservation_id)
-        if reservation:
-            reservation.update({Reservation.checkin: True})
-            db.session.commit()
-            db.session.flush()
+        HttpUtils.make_get_request("{}/{}/checkin".format(BOOKING_MICROSERVICE_URL, reservation_id))
 
     @staticmethod
     def get_all_restaurants_info(restaurant_id: int):

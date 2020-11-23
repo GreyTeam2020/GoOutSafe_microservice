@@ -103,37 +103,6 @@ class Test_UserServices:
         result_delete = UserService.delete_user(user_modified.id)
         assert result_delete is True
 
-    def test_delete_user_with_email(self):
-        """
-        This test cases test if the user service are able to
-        remove correctly the user inside the DB
-        Test flow
-        - Create a new user with the service
-        - delete a new user with service with user pass
-        - check on db if this user is gone
-        """
-
-        form = UserForm()
-        form.firstname.data = "user_{}".format(randrange(10000))
-        form.lastname.data = "user_{}".format(randrange(10000))
-        form.password.data = "pass_{}".format(randrange(10000))
-        form.phone.data = "12345{}".format(randrange(10000))
-        form.dateofbirth.data = "1995-12-12"
-        form.email.data = "alibaba{}@alibaba.com".format(randrange(10000))
-        result = UserService.create_user(form, 2)
-        assert result is True
-        assert result < 300
-
-        user_and_code = UserService.login_user(form.email.data, form.password.data)
-        user = user_and_code[0]
-        status_code = user_and_code[1]
-        assert user.firstname == form.firstname.data
-        assert user.id is not None
-        assert status_code < 300
-
-        result_delete = UserService.delete_user(email=user.email)
-        assert result_delete is True
-
     def test_delete_user_with_id(self):
         """
         This test cases test if the user service are able to
