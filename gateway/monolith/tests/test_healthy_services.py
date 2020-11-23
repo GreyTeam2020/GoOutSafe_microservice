@@ -2,7 +2,7 @@ from datetime import datetime, timedelta
 from random import randrange
 
 from monolith.database import db, Positive
-from monolith.services import HealthyServices
+from monolith.services import HealthyServices, UserService
 from monolith.tests.utils import (
     create_user_on_db,
     del_user_on_db,
@@ -230,10 +230,10 @@ class Test_HealthyServices:
 
         owner = create_user_on_db(randrange(1, 50000000))
         assert owner is not None
-        restaurant = create_restaurants_on_db("Pepperwood", user_id=owner.id)
+        restaurant = create_restaurants_on_db(user_id=owner.id, user_email=owner.email)
         assert restaurant is not None
 
-        customer1 = create_user_on_db(787437)
+        customer1 = create_user_on_db(randrange(1, 50000000))
         assert customer1 is not None
 
         date_booking_1 = (
@@ -248,7 +248,7 @@ class Test_HealthyServices:
         assert len(books1) == 1
 
         # a new user that books in the same restaurant of the previous one
-        customer2 = create_user_on_db(787438)
+        customer2 = create_user_on_db(randrange(1, 50000000))
         assert customer2 is not None
 
         date_booking_2 = (
@@ -267,14 +267,11 @@ class Test_HealthyServices:
         message = HealthyServices.mark_positive(user_phone=customer1.phone)
         assert len(message) == 0
 
-        q_already_positive = (
-            db.session.query(Positive)
-            .filter_by(user_id=customer1.id, marked=True)
-            .first()
-        )
-        assert q_already_positive is not None
+        q_already_positive = UserService.get_user_by_id(customer1.id)
+        print(q_already_positive)
+        assert q_already_positive.is_positive is True
 
-        contacts = HealthyServices.search_contacts(customer1.id)
+        contacts = HealthyServices.search_contacts(customer1.email, "")
         assert len(contacts) == 1
 
         message = HealthyServices.unmark_positive("", customer1.phone)
