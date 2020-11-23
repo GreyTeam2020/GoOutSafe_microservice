@@ -1,6 +1,7 @@
 import requests
 from flask import current_app
 from monolith.app_constant import EMAIL_MICROSERVICE_URL
+from monolith.utils.http_utils import HttpUtils
 
 
 class SendEmailService:
@@ -10,7 +11,7 @@ class SendEmailService:
     """
 
     @staticmethod
-    def confirm_registration(email: str, name: str):
+    def confirm_registration(email: str, name: str) -> bool:
         """
         :param email: Email of the new user
         :param name: Name of the new user
@@ -30,3 +31,12 @@ class SendEmailService:
             current_app.logger.error("Error with message {}".format(json))
             return False
         return True
+
+    @staticmethod
+    def send_possible_contact(contacts: list) -> bool:
+        """
+        This method perform the request to send emails to possible contacts
+        """
+        url = EMAIL_MICROSERVICE_URL + "/send_contact"
+        response = HttpUtils.make_post_request(url, contacts)
+        return response is not None

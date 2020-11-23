@@ -45,7 +45,7 @@ class Test_RestaurantServices:
         form.open_dinner.data = datetime.time(datetime(2020, 7, 1, 18, 00))
         form.close_dinner.data = datetime.time(datetime(2020, 6, 1, 22, 00))
 
-        user = create_user_on_db(role_id=2)
+        user = create_user_on_db(randrange(1, 60000), role_id=2)
         assert user is not None
         assert user.role_id == 2
 
@@ -83,7 +83,7 @@ class Test_RestaurantServices:
         def_rest = RestaurantServices.get_all_restaurants()[0]
         assert def_rest is not None
         all_reservation = RestaurantServices.get_reservation_rest(
-            def_rest.owner_id, def_rest.id, from_date, to_date, user.email
+            def_rest["id"], from_date, to_date, user.email
         )
         assert len(all_reservation) == 0
 
@@ -113,7 +113,7 @@ class Test_RestaurantServices:
         to_date = "2020-11-28"
 
         reservations = RestaurantServices.get_reservation_rest(
-            rest.owner_id, rest.id, from_date, to_date, user.email
+            rest["id"], from_date, to_date, user.email
         )
         assert len(reservations) == 1
 
@@ -125,12 +125,12 @@ class Test_RestaurantServices:
         test for the new review function
         """
         form = RestaurantForm()
-        form.name.data = "rest_mock_{}".format(randrange(10000))
-        form.phone.data = "096321343{}".format(randrange(10000))
+        form.name.data = "rest_mock_{}".format(randrange(1, 10000))
+        form.phone.data = "096321343{}".format(randrange(1, 10000))
         form.lat.data = 12
         form.lon.data = 12
         form.n_tables.data = 50
-        form.covid_measures.data = "Random comment {}".format(randrange(10000))
+        form.covid_measures.data = "Random comment {}".format(randrange(1, 10000))
         form.cuisine.data = ["Italian food"]
         form.open_days.data = ["0"]
         form.open_lunch.data = datetime.time(datetime(2020, 7, 1, 12, 00))
@@ -138,7 +138,7 @@ class Test_RestaurantServices:
         form.open_dinner.data = datetime.time(datetime(2020, 7, 1, 18, 00))
         form.close_dinner.data = datetime.time(datetime(2020, 6, 1, 22, 00))
 
-        user = create_user_on_db(role_id=2)
+        user = create_user_on_db(randrange(10, 50000), role_id=2)
         assert user is not None
         assert user.role_id == 2
 
@@ -180,7 +180,7 @@ class Test_RestaurantServices:
         form.open_dinner.data = datetime.time(datetime(2020, 7, 1, 18, 00))
         form.close_dinner.data = datetime.time(datetime(2020, 6, 1, 22, 00))
 
-        user = create_user_on_db(role_id=2)
+        user = create_user_on_db(randrange(10, 50000), role_id=2)
         assert user is not None
         assert user.role_id == 2
 
@@ -213,7 +213,7 @@ class Test_RestaurantServices:
         form.open_dinner.data = datetime.time(datetime(2020, 7, 1, 18, 00))
         form.close_dinner.data = datetime.time(datetime(2020, 6, 1, 22, 00))
 
-        user = create_user_on_db(role_id=2)
+        user = create_user_on_db(randrange(10, 50000), role_id=2)
         assert user is not None
         assert user.role_id == 2
 
@@ -222,17 +222,20 @@ class Test_RestaurantServices:
         )
         assert restaurant is not None
 
-        reviewer = create_user_on_db(randrange(40000, 3000000), role_id=3)
+        reviewer = create_user_on_db(randrange(10, 50000), role_id=3)
 
         review1 = RestaurantServices.review_restaurant(
             restaurant.id, reviewer.email, 5, "test1"
         )
+        assert review1 is not None
         review2 = RestaurantServices.review_restaurant(
             restaurant.id, reviewer.email, 4, "test2"
         )
+        assert review2 is not None
         review3 = RestaurantServices.review_restaurant(
             restaurant.id, reviewer.email, 3, "test3"
         )
+        assert review3 is not None
 
         three_reviews = RestaurantServices.get_three_reviews(restaurant.id)
         assert three_reviews is not None
@@ -319,7 +322,7 @@ class Test_RestaurantServices:
         check if dish get deletedS
         """
 
-        user = create_user_on_db(role_id=2)
+        user = create_user_on_db(randrange(10, 50000), role_id=2)
         assert user is not None
 
         dish = MenuDish()
@@ -362,9 +365,9 @@ class Test_RestaurantServices:
         - check on db the new rating
         - erase all data create inside the test
         """
-        owner_one = create_user_on_db(123444223, role_id=2)
+        owner_one = create_user_on_db(randrange(10, 50000), role_id=2)
         assert owner_one is not None
-        owner_two = create_user_on_db(123444226, role_id=2)
+        owner_two = create_user_on_db(randrange(10, 50000), role_id=2)
         assert owner_two is not None
 
         restaurant_one = create_restaurants_on_db(
@@ -402,7 +405,7 @@ class Test_RestaurantServices:
         rating_rest_one = (start_one + start_two) / 2
         rating_rest_two = start_tree
 
-        RestaurantServices.restaur()
+        RestaurantServices.force_reload_rating_all_restaurants()
 
         rest = get_rest_with_name(restaurant_one.name)
         assert rest.rating == rating_rest_one
@@ -416,55 +419,6 @@ class Test_RestaurantServices:
         del_user_on_db(owner_one.id)
         del_user_on_db(owner_two.id)
 
-    def test_rating_single_restaurant(self):
-        """
-        TODO maybe this now don't have sens
-        This method test the method to calculate a rating inside a new restautants
-
-        Test flow:
-        - Create owner
-        - Create restaurant1 and binding owner
-        - Create a customer
-        - Make a review for the restaurant
-        - check the result of the function
-        - check on bd the new rating
-        - erase all data create inside the test
-        """
-        owner_one = create_user_on_db(123444223, role_id=2)
-        assert owner_one is not None
-
-        restaurant_one = create_restaurants_on_db(
-            name="First", user_id=owner_one.id, user_email=owner_one.email
-        )
-        assert restaurant_one is not None
-
-        start_one = 3.0
-        start_two = 4.5
-        review = create_review_for_restaurants(
-            starts=start_one,
-            rest_id=restaurant_one.id,
-            reviewer_email="user_{}@asu.edu".format(randrange(2000, 7000)),
-        )
-        assert review is not None
-        review = create_review_for_restaurants(
-            starts=start_two,
-            rest_id=restaurant_one.id,
-            reviewer_email="user_{}@asu.edu".format(randrange(2000, 7000)),
-        )
-        assert review is not None
-
-        rating_rest_one = (start_one + start_two) / 2.0
-
-        rating = RestaurantServices.get_rating_restaurant(restaurant_one.id)
-        assert rating == rating_rest_one
-
-        rest = get_rest_with_name(restaurant_one.name)
-        assert rest.rating == rating_rest_one
-
-        del_all_review_for_rest(restaurant_one.id)
-        del_restaurant_on_db(restaurant_one.id)
-        del_user_on_db(owner_one.id)
-
     def test_get_restaurant_people_none(self):
         """
         The method test the function inside the RestaurantServices to search all the people
@@ -476,7 +430,7 @@ class Test_RestaurantServices:
         - get all people
         - del restaurant
         """
-        owner_one = create_user_on_db(randrange(100000))
+        owner_one = create_user_on_db(randrange(10, 50000), role_id=2)
         assert owner_one is not None
 
         restaurant_one = create_restaurants_on_db(name="First", user_id=owner_one.id)

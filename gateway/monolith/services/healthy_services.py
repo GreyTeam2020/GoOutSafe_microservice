@@ -1,18 +1,7 @@
-from flask import current_app
 from monolith.utils.http_utils import HttpUtils
-from monolith.app_constant import (
-    USER_MICROSERVICE_URL,
-    EMAIL_MICROSERVICE_URL,
-    BOOKING_MICROSERVICE_URL,
-    RESTAURANTS_MICROSERVICE_URL,
-)
-from monolith.model import UserModel
-
 from datetime import datetime, timedelta
-from sqlalchemy import extract
-
 from monolith.services import UserService
-from monolith.tests.utils import get_user_with_id
+from monolith.services.send_email_service import SendEmailService
 from monolith.app_constant import *
 
 
@@ -24,116 +13,58 @@ class HealthyServices:
 
     @staticmethod
     def report_positive():
-        # bind filter params...
-        url = "{}/report_positive".format(USER_MICROSERVICE_URL)
-        response = HttpUtils.make_get_request(url)
-        if response is None:
-            return []
-        users = response["result"]
-        list_user = []
-        for user in users:
-            new_user = UserModel()
-            new_user.fill_from_json(user)
-            list_user.append(new_user)
-        return list_user
+        """
+        This method call the user service to get all the positive
+        """
+        return UserService.get_list_of_positive_user()
 
     @staticmethod
-    def mark_positive(user_email: str = "", user_phone: str = "") -> str:
-        # bind filter params...
-        if user_email is not None:
-            key = "email"
-            value = user_email
-        elif user_phone is not None:
-            key = "phone"
-            value = user_phone
-        else:
-            return None
-
-        if user_email == "" and user_phone == "":
+    def mark_positive(user_email: str = None, user_phone: str = None) -> str:
+        if user_email is None and user_phone is None:
             return "Insert an email or a phone number"
-
-        url = "{}/mark/{}/{}".format(USER_MICROSERVICE_URL, key, value)
-
-        response = HttpUtils.make_get_request(url)
-
+        response = UserService.mark_positive(user_email, user_phone)
         if response is True:
-            """
-            call for API email_microservice
-            """
+            # call for API email_microservice
             contacts = HealthyServices.search_contacts_for_email(user_email, user_phone)
-            url = EMAIL_MICROSERVICE_URL + "/send_contact"
-            HttpUtils.make_post_request(url, contacts)
+            SendEmailService.send_possible_contact(contacts) ## We assume that is true
             return ""
         else:
             return "An error occurs, please try again"
 
     @staticmethod
-    def unmark_positive(user_email: str, user_phone: str) -> str:
+    def unmark_positive(user_email: str = None, user_phone: str = None) -> str:
         """
-        This method mark the a people as positive on db
-        :param user_email:
-        :param user_phone:
-        :return: return a message
+        This method perform the request to unmark th user as positive.
         """
-        if user_email == "" and user_phone == "":
-            return "Insert an email or a phone number"
-
-        if user_email != "":
-            body = {"key": "email", "value": user_email}
-        else:
-            body = {"key": "phone", "value": user_phone}
-
-        URL = USER_MICROSERVICE_URL + "/unmark"
-
-        response = HttpUtils.make_put_request(URL, body)
-        if response is None:
+        response = UserService.unmark_positive(user_email, user_phone)
+        if response[0] is None:
             return "An error occurs"
-
         if response[1] == 400:
             return "An error occurs, please try again"
-
         if response[1] == 404:
+            # Logic error make the check of the user inside the UI
+            # If the user don't exist we don't need to perform the request
             return "The customer not registered or not positive"
-
-            # if response[0] == "User not found":
-            #    return "The customer is not registered"
-            # else: #response[0] == "User not positive":
-            #    return "The user is not Covid-19 positive"
 
         if response[1] == 200:
             return ""
-
-        return "Error"
+        return "Error on Server please try again."
 
     @staticmethod
     def search_contacts(user_email: str, user_phone: str):
-
         if user_email == "" and user_phone == "":
             return "Insert an email or a phone number"
-
-        if user_email != "":
-            URL = USER_MICROSERVICE_URL + "/positiveinfo/email/" + str(user_email)
-        else:
-            URL = USER_MICROSERVICE_URL + "/positiveinfo/phone/" + str(user_phone)
-
+        # TODO(vincenzopalazzo) what is mean?
         # check if the user exists
         # check if the user is positive (get also date of marking) (API)
-        response = HttpUtils.make_get_request(URL)
+        response = UserService.search_possible_contacts(user_email, user_phone)
 
+        ## TODO(vincenzopalazzo) if the user don't exist we must not call this method
         if response is None:
             return "The customer not registered or not positive"
 
-        """
-        if response == "User not found":
-            return "The customer is not registered"
-        elif response == "Information not found":
-            return "The user is not Covid-19 positive"
-        elif response == "Bad Request":
-            return "Error here"
-        """
-
+        ## TODO(vincenzoapazzo) continuing refactoring from here
         contact_users_GUI = []
-
         # now we have the information about the positivity of the user in response
         date_marking = response["from_date"]
         user_id = response["user_id"]
