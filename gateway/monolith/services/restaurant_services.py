@@ -226,7 +226,7 @@ class RestaurantServices:
         with the filter on the date
         """
 
-        url = "{}?restaurant_id={}".format(BOOKING_MICROSERVICE_URL, restaurant_id)
+        url = "{}/list/{}".format(BOOKING_MICROSERVICE_URL, restaurant_id)
         # add filters...
         if from_date:
             url = HttpUtils.append_query(url, "fromDate", from_date)
