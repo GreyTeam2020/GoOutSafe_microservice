@@ -515,6 +515,9 @@ def create_random_booking(num: int, rest_id: int, user: UserModel, date_time, fr
     :param friends:
     :return:
     """
+    people_number = len(friends.split(";")) + 1
+    reservation = BookingServices.book(rest_id, user, date_time, people_number, friends)
+    """
     books = []
     for i in range(0, num):
         # register on db the reservation
@@ -542,6 +545,11 @@ def create_random_booking(num: int, rest_id: int, user: UserModel, date_time, fr
         db.session.commit()
         books.append(new_reservation)
     return books
+    """
+    return reservation
+
+def del_booking(reservation_id, customer_id):
+    return BookingServices.delete_book(reservation_id, customer_id)
 
 
 def del_booking_with_user_id(user_id):
