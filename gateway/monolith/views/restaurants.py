@@ -26,6 +26,7 @@ from monolith.utils.formatter import my_date_formatter_iso
 from monolith.app_constant import CALCULATE_RATING_RESTAURANT
 from monolith.services.user_service import UserService
 from monolith.model.dish_model import DishModel
+from monolith.model.table_model import TableModel
 
 restaurants = Blueprint("restaurants", __name__)
 
@@ -205,19 +206,20 @@ def my_data():
 def my_tables():
     if request.method == "POST":
         # insert the table with data provided by the form
-        table = RestaurantTable()
+        table = TableModel()
         table.restaurant_id = session["RESTAURANT_ID"]
-        table.max_seats = request.form.get("capacity")
+        table.max_seats = int(request.form.get("capacity"))
         table.name = request.form.get("name")
-        db.session.add(table)
-        db.session.commit()
+        if RestaurantServices.add_table(table) is None:
+            return render_template("generic_error.html", "An error occured while inserting the table. Please try again later.")
         ##
         return redirect("/restaurant/data")
 
     elif request.method == "GET":
         # delete the table specified by the get request
-        RestaurantTable.query.filter_by(id=request.args.get("id")).delete()
-        db.session.commit()
+        if RestaurantServices.delete_table(request.args.get("id")) is None:
+            return render_template("generic_error.html", "An error occured while deleting the table. Please try again later.")
+
         return redirect("/restaurant/data")
 
 

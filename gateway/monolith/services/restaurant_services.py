@@ -216,6 +216,31 @@ class RestaurantServices:
         return all_tables
 
     @staticmethod
+    def add_table(table):
+        """
+        This method add a table to the restaurant
+        :param table: TableModel to insert
+        """
+        url = "{}/{}/tables".format(RESTAURANTS_MICROSERVICE_URL, table.restaurant_id)
+        response = HttpUtils.make_post_request(url, table.serialize())
+        if response is None:
+            return None
+        return True
+
+    @staticmethod
+    def delete_table(table_id):
+        """
+        This method remove a table from the restaurant
+        :param table: table id
+        """
+        url = "{}/table/{}".format(RESTAURANTS_MICROSERVICE_URL, table_id)
+        response = HttpUtils.make_delete_request(url)
+        if response is None:
+            return None
+        return True
+
+
+    @staticmethod
     def get_photos_restaurants(restaurant_id: int):
         """
         This method retrieval all information about the restaurants photos
