@@ -226,7 +226,7 @@ class RestaurantServices:
         with the filter on the date
         """
 
-        url = "{}?restaurant_id={}".format(BOOKING_MICROSERVICE_URL, restaurant_id)
+        url = "{}/list/{}".format(BOOKING_MICROSERVICE_URL, restaurant_id)
         # add filters...
         if from_date:
             url = HttpUtils.append_query(url, "fromDate", from_date)
@@ -322,73 +322,11 @@ class RestaurantServices:
         """
         Given the id of the restaurant return the number of people at lunch and dinner
         """
-        openings = (
-            db.session.query(OpeningHours)
-            .filter(
-                OpeningHours.week_day == datetime.today().weekday(),
-                OpeningHours.restaurant_id == restaurant_id,
-            )
-            .first()
-        )
-        if openings is None:
+        response = HttpUtils.make_get_request("{}/stats/{}".format(BOOKING_MICROSERVICE_URL, restaurant_id))
+        if response is None:
             return [0, 0, 0]
 
-        tables = (
-            db.session.query(RestaurantTable)
-            .filter_by(restaurant_id=restaurant_id)
-            .all()
-        )
-        tables_id = []
-        for table in tables:
-            tables_id.append(table.id)
-
-        reservations_l = (
-            db.session.query(Reservation)
-            .filter(
-                Reservation.table_id.in_(tables_id),
-                extract("day", Reservation.reservation_date)
-                == extract("day", datetime.today()),
-                extract("month", Reservation.reservation_date)
-                == extract("month", datetime.today()),
-                extract("year", Reservation.reservation_date)
-                == extract("year", datetime.today()),
-                extract("hour", Reservation.reservation_date)
-                >= extract("hour", openings.open_lunch),
-                extract("hour", Reservation.reservation_date)
-                <= extract("hour", openings.close_lunch),
-            )
-            .all()
-        )
-
-        reservations_d = (
-            db.session.query(Reservation)
-            .filter(
-                Reservation.table_id.in_(tables_id),
-                extract("day", Reservation.reservation_date)
-                == extract("day", datetime.today()),
-                extract("month", Reservation.reservation_date)
-                == extract("month", datetime.today()),
-                extract("year", Reservation.reservation_date)
-                == extract("year", datetime.today()),
-                extract("hour", Reservation.reservation_date)
-                >= extract("hour", openings.open_dinner),
-                extract("hour", Reservation.reservation_date)
-                <= extract("hour", openings.close_dinner),
-            )
-            .all()
-        )
-
-        reservations_now = (
-            db.session.query(Reservation)
-            .filter(
-                Reservation.checkin is True,
-                Reservation.reservation_date <= datetime.now(),
-                Reservation.reservation_end >= datetime.now(),
-            )
-            .all()
-        )
-
-        return [len(reservations_l), len(reservations_d), len(reservations_now)]
+        return [response["lunch"], response["dinner"], response["now"]]
 
     @staticmethod
     def checkin_reservations(reservation_id: int):
