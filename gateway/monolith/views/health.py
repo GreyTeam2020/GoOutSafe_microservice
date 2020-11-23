@@ -40,7 +40,6 @@ def mark_positive():
 @health.route("/search_contacts", methods=["POST", "GET"])
 @roles_allowed(roles=["HEALTH"])
 def search_contacts():
-
     form = SearchUserForm()
     if request.method == "POST":
         if form.validate_on_submit():
@@ -50,19 +49,15 @@ def search_contacts():
                     "search_contacts.html",
                     _test="search_contacts_no_data",
                     form=form,
-                    message="Insert an email or a phone number"
+                    message="Insert an email or a phone number",
                 )
 
             contacts = HealthyServices.search_contacts(form.email.data, form.phone.data)
-
-            if str(type(contacts)) == "<class 'list'>":
-
+            if isinstance(contacts, list):
                 return render_template(
                     "list_contacts.html", _test="list_page", contacts=contacts
                 )
-
-            elif str(type(contacts)) == "<class 'str'>":
-
+            elif isinstance(contacts, str):
                 return render_template(
                     "search_contacts.html",
                     _test="search_contacts_no_positive",
@@ -74,7 +69,7 @@ def search_contacts():
                     "search_contacts.html",
                     _test="search_contacts_no_positive",
                     form=form,
-                    message="Error"
+                    message="Error",
                 )
 
     return render_template("/search_contacts.html", form=form)
