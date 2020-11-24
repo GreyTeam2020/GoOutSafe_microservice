@@ -1194,6 +1194,7 @@ class Test_GoOutSafeForm:
         restaurant.covid_measures = "masks"
         response = create_new_restaurant_with_form(client, restaurant)
         assert response.status_code == 200
+        print (response.data.decode)
         assert "Register your Restaurant" in response.data.decode("utf-8")
 
         db.session.query(Restaurant).filter_by(name=restaurant.name).delete()
