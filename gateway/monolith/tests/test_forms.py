@@ -1237,13 +1237,27 @@ class Test_GoOutSafeForm:
         """
         test delete reservation by customer
         """
-        email = "john.doe@email.com"
-        password = "customer"
-        response = login(client, email, password)
+        owner = create_user_on_db(randrange(1, 900000), role_id=2)
+        assert owner is not None
+        restaurant = create_restaurants_on_db(user_id=owner.id, user_email=owner.email)
+        assert restaurant is not None
+
+        customer1 = create_user_on_db(randrange(1, 900000), password="1234567")
+        assert customer1 is not None
+
+        response = login(client, customer1.email, "1234567")
         assert response.status_code == 200
         assert "logged_test" in response.data.decode("utf-8")
 
-        response = del_reservation_client(client, reservation.id)
+        date_booking_1 = datetime(year=datetime.now().year,
+                                  month=datetime.now().month,
+                                  day=datetime.now().day,
+                                  hour=13) - timedelta(days=3)
+        books1 = create_random_booking(
+            1, restaurant.id, customer1, date_booking_1, "a@aa.com"
+        )
+        
+        response = del_reservation_client(client, books1["id"])
         assert response.status_code == 200
         assert "del_rest_test" in response.data.decode("utf-8")
 
