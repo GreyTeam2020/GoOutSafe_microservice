@@ -146,7 +146,7 @@ def my_reservations():
 
 
     reservations_as_list = RestaurantServices.get_reservation_rest(
-        restaurant_id, fromDate, toDate, email
+        restaurant_id, fromDate, toDate
     )
     if reservations_as_list is None:
         reservations_as_list =[]

@@ -1,3 +1,4 @@
+from flask import current_app
 from monolith.utils.http_utils import HttpUtils
 from datetime import datetime, timedelta
 from monolith.services import UserService
@@ -82,7 +83,7 @@ class HealthyServices:
 
                 start = datetime.strptime(reservation["reservation_date"], "%Y-%m-%dT%H:%M:%SZ")
                 end = datetime.strptime(reservation["reservation_end"], "%Y-%m-%dT%H:%M:%SZ")
-
+                current_app.logger.debug("I'm working with reserv from {} to {}".format(start, end))
                 for one_reservation in all_reservations:
                     restaurant_id_contact = one_reservation["table"]["restaurant"]["id"]
                     if restaurant_id_contact != restaurant_id:
@@ -96,8 +97,8 @@ class HealthyServices:
 
                         dayNumber = start.weekday()
                         restaurant_hours = []
-
-                        for opening in openings["openings"]:
+                        current_app.logger.debug("I got openings. Start is {}".format(dayNumber))
+                        for opening in openings:
                             if opening["week_day"] == dayNumber:
                                 restaurant_hours.append(datetime.strptime(opening["open_lunch"], "%H:%M"))
                                 restaurant_hours.append(datetime.strptime(opening["close_lunch"], "%H:%M"))
@@ -196,7 +197,7 @@ class HealthyServices:
 
                     dayNumber = start.weekday()
                     restaurant_hours = []
-                    for opening in openings["openings"]:
+                    for opening in openings:
                         if opening["week_day"] == dayNumber:
                             restaurant_hours.append(datetime.strptime(opening["open_lunch"], "%H:%M"))
                             restaurant_hours.append(datetime.strptime(opening["close_lunch"], "%H:%M"))
