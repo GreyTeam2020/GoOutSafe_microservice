@@ -217,12 +217,12 @@ def create_new_user_with_form(client, form: UserForm, type):
     return client.post(
         "/user/create_" + type,
         data=dict(
-            email=form.email,
-            firstname=form.firstname,
-            lastname=form.lastname,
+            email=form.email.data,
+            firstname=form.firstname.data,
+            lastname=form.lastname.data,
             password="12345678",
             dateofbirth="22/03/1998",
-            phone="123452345",
+            phone="1235{}".format(randrange(100000)),
             headers={"Content-type": "application/x-www-form-urlencoded"},
         ),
         follow_redirects=True,
