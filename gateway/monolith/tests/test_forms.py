@@ -527,7 +527,7 @@ class Test_GoOutSafeForm:
         assert response.status_code == 200
 
         mark = SearchUserForm()
-        mark.email.data = None
+        mark.email.data = ""
         mark.phone.data = user.phone.data
         response = mark_people_for_covid19(client, mark)
         assert response.status_code == 200
