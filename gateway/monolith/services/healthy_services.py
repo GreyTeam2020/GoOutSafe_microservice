@@ -119,16 +119,17 @@ class HealthyServices:
                                 # they are contacts!
                                 # API: get user email and name of the contact
                                 user = UserService.get_user_by_id(one_reservation["customer_id"])
-                                contact_users_GUI.append(
-                                    [
-                                        i,
-                                        user.firstname + " " + user.lastname,
-                                        user.dateofbirth,
-                                        user.email,
-                                        user.phone,
-                                    ]
-                                )
-                                i += 1
+                                if user is not None:
+                                    contact_users_GUI.append(
+                                        [
+                                            i,
+                                            user.firstname + " " + user.lastname,
+                                            user.dateofbirth,
+                                            user.email,
+                                            user.phone,
+                                        ]
+                                    )
+                                    i += 1
         return contact_users_GUI
 
     @staticmethod
@@ -221,15 +222,16 @@ class HealthyServices:
                             # they are contacts!
                             # API: get user email and name of the contact
                             user = UserService.get_user_by_id(one_reservation["customer_id"])
-                            contacts.append(
-                                {
-                                    "email": user.email,
-                                    "name": user.firstname,
-                                    "restaurant_name": restaurant.name,
-                                    "date": start.strftime("%Y-%m-%dT%H:%M:%SZ"),
-                                }
-                            )
-                            friends = friends + one_reservation["people"]
+                            if user is not None:
+                                contacts.append(
+                                    {
+                                        "email": user.email,
+                                        "name": user.firstname,
+                                        "restaurant_name": restaurant.name,
+                                        "date": start.strftime("%Y-%m-%dT%H:%M:%SZ"),
+                                    }
+                                )
+                                friends = friends + one_reservation["people"]
         if user_email != "":
             customer_email = user_email
         else:
