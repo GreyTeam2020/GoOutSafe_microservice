@@ -400,11 +400,11 @@ class Test_GoOutSafeForm:
         response = login(client, user.email, form.password.data)
         assert response.status_code == 200
 
-        response = visit_reservation(
-            client, from_date="2013-10-07", to_date="2014-10-07", email=user.email
+        response = visit_customer_reservation(
+            client, from_date="2013-10-07T00:00:00Z", to_date="2014-10-07T00:00:00Z"
         )
         assert response.status_code == 200
-        assert "restaurant_reservations_test" in response.data.decode("utf-8")
+        assert "customer_reservations_test" in response.data.decode("utf-8")
 
         response = logout(client)
         assert response.status_code == 200

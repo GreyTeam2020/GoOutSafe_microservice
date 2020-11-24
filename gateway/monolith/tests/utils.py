@@ -134,6 +134,18 @@ def visit_reservation(client, from_date, to_date, email):
         follow_redirects=True,
     )
 
+def visit_customer_reservation(client, from_date, to_date):
+    """
+    This perform the URL to visit the reservatioin of a restaurants
+    ----- This is an example of URL --
+    http://localhost:5000/list_reservations?fromDate=2013-10-07&toDate=2014-10-07&email=john.doe@email.com
+    """
+    return client.get(
+        "/customer/reservations?fromDate={}&toDate={}".format(
+            from_date, to_date
+        ),
+        follow_redirects=True,
+    )
 
 def make_revew(client, restaurant_id: int, form: ReviewForm):
     """
