@@ -61,7 +61,7 @@ def search_contacts():
                 )
 
             user_email = UserService.user_is_present(email)
-            user_phone = UserService.user_is_present(phone)
+            user_phone = UserService.user_is_present(phone=phone)
             if user_email is None and user_phone is None:
                 return render_template("/search_contacts.html", form=form, message="User not exist inside the sistem",
                                        _test="search_contact_not_registered")
