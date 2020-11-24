@@ -130,8 +130,7 @@ class RestaurantServices:
         if response is None:
             current_app.logger.error("Microservices error")
             return []
-        all_restaurants = response["restaurants"]
-        return all_restaurants
+        return response["restaurants"]
 
     @staticmethod
     def get_rest_by_id(id: int):
@@ -275,20 +274,17 @@ class RestaurantServices:
         return photo
 
     @staticmethod
-    def get_reservation_rest(restaurant_id, from_date, to_date, email):
+    def get_reservation_rest(restaurant_id, from_date, to_date):
         """
         This method contains the logic to find all reservation in the restaurant
         with the filter on the date
         """
 
         url = "{}/list/{}".format(BOOKING_MICROSERVICE_URL, restaurant_id)
-        # add filters...
         if from_date:
             url = HttpUtils.append_query(url, "fromDate", from_date)
         if to_date:
             url = HttpUtils.append_query(url, "toDate", to_date)
-        if email:
-            url = HttpUtils.append_query(url, "email", email)
 
         response = HttpUtils.make_get_request(url)
         return response
@@ -377,7 +373,9 @@ class RestaurantServices:
         """
         Given the id of the restaurant return the number of people at lunch and dinner
         """
-        response = HttpUtils.make_get_request("{}/stats/{}".format(BOOKING_MICROSERVICE_URL, restaurant_id))
+        response = HttpUtils.make_get_request(
+            "{}/stats/{}".format(BOOKING_MICROSERVICE_URL, restaurant_id)
+        )
         if response is None:
             return [0, 0, 0]
 
@@ -385,9 +383,10 @@ class RestaurantServices:
 
     @staticmethod
     def checkin_reservations(reservation_id: int):
-        HttpUtils.make_get_request(
+        response = HttpUtils.make_get_request(
             "{}/{}/checkin".format(BOOKING_MICROSERVICE_URL, reservation_id)
         )
+        return response
 
     @staticmethod
     def get_all_restaurants_info(restaurant_id: int):
@@ -469,7 +468,7 @@ class RestaurantServices:
         This method delete a dish
         :param dish_id: dish id
         """
-        url = "{}/menu/{}".format(RESTAURANTS_MICROSERVICE_URL, dish_id)
+        url = "{}/dishes/{}".format(RESTAURANTS_MICROSERVICE_URL, dish_id)
         response = HttpUtils.make_delete_request(url)
         return response
 
@@ -480,7 +479,7 @@ class RestaurantServices:
         the rating for each restaurants
         :return if the request is ok I rill return the request, otherwise None
         """
-        user = "{}//restaurants/calculate_rating_for_all_restaurant".format(
+        user = "{}/calculate_rating_for_all_restaurant".format(
             RESTAURANTS_MICROSERVICE_URL
         )
         return HttpUtils.make_get_request(user)

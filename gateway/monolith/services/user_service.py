@@ -339,10 +339,11 @@ class UserService:
         """
         This method perform the request to user microservices to make the user positive
         """
-        if email is not None:
+        current_app.logger.debug("Asking to mark. Called with: {} , {}".format(email, phone))
+        if email is not None and email is not "":
             key = "email"
             value = email
-        elif phone is not None:
+        elif phone is not None and phone is not "":
             key = "phone"
             value = phone
         else:
@@ -374,9 +375,9 @@ class UserService:
         """
         url = "{}/report_positive".format(USER_MICROSERVICE_URL)
         response = HttpUtils.make_get_request(url)
-        if response is None:
+        if response is None or len(response) == 0:
             return []
-        users = response["result"]
+        users = response["users"]
         list_user = []
         for user in users:
             new_user = UserModel()
@@ -398,3 +399,14 @@ class UserService:
         # check if the user exists (ON VIEW)
         # check if the user is positive (get also date of marking) (API) ????
         return HttpUtils.make_get_request(url)
+
+    @staticmethod
+    def get_user_by_id(user_id):
+        """"""
+        user = "{}/{}".format(USER_MICROSERVICE_URL, user_id)
+        response = HttpUtils.make_get_request(user)
+        if response is None:
+            return None
+        user_model = UserModel()
+        user_model.fill_from_json(response)
+        return user_model

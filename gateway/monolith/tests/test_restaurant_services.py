@@ -4,7 +4,8 @@ from monolith.database import db, User, Restaurant, Review, MenuDish, Reservatio
 from monolith.forms import RestaurantForm
 from monolith.services.restaurant_services import RestaurantServices
 from datetime import datetime
-from monolith.tests.utils import create_user_on_db
+from monolith.services.booking_services import BookingServices
+from monolith.model.dish_model import DishModel
 
 from monolith.tests.utils import (
     get_user_with_email,
@@ -17,6 +18,7 @@ from monolith.tests.utils import (
     create_review_for_restaurants,
     get_rest_with_name,
     del_all_review_for_rest,
+    del_booking,
 )
 
 
@@ -74,16 +76,16 @@ class Test_RestaurantServices:
         http://localhost:5000/my_reservations?fromDate=2013-10-07&toDate=2014-10-07&email=john.doe@email.com
         :return:
         """
-        user = create_user_on_db(role_id=2)
+        user = create_user_on_db(randrange(1, 500000), role_id=2)
         assert user is not None
 
-        from_date = "2013-10-07"
-        to_date = "2014-10-07"
+        from_date = datetime(2013, 10, 7)
+        to_date = datetime(2014, 10, 7)
 
         def_rest = RestaurantServices.get_all_restaurants()[0]
         assert def_rest is not None
-        all_reservation = RestaurantServices.get_reservation_rest(
-            def_rest["id"], from_date, to_date, user.email
+        all_reservation = BookingServices.get_reservation_by_constraint(
+            user.id, from_date, to_date, def_rest["id"],
         )
         assert len(all_reservation) == 0
 
@@ -95,29 +97,35 @@ class Test_RestaurantServices:
         http://localhost:5000/my_reservations?fromDate=2013-10-07&toDate=2014-10-07&email=john.doe@email.com
         :return:
         """
-        owner = create_user_on_db(role_id=2)
+        owner = create_user_on_db(randrange(1, 500000), role_id=2)
         assert owner is not None
 
         rest = create_restaurants_on_db(user_id=owner.id, user_email=owner.email)
         assert rest is not None
 
-        user = create_user_on_db()
+        user = create_user_on_db(randrange(1, 500000), )
         assert user is not None
 
         date_time = datetime(2022, 10, 28, 21, 30)
 
-        books = create_random_booking(1, rest.id, user, date_time, "a@a.com")
-        assert len(books) == 1
+        reservation = create_random_booking(1, rest.id, user, date_time, "a@a.com")
+        assert reservation is not None
 
-        from_date = "2020-09-28"
-        to_date = "2020-11-28"
+        from_date = datetime(2022, 9, 28)
+        to_date = datetime(2022, 11, 28)
 
-        reservations = RestaurantServices.get_reservation_rest(
-            rest["id"], from_date, to_date, user.email
+        print (BookingServices.get_all_booking())
+
+        search_reservation = BookingServices.get_reservation_by_constraint(
+            user.id, from_date, to_date, rest.id
         )
-        assert len(reservations) == 1
+        print(search_reservation)
+        assert len(search_reservation) != 0
 
+
+        del_booking(reservation["id"], user.id)
         del_user_on_db(user.id)
+        del_user_on_db(owner.id)
         del_restaurant_on_db(rest.id)
 
     def test_new_review(self):
@@ -147,7 +155,7 @@ class Test_RestaurantServices:
         )
         assert restaurant is not None
 
-        reviewer = create_user_on_db(randrange(40000, 3000000), role_id=3)
+        reviewer = create_user_on_db(randrange(1, 3000000), role_id=3)
         review = RestaurantServices.review_restaurant(
             restaurant_id=restaurant.id,
             reviewer_email=reviewer.email,
@@ -325,32 +333,43 @@ class Test_RestaurantServices:
         user = create_user_on_db(randrange(10, 50000), role_id=2)
         assert user is not None
 
-        dish = MenuDish()
+        dish = DishModel()
         dish.name = "Pearà"
         dish.price = 5.50
         dish.restaurant_id = 1
-        db.session.add(dish)
-        db.session.commit()
+        dish = RestaurantServices.insert_dish(dish)
         assert dish is not None
 
-        client.get("/restaurant/menu/delete/" + str(dish.id))
-
-        dish = db.session.query(MenuDish).filter_by(name="Pearà").first()
-        assert dish is None
+        response = RestaurantServices.delete_dish(dish["id"])
+        print (response)
+        assert response is not None
 
     def test_checkin_reservation(self):
         """
         test mark checked in a reservation by operator
         """
-        reservation = db.session.query(Reservation).first()
-        reservation_query = db.session.query(Reservation).filter_by(id=reservation.id)
-        reservation_query.update({Reservation.checkin: False})
-        RestaurantServices.checkin_reservations(reservation.id)
-        assert reservation.checkin is True
-        reservation_query = db.session.query(Reservation).filter_by(id=reservation.id)
-        reservation_query.update({Reservation.checkin: False})
-        db.session.commit()
-        db.session.flush()
+        owner = create_user_on_db(randrange(1, 500000), role_id=2)
+        assert owner is not None
+
+        rest = create_restaurants_on_db(user_id=owner.id, user_email=owner.email)
+        assert rest is not None
+
+        user = create_user_on_db(randrange(1, 500000))
+        assert user is not None
+
+        date_time = datetime(2022, 10, 28, 21, 30)
+
+        reservation = create_random_booking(1, rest.id, user, date_time, "a@a.com")
+
+        assert reservation is not None
+
+        response = RestaurantServices.checkin_reservations(reservation["id"])
+        assert response is not None
+
+        del_booking(reservation["id"], user.id)
+        del_user_on_db(user.id)
+        del_user_on_db(owner.id)
+        del_restaurant_on_db(rest.id)
 
     def test_rating_review_restaurants(self):
         """
@@ -407,6 +426,7 @@ class Test_RestaurantServices:
 
         RestaurantServices.force_reload_rating_all_restaurants()
 
+        print ("Restaurant_name:{}".format(restaurant_one.name))
         rest = get_rest_with_name(restaurant_one.name)
         assert rest.rating == rating_rest_one
         rest = get_rest_with_name(restaurant_two.name)
@@ -433,7 +453,7 @@ class Test_RestaurantServices:
         owner_one = create_user_on_db(randrange(10, 50000), role_id=2)
         assert owner_one is not None
 
-        restaurant_one = create_restaurants_on_db(name="First", user_id=owner_one.id)
+        restaurant_one = create_restaurants_on_db(name="First", user_id=owner_one.id, user_email=owner_one.email)
         assert restaurant_one is not None
 
         all_people = RestaurantServices.get_restaurant_people(restaurant_one.id)

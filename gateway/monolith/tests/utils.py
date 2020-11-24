@@ -92,8 +92,8 @@ def mark_people_for_covid19(client, form: SearchUserForm):
     return client.post(
         "/mark_positive",
         data=dict(
-            email=form.email,
-            phone=form.phone,
+            email=form.email.data,
+            phone=form.phone.data,
             submit=True,
             headers={"Content-type": "application/x-www-form-urlencoded"},
         ),
@@ -142,8 +142,8 @@ def make_revew(client, restaurant_id: int, form: ReviewForm):
     return client.post(
         "/restaurant/review/{}".format(restaurant_id),
         data=dict(
-            stars=form.stars,
-            review=form.review,
+            stars=form.stars.data,
+            review=form.review.data,
             submit=True,
             headers={"Content-type": "application/x-www-form-urlencoded"},
         ),
@@ -385,29 +385,11 @@ def positive_with_user_id(user_id: int = None, marked: bool = True):
     """
     This method is an util function to search inside the positive user
     """
-    if user_id is None:
-        return db.session.query(Positive).all()
-    else:
-        return (
-            db.session.query(Positive).filter_by(user_id=user_id, marked=marked).first()
-        )
-
-
-def delete_positive_with_user_id(user_id: int, marked: bool = True):
-    """
-    This method is an util function to search inside the positive user
-    """
-    db.session.query(Positive).filter_by(user_id=user_id, marked=marked).delete()
-    db.session.commit()
-
-
-def delete_was_positive_with_user_id(user_id: int, marked: bool = True):
-    """
-    This delete a row of a previous positive person
-    """
-    db.session.query(Positive).filter_by(user_id=user_id).delete()
-    db.session.commit()
-
+    users = HealthyServices.report_positive()
+    for user in users:
+        if user.id == user_id and user.is_positive is marked:
+            return user
+    return None
 
 def unmark_people_for_covid19(client, form: SearchUserForm):
     """
@@ -533,6 +515,9 @@ def create_random_booking(num: int, rest_id: int, user: UserModel, date_time, fr
     :param friends:
     :return:
     """
+    people_number = len(friends.split(";")) + 1
+    reservation = BookingServices.book(rest_id, user, date_time, people_number, friends)
+    """
     books = []
     for i in range(0, num):
         # register on db the reservation
@@ -560,6 +545,11 @@ def create_random_booking(num: int, rest_id: int, user: UserModel, date_time, fr
         db.session.commit()
         books.append(new_reservation)
     return books
+    """
+    return reservation
+
+def del_booking(reservation_id, customer_id):
+    return BookingServices.delete_book(reservation_id, customer_id)
 
 
 def del_booking_with_user_id(user_id):
