@@ -524,7 +524,7 @@ class Test_GoOutSafeForm:
         user.email.data = "cr7@gmail.com"
         user.firstname.data = "Cristiano"
         user.lastname.data = "Ronaldo"
-        user.password.data = "Siii"
+        user.password.data = "Siiidsadasdasdas"
         user.phone.data = "12345565"
         user.dateofbirth.data = "12/12/1975"
         register_user(client, user)
@@ -555,7 +555,7 @@ class Test_GoOutSafeForm:
         - delete the customer
         :param client:
         """
-        user = create_user_on_db(ran=1234564324324)
+        user = create_user_on_db(randrange(1, 500000))
 
         response = login(client, "health_authority@gov.com", "nocovid")
         assert response.status_code == 200
