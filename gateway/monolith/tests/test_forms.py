@@ -832,7 +832,7 @@ class Test_GoOutSafeForm:
 
         mark = SearchUserForm()
         mark.email.data = ""
-        mark.phone.data = user.phone
+        mark.phone.data = user.phone.data
         response = mark_people_for_covid19(client, mark)
         assert response.status_code == 200
 
@@ -1339,8 +1339,8 @@ class Test_GoOutSafeForm:
         assert response.status_code == 200
 
         mark = SearchUserForm()
-        mark.email = "joe@gmail.com"
-        mark.phone = "324545"
+        mark.email.data = "joe@gmail.com"
+        mark.phone.data = "324545"
         response = search_contact_positive_covid19(client, mark)
         assert response.status_code == 200
         assert "search_contact_not_registered" in response.data.decode("utf-8")
@@ -1358,8 +1358,8 @@ class Test_GoOutSafeForm:
         assert response.status_code == 200
 
         mark = SearchUserForm()
-        mark.email = ""
-        mark.phone = ""
+        mark.email.data = ""
+        mark.phone.data = ""
         response = search_contact_positive_covid19(client, mark)
         assert response.status_code == 200
         assert "search_contacts_no_data" in response.data.decode("utf-8")
@@ -1462,12 +1462,12 @@ class Test_GoOutSafeForm:
         """
         # a new owner of a restaurant
 
-        owner = create_user_on_db(787436)
+        owner = create_user_on_db(randrange(1, 5000000), role_id=2)
         assert owner is not None
         restaurant = create_restaurants_on_db("Pepperwood", user_id=owner.id)
         assert restaurant is not None
 
-        customer1 = create_user_on_db(787437)
+        customer1 = create_user_on_db(randrange(1, 5000000))
         assert customer1 is not None
 
         date_booking_1 = (
@@ -1482,7 +1482,7 @@ class Test_GoOutSafeForm:
         assert len(books1) == 1
 
         # a new user that books in the same restaurant of the previous one
-        customer2 = create_user_on_db(787438)
+        customer2 = create_user_on_db(randrange(1, 5000000))
         assert customer2 is not None
 
         date_booking_2 = (
@@ -1501,8 +1501,8 @@ class Test_GoOutSafeForm:
 
         # an user become covid19 positive
         mark = SearchUserForm()
-        mark.email = customer1.email
-        mark.phone = ""
+        mark.email.data = customer1.email
+        mark.phone.data = ""
         response = mark_people_for_covid19(client, mark)
         assert response.status_code == 200
         assert "logged_test" in response.data.decode("utf-8")
@@ -1519,9 +1519,6 @@ class Test_GoOutSafeForm:
         del_user_on_db(customer2.id)
         del_restaurant_on_db(restaurant.id)
         del_user_on_db(owner.id)
-
-        q_restaurant = get_rest_with_name(restaurant.name)
-        assert q_restaurant is None
 
     def test_search_contacts_ok_phone(self, client):
         """
@@ -1541,12 +1538,12 @@ class Test_GoOutSafeForm:
         :param client:
         """
         # a new owner of a restaurant
-        owner = create_user_on_db(787436)
+        owner = create_user_on_db(randrange(1, 5000000), role_id=2)
         assert owner is not None
-        restaurant = create_restaurants_on_db("Pepperwood", user_id=owner.id)
+        restaurant = create_restaurants_on_db(user_id=owner.id, user_email=owner.email)
         assert restaurant is not None
 
-        customer1 = create_user_on_db(787437)
+        customer1 = create_user_on_db(randrange(1, 5000000))
         assert customer1 is not None
 
         date_booking_1 = (
@@ -1561,7 +1558,7 @@ class Test_GoOutSafeForm:
         assert len(books1) == 1
 
         # a new user that books in the same restaurant of the previous one
-        customer2 = create_user_on_db(787438)
+        customer2 = create_user_on_db(randrange(1, 5000000))
         assert customer2 is not None
 
         date_booking_2 = (
@@ -1580,13 +1577,13 @@ class Test_GoOutSafeForm:
 
         # an user become covid19 positive
         mark = SearchUserForm()
-        mark.email = ""
-        mark.phone = customer1.phone
+        mark.email.data = ""
+        mark.phone.data = customer1.phone
         response = mark_people_for_covid19(client, mark)
         assert response.status_code == 200
         assert "logged_test" in response.data.decode("utf-8")
 
-        user = UserService.user_is_present(customer1.email.data, customer1.phone.data)
+        user = UserService.user_is_present(customer1.email, customer1.phone)
         assert user.is_positive is True
 
         response = search_contact_positive_covid19(client, mark)
@@ -1598,9 +1595,6 @@ class Test_GoOutSafeForm:
         del_user_on_db(customer2.id)
         del_restaurant_on_db(restaurant.id)
         del_user_on_db(owner.id)
-
-        q_restaurant = get_rest_with_name(restaurant.name)
-        assert q_restaurant is None
 
     def test_search_contacts_ok_no_contacts(self, client):
         """
@@ -1624,12 +1618,10 @@ class Test_GoOutSafeForm:
         assert restaurant is not None
 
         # a new client
-
-        customer1 = create_user_on_db(787437)
+        customer1 = create_user_on_db(randrange(1, 5000000))
         assert customer1 is not None
 
         # this user books in the restaurant
-
         date_booking_1 = (
             get_today_midnight()
             - timedelta(days=datetime.today().weekday())
@@ -1645,12 +1637,12 @@ class Test_GoOutSafeForm:
 
         # an user become covid19 positive
         mark = SearchUserForm()
-        mark.email = ""
-        mark.phone = customer1.phone
+        mark.email.data = ""
+        mark.phone.data = customer1.phone
         response = mark_people_for_covid19(client, mark)
         assert response.status_code == 200
 
-        user = UserService.user_is_present(customer1.email.data, customer1.phone.data)
+        user = UserService.user_is_present(customer1.email, customer1.phone)
         assert user.is_positive is True
 
         response = search_contact_positive_covid19(client, mark)
@@ -1661,8 +1653,6 @@ class Test_GoOutSafeForm:
         del_restaurant_on_db(restaurant.id)
         del_user_on_db(owner.id)
 
-        q_restaurant = get_rest_with_name(restaurant.name)
-        assert q_restaurant is None
 
     def test_search_contacts_ok_more_restaurants(self, client):
         """
@@ -1691,12 +1681,11 @@ class Test_GoOutSafeForm:
         # a new owner of a restaurant
         owner = create_user_on_db(randrange(1, 50000), role_id=2)
         assert owner is not None
-        restaurant = create_restaurants_on_db("Pepperwood", user_id=owner.id)
+        restaurant = create_restaurants_on_db(user_id=owner.id, user_email=owner.email)
         assert restaurant is not None
-        print("\nnew restaurant " + str(restaurant.id))
-        # a new client
 
-        customer1 = create_user_on_db(randrange(1, 50000), role_id=2)
+        # a new customer
+        customer1 = create_user_on_db(randrange(1, 50000))
         assert customer1 is not None
 
         # this user books in the restaurant
@@ -1710,17 +1699,9 @@ class Test_GoOutSafeForm:
             1, restaurant.id, customer1, date_booking_1, "a@a.com"
         )
         assert len(books1) == 1
-        print(
-            "booked at table "
-            + str(books1[0].table_id)
-            + " for customer "
-            + str(books1[0].customer_id)
-            + " at "
-            + str(books1[0].reservation_date)
-        )
         # a new user that books in the same restaurant of the previous one
 
-        customer2 = create_user_on_db(randrange(1, 50000), role_id=2)
+        customer2 = create_user_on_db(randrange(1, 50000))
         assert customer2 is not None
 
         date_booking_2 = (
@@ -1736,12 +1717,10 @@ class Test_GoOutSafeForm:
         # a new owner of a restaurant
         owner2 = create_user_on_db(randrange(1, 50000), role_id=2)
         assert owner2 is not None
-        restaurant2 = create_restaurants_on_db("Pepperwood2", user_id=owner2.id)
+        restaurant2 = create_restaurants_on_db(user_id=owner2.id)
         assert restaurant2 is not None
 
-        print("\nnew restaurant " + str(restaurant2.id))
         # a new user that books in this new restaurant
-
         customer3 = create_user_on_db(randrange(1, 50000), role_id=2)
         assert customer3 is not None
 
@@ -1765,7 +1744,7 @@ class Test_GoOutSafeForm:
         response = mark_people_for_covid19(client, mark)
         assert response.status_code == 200
 
-        user = UserService.user_is_present(customer1.email.data, customer1.phone.data)
+        user = UserService.user_is_present(customer1.email, customer1.phone)
         assert user.is_positive is True
 
         response = search_contact_positive_covid19(client, mark)

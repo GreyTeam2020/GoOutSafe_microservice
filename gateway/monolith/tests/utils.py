@@ -414,8 +414,8 @@ def unmark_people_for_covid19(client, form: SearchUserForm):
     return client.post(
         "/unmark_positive",
         data=dict(
-            email=form.email,
-            phone=form.phone,
+            email=form.email.data,
+            phone=form.phone.data,
             submit=True,
             headers={"Content-type": "application/x-www-form-urlencoded"},
         ),
@@ -430,8 +430,8 @@ def search_contact_positive_covid19(client, form: SearchUserForm):
     return client.post(
         "/search_contacts",
         data=dict(
-            email=form.email,
-            phone=form.phone,
+            email=form.email.data,
+            phone=form.phone.data,
             submit=True,
             headers={"Content-type": "application/x-www-form-urlencoded"},
         ),

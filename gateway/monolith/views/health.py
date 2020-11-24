@@ -1,7 +1,7 @@
 from flask import Blueprint, redirect, render_template, request
 
 from monolith.auth import roles_allowed
-from monolith.database import db, User, Positive
+from monolith.services import UserService
 from monolith.forms import SearchUserForm
 
 from monolith.services import HealthyServices
@@ -43,8 +43,9 @@ def search_contacts():
     form = SearchUserForm()
     if request.method == "POST":
         if form.validate_on_submit():
-
-            if form.email.data == "" and form.phone.data == "":
+            email = form.email.data
+            phone = form.phone.data
+            if len(email) == 0 and len(phone) == 0:
                 return render_template(
                     "search_contacts.html",
                     _test="search_contacts_no_data",
@@ -52,7 +53,11 @@ def search_contacts():
                     message="Insert an email or a phone number",
                 )
 
-            contacts = HealthyServices.search_contacts(form.email.data, form.phone.data)
+            user = UserService.user_is_present(email, phone)
+            if user is None:
+                return render_template("/search_contacts.html", form=form, message="User not exist inside the sistem",
+                                       _test="search_contact_not_registered")
+            contacts = HealthyServices.search_contacts(email, phone)
             if isinstance(contacts, list):
                 return render_template(
                     "list_contacts.html", _test="list_page", contacts=contacts
