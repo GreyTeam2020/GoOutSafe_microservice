@@ -116,6 +116,8 @@ class RestaurantServices:
         url = "{}/create".format(RESTAURANTS_MICROSERVICE_URL)
         restaurant, status_code = HttpUtils.make_post_request(url, json_body)
         restaurant_model = RestaurantModel()
+        if restaurant is None:
+            return None
         restaurant_model.fill_from_json(restaurant)
         return restaurant_model
 
