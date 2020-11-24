@@ -1654,7 +1654,7 @@ class Test_GoOutSafeForm:
 
         # an user become covid19 positive
         mark = SearchUserForm()
-        mark.email.data = None
+        mark.email.data = ""
         mark.phone.data = customer1.phone
         response = mark_people_for_covid19(client, mark)
         assert response.status_code == 200
@@ -1732,7 +1732,7 @@ class Test_GoOutSafeForm:
         # a new owner of a restaurant
         owner2 = create_user_on_db(randrange(1, 50000), role_id=2)
         assert owner2 is not None
-        restaurant2 = create_restaurants_on_db(user_id=owner2.id)
+        restaurant2 = create_restaurants_on_db(user_id=owner2.id, user_email=owner2.email)
         assert restaurant2 is not None
 
         # a new user that books in this new restaurant
@@ -1753,7 +1753,7 @@ class Test_GoOutSafeForm:
 
         # an user become covid19 positive
         mark = SearchUserForm()
-        mark.email.data = None
+        mark.email.data = ""
         mark.phone.data = customer1.phone
         response = mark_people_for_covid19(client, mark)
         assert response.status_code == 200

@@ -178,9 +178,9 @@ class HealthyServices:
                 end = datetime.strptime(reservation["reservation_end"], "%Y-%m-%dT%H:%M:%SZ")
                 past_restaurants.append(
                         {
-                            "email": restaurant["owner_email"],
-                            "name": restaurant["name"],
-                            "date": start,
+                            "email": restaurant.owner_email,
+                            "name": restaurant.name,
+                            "date": start.strftime("%Y-%m-%dT%H:%M:%SZ"),
                         }
                 )
                 for one_reservation in all_reservations:
@@ -226,7 +226,7 @@ class HealthyServices:
                                     "email": user.email,
                                     "name": user.firstname,
                                     "restaurant_name": restaurant.name,
-                                    "date": start,
+                                    "date": start.strftime("%Y-%m-%dT%H:%M:%SZ"),
                                 }
                             )
                             friends = friends + one_reservation["people"]
@@ -246,9 +246,9 @@ class HealthyServices:
             if restaurant is not None:
                 future_restaurants.append(
                     {
-                        "email": restaurant["owner_email"],
-                        "name": restaurant["name"],
-                        "date": date,
+                        "email": restaurant.owner_email,
+                        "name": restaurant.name,
+                        "date": date.strftime("%Y-%m-%dT%H:%M:%SZ"),
                         "customer_email": customer_email,
                     }
                 )
