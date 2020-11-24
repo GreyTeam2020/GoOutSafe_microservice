@@ -914,18 +914,34 @@ class Test_GoOutSafeForm:
         # GET
         response = client.get("/restaurant/menu")
         assert response.status_code is 200
+        assert "menu_view_test" in response.data.decode("utf-8")
 
         rest = RestaurantServices.get_all_restaurants()[0]
         form = DishForm()
-        form.name.data = "Pasta"
-        form.price.data = 14
+        form.name = "Pasta"
+        form.price = 14
+
         with client.session_transaction() as session:
             session["RESTAURANT_ID"] = rest["id"]
+
         response = create_new_menu(client, form)
         assert response.status_code is 200
-        assert "menu_ok_test" in response.data.decode("utf-8")
+        assert "menu_view_test" in response.data.decode("utf-8")
+
+
+        #delete th dish
+        dish_id = None
+        dishes = RestaurantServices.get_dishes_restaurant(rest["id"])
+        for dish in dishes:
+            if dish.name == "Pasta":
+                print (dish.name)
+                dish_id = dish.id
+        if dish_id is not None:
+            RestaurantServices.delete_dish(dish_id)
 
         logout(client)
+
+
 
     def test_create_new_menu_restaurant_ko(self, client):
         """
