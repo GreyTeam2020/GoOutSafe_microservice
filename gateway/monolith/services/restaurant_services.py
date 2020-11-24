@@ -383,9 +383,10 @@ class RestaurantServices:
 
     @staticmethod
     def checkin_reservations(reservation_id: int):
-        HttpUtils.make_get_request(
+        response = HttpUtils.make_get_request(
             "{}/{}/checkin".format(BOOKING_MICROSERVICE_URL, reservation_id)
         )
+        return response
 
     @staticmethod
     def get_all_restaurants_info(restaurant_id: int):
@@ -467,7 +468,7 @@ class RestaurantServices:
         This method delete a dish
         :param dish_id: dish id
         """
-        url = "{}/menu/{}".format(RESTAURANTS_MICROSERVICE_URL, dish_id)
+        url = "{}/dishes/{}".format(RESTAURANTS_MICROSERVICE_URL, dish_id)
         response = HttpUtils.make_delete_request(url)
         return response
 
@@ -478,7 +479,7 @@ class RestaurantServices:
         the rating for each restaurants
         :return if the request is ok I rill return the request, otherwise None
         """
-        user = "{}//restaurants/calculate_rating_for_all_restaurant".format(
+        user = "{}/calculate_rating_for_all_restaurant".format(
             RESTAURANTS_MICROSERVICE_URL
         )
         return HttpUtils.make_get_request(user)

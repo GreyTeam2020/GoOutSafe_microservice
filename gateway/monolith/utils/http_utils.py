@@ -108,6 +108,7 @@ class HttpUtils:
         """
         try:
             current_app.logger.debug("Url is: {}".format(to_url))
+            current_app.logger.debug("Method: DELETE".format(to_url))
             response = requests.delete(to_url)
             current_app.logger.debug(
                 "Header Request: {}".format(response.request.headers)
