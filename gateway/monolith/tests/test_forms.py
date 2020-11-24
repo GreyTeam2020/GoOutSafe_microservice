@@ -567,7 +567,7 @@ class Test_GoOutSafeForm:
         assert response.status_code == 200
         assert "logged_test" in response.data.decode("utf-8")
 
-        user = UserService.user_is_present(user.email.data, user.phone.data)
+        user = UserService.user_is_present(user.email, user.phone)
         assert user.is_positive is True
 
         response = mark_people_for_covid19(client, mark)
@@ -632,12 +632,12 @@ class Test_GoOutSafeForm:
         register_user(client, user)
 
         unmark = SearchUserForm()
-        unmark.email.data = user.email
-        unmark.phone.data = user.phone
+        unmark.email.data = user.email.data
+        unmark.phone.data = user.phone.data
         response = unmark_people_for_covid19(client, unmark)
         assert response.status_code == 401
 
-        q_user = get_user_with_email(user.email)
+        q_user = UserService.user_is_present(user.email.data, user.phone.data)
         del_user_on_db(q_user.id)
 
     def test_unmark_positive_ko_user_not_positive(self, client):
