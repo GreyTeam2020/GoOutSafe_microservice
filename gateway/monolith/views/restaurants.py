@@ -251,7 +251,6 @@ def my_menu():
             dish.price = form.data["price"]
             dish.restaurant_id = session["RESTAURANT_ID"]
             result = RestaurantServices.insert_dish(dish)
-            _test = "menu_ok_test"
             if result is None:
                 return render_template(
                     "restaurant_menu.html",

@@ -16,6 +16,7 @@ services:
             - user_api
             - sendemail_api
             - restaurants_api
+            - restaurants_api_2
         build: ./gateway
         volumes:
             - ./gateway/db:/code/monolith/db
@@ -31,6 +32,8 @@ services:
         volumes:
             - ./restaurants_microservice:/code
     restaurants_api_2:
+        depends_on:
+            - restaurants_api
         build: ./restaurants_microservice
         volumes:
             - ./restaurants_microservice:/code
