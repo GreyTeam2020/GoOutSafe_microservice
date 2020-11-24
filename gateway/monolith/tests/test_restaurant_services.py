@@ -6,6 +6,7 @@ from monolith.services.restaurant_services import RestaurantServices
 from datetime import datetime
 from monolith.services.booking_services import BookingServices
 from monolith.model.dish_model import DishModel
+from monolith.model.table_model import TableModel
 
 from monolith.tests.utils import (
     get_user_with_email,
@@ -396,3 +397,10 @@ class Test_RestaurantServices:
         assert all_people[2] == 0
         del_restaurant_on_db(restaurant_one.id)
         del_user_on_db(owner_one.id)
+
+    def test_create_table_model(self):
+        table = TableModel()
+        json = {"id": 45, "name": "Table45", "max_seats": 6, "restaurant_id": 1, "available": True}
+        table.fill_from_json(json)
+
+        assert json["name"] == (table.serialize())["name"]
