@@ -359,7 +359,7 @@ class UserService:
         if email is None and phone is None:
             return "Insert an email or a phone number"
 
-        if email != "":
+        if email is not None and len(email) != 0:
             body = {"key": "email", "value": email}
         else:
             body = {"key": "phone", "value": phone}
