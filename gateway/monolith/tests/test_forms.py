@@ -278,29 +278,23 @@ class Test_GoOutSafeForm:
         - Go to photo gallery
         - check if the page is load correctly
         """
-        user = UserForm()
-        user.email.data = "cr7@gmail.com"
-        user.firstname.data = "Cristiano"
-        user.lastname.data = "Ronaldo"
-        user.password.data = "generic_pass"
-        user.dateofbirth.data = "12/12/1975"
-        user.phone.data = "123456654"
-        register_user(client, user)
-        response = login(client, user.email.data, user.password.data)
-        assert response is not None
-        assert "logged_test" in response.data.decode("utf-8")
+        user = create_user_on_db(randrange(100000), password="ciccio")
 
-        owner = create_user_on_db(randrange(100000))
+        response = login(client, user.email, "ciccio")
+        assert response.status_code == 200
+
+        owner = create_user_on_db(randrange(100000), role_id=2)
         assert owner is not None
         restaurant = create_restaurants_on_db(
             name="First", user_id=owner.id, user_email=owner.email
         )
         assert restaurant is not None
+
         response = visit_restaurant(client, restaurant.id)
         assert response.status_code == 200
         assert "visit_rest_test" in response.data.decode("utf-8")
 
-        user_stored = get_user_with_email(user.email.data)
+        user_stored = get_user_with_email(user.email)
         response = visit_photo_gallery(client)
         ## the user is a customer and not a operator
         assert response.status_code == 401
@@ -406,11 +400,11 @@ class Test_GoOutSafeForm:
         response = login(client, user.email, form.password.data)
         assert response.status_code == 200
 
-        response = visit_reservation(
-            client, from_date="2013-10-07", to_date="2014-10-07", email=user.email
+        response = visit_customer_reservation(
+            client, from_date="2013-10-07T00:00:00Z", to_date="2014-10-07T00:00:00Z"
         )
         assert response.status_code == 200
-        assert "restaurant_reservations_test" in response.data.decode("utf-8")
+        assert "customer_reservations_test" in response.data.decode("utf-8")
 
         response = logout(client)
         assert response.status_code == 200

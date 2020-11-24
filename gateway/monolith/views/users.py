@@ -138,6 +138,7 @@ def myreservation():
         reservations_as_list=reservations_as_list,
         my_date_formatter_iso=my_date_formatter_iso,
         form=form,
+        _test="customer_reservations_test",
     )
 
 

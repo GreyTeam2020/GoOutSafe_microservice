@@ -134,6 +134,18 @@ def visit_reservation(client, from_date, to_date, email):
         follow_redirects=True,
     )
 
+def visit_customer_reservation(client, from_date, to_date):
+    """
+    This perform the URL to visit the reservatioin of a restaurants
+    ----- This is an example of URL --
+    http://localhost:5000/list_reservations?fromDate=2013-10-07&toDate=2014-10-07&email=john.doe@email.com
+    """
+    return client.get(
+        "/customer/reservations?fromDate={}&toDate={}".format(
+            from_date, to_date
+        ),
+        follow_redirects=True,
+    )
 
 def make_revew(client, restaurant_id: int, form: ReviewForm):
     """
@@ -283,11 +295,14 @@ def get_rest_with_name(name):
     return RestaurantServices.get_restaurants_by_keyword(name)[0]
 
 
-def create_user_on_db(ran: int = randrange(100000), role_id: int = 3):
+def create_user_on_db(ran: int = randrange(100000), role_id: int = 3, password = None):
     form = UserForm()
     form.firstname.data = "User_{}".format(ran)
     form.lastname.data = "user_{}".format(ran)
-    form.password.data = "Alibaba{}".format(ran)
+    if password is None:
+        form.password.data = "Alibaba{}".format(ran)
+    else:
+        form.password.data = password
     form.phone.data = "1234562344{}".format(ran)
     form.dateofbirth.data = "1985-12-12"
     form.email.data = "user{}@user.edu".format(str(ran))
