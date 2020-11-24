@@ -791,7 +791,7 @@ class Test_GoOutSafeForm:
         assert response.status_code == 200
 
         mark = SearchUserForm()
-        mark.email.data = user.email
+        mark.email.data = user.email.data
         mark.phone.data = ""
         response = mark_people_for_covid19(client, mark)
         assert response.status_code == 200
@@ -1066,11 +1066,12 @@ class Test_GoOutSafeForm:
         client.get("/user/data")
 
         # POST
+        name = "Stefano"
         response = client.post(
             "/user/data",
             data=dict(
                 email=form.email.data,
-                firstname="Stefano",
+                firstname=name,
                 lastname="Lavori",
                 dateofbirth="22/03/1998",
                 phone = "123434323432",
@@ -1080,15 +1081,25 @@ class Test_GoOutSafeForm:
         )
 
         assert response.status_code == 200
-        assert "Hi Stefano" in response.data.decode("utf-8")
+        user = UserService.user_is_present(form.email.data)
+        assert user.firstname == name
 
     def test_delete_user(self, client):
         """
         test delete user url
         """
-        email = "steve@apple.com"
-        password = "12345678"
-        response = login(client, email, password)
+        form = UserForm()
+        form.firstname.data = "user_{}".format(randrange(10000))
+        form.lastname.data = "user_{}".format(randrange(10000))
+        form.password.data = "pass_{}".format(randrange(10000))
+        form.phone.data = "12345{}".format(randrange(10000))
+        form.dateofbirth.data = "1995-12-12"
+        form.email.data = "alibaba{}@alibaba.com".format(randrange(10000))
+        result = UserService.create_user(form, 2)
+        assert result is True
+        assert result < 300
+
+        response = login(client, form.email.data, form.password.data)
         assert response.status_code == 200
         assert "logged_test" in response.data.decode("utf-8")
 

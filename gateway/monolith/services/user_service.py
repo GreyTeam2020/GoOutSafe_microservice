@@ -257,7 +257,7 @@ class UserService:
         return user
 
     @staticmethod
-    def delete_user(user_id: int = None, email: str = ""):
+    def delete_user(user_id: int = None):
         try:
             url = "{}/delete/{}".format(USER_MICROSERVICE_URL, str(user_id))
             current_app.logger.debug("Url is: {}".format(url))

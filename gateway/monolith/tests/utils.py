@@ -338,22 +338,10 @@ def create_restaurants_on_db(
 
 def del_user_on_db(id):
     UserService.delete_user(user_id=id)
-    """
-    delete_positive_with_user_id(id, marked=True)
-    del_booking_with_user_id(id)
-    """
 
 
 def del_restaurant_on_db(id):
     RestaurantServices.delete_restaurant(id)
-    """
-    db.session.query(OpeningHours).filter_by(restaurant_id=id).delete()
-    db.session.commit()
-    q = db.session.query(Restaurant).filter_by(id=id).delete()
-    db.session.commit()
-    db.session.query(Menu).filter_by(restaurant_id=id).delete()
-    db.session.commit()
-    """
 
 
 def del_time_for_rest(id):
