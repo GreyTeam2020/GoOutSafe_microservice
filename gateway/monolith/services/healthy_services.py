@@ -69,11 +69,11 @@ class HealthyServices:
         # API: get all reservation of the customer between date_marking and date_marking -14
         date_marking = datetime.strptime(date_marking, "%Y-%m-%d")
         to_date = date_marking - timedelta(days=14)
-        reservations_customer = BookingServices.get_reservation_by_constraint(user_id, from_data=date_marking, to_data=to_date)
+        reservations_customer = BookingServices.get_reservation_by_constraint(user_id, from_data=to_date, to_data=date_marking)
 
         i = 1
         if reservations_customer is not None:
-            all_reservations = BookingServices.get_reservation_by_constraint(from_data=date_marking, to_data=to_date)
+            all_reservations = BookingServices.get_reservation_by_constraint(from_data=to_date, to_data=date_marking)
             if all_reservations is None:
                 return None
 
@@ -160,13 +160,13 @@ class HealthyServices:
         # API: get all reservation of the customer between date_marking and date_marking -14
         date_marking = datetime.strptime(date_marking, "%Y-%m-%d")
         to_date = date_marking - timedelta(days=14)
-        reservations_customer = BookingServices.get_reservation_by_constraint(user_id, from_data=date_marking,
-                                                                              to_data=to_date)
+        reservations_customer = BookingServices.get_reservation_by_constraint(user_id, from_data=to_date,
+                                                                              to_data=date_marking)
 
         if reservations_customer is not None:
 
             # API: get all reservations between date_marking and date_m -14
-            all_reservations = BookingServices.get_reservation_by_constraint(from_data=date_marking, to_data=to_date)
+            all_reservations = BookingServices.get_reservation_by_constraint(from_data=to_date, to_data=date_marking)
             for reservation in reservations_customer:
                 restaurant_id = reservation["table"]["restaurant"]["id"]
                 restaurant = RestaurantServices.get_rest_by_id(restaurant_id)
@@ -237,7 +237,7 @@ class HealthyServices:
             customer_email = user["email"]
 
         # API booking: get all future booking of the customer
-        future_reservations = BookingServices.get_reservation_by_constraint(user_id, from_data=date_marking, to_data=to_date)
+        future_reservations = BookingServices.get_reservation_by_constraint(user_id, from_data=to_date, to_data=date_marking)
         for future_reservation in future_reservations:
             date = datetime.strptime(reservation["reservation_date"], "%Y-%m-%dT%H:%M:%SZ")
             restaurant_id = future_reservation["table"]["restaurant"]["id"]

@@ -24,6 +24,13 @@ def mark_positive():
         if form.validate_on_submit():
             email = form.email.data
             phone = form.phone.data
+            if len(email) == 0 and len(phone) == 0:
+                return render_template(
+                    "mark_positive.html",
+                    _test="search_contacts_no_data",
+                    form=form,
+                    message="Insert an email or a phone number",
+                )
             message = HealthyServices.mark_positive(email, phone)
             if len(message) == 0:
                 return redirect("/")

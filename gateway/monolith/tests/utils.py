@@ -520,35 +520,6 @@ def create_random_booking(num: int, rest_id: int, user: UserModel, date_time, fr
     """
     people_number = len(friends.split(";")) + 1
     reservation = BookingServices.book(rest_id, user, date_time, people_number, friends)
-    """
-    books = []
-    for i in range(0, num):
-        # register on db the reservation
-        table = RestaurantTable()
-        table.name = user.lastname
-        table.max_seats = len(friends.split(";")) + 2
-        table.restaurant_id = rest_id
-        db.session.add(table)
-        db.session.commit()
-        new_reservation = Reservation()
-        new_reservation.reservation_date = date_time
-        new_reservation.reservation_end = date_time + timedelta(hours=i)
-        new_reservation.customer_id = user.id
-        new_reservation.table_id = table.id
-        friends = friends.split(";")
-        new_reservation.people_number = len(friends) + 1
-        db.session.add(new_reservation)
-        db.session.flush()
-        for friend in friends:
-            friend_db = Friend()
-            friend_db.reservation_id = new_reservation.id
-            friend_db.email = friend
-            db.session.add(friend_db)
-            db.session.flush()
-        db.session.commit()
-        books.append(new_reservation)
-    return books
-    """
     return reservation
 
 def del_booking(reservation_id, customer_id):
