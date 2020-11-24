@@ -1421,11 +1421,10 @@ class Test_GoOutSafeForm:
         date_booking_1 = datetime(year=datetime.now().year,
                                   month=datetime.now().month,
                                   day=datetime.now().day,
-                                  hour=13) + timedelta(days=3)
+                                  hour=13) - timedelta(days=3)
         books1 = create_random_booking(
             1, restaurant.id, customer1, date_booking_1, "a@aa.com"
         )
-
         assert books1 is not None
 
         # a new user that books in the same restaurant of the previous one
@@ -1435,7 +1434,7 @@ class Test_GoOutSafeForm:
         date_booking_2 = datetime(year=datetime.now().year,
                                   month=datetime.now().month,
                                   day=datetime.now().day,
-                                  hour=13) +  timedelta(days=3)
+                                  hour=13) - timedelta(days=3)
         books2 = create_random_booking(
             1, restaurant.id, customer2, date_booking_2, "b@b.com"
         )

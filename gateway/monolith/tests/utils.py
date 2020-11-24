@@ -519,7 +519,7 @@ def create_random_booking(num: int, rest_id: int, user: UserModel, date_time, fr
     :return:
     """
     people_number = len(friends.split(";")) + 1
-    reservation = BookingServices.book(rest_id, user, date_time, people_number, friends)
+    reservation = BookingServices.book(rest_id, user, date_time, people_number, friends, True)
     return reservation
 
 def del_booking(reservation_id, customer_id):

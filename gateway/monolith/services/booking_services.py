@@ -4,7 +4,7 @@ from monolith.utils import HttpUtils
 
 class BookingServices:
     @staticmethod
-    def book(restaurant_id, current_user, py_datetime, people_number, raw_friends):
+    def book(restaurant_id, current_user, py_datetime, people_number, raw_friends, is_debug: bool = False):
         json = {
             "restaurant_id": int(restaurant_id),
             "user_id": int(current_user.id),
@@ -12,6 +12,8 @@ class BookingServices:
             "people_number": people_number,
             "raw_friends": raw_friends,
         }
+        if is_debug is True:
+            json["is_debug"] = True
         response, code = HttpUtils.make_post_request(BOOKING_MICROSERVICE_URL, json)
         return response
 
