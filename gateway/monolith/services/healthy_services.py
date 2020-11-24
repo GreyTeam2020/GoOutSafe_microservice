@@ -1,3 +1,4 @@
+from flask import current_app
 from monolith.utils.http_utils import HttpUtils
 from datetime import datetime, timedelta
 from monolith.services import UserService
@@ -69,11 +70,11 @@ class HealthyServices:
         # API: get all reservation of the customer between date_marking and date_marking -14
         date_marking = datetime.strptime(date_marking, "%Y-%m-%d")
         to_date = date_marking - timedelta(days=14)
-        reservations_customer = BookingServices.get_reservation_by_constraint(user_id, from_data=date_marking, to_data=to_date)
+        reservations_customer = BookingServices.get_reservation_by_constraint(user_id, from_data=to_date, to_data=date_marking)
 
         i = 1
         if reservations_customer is not None:
-            all_reservations = BookingServices.get_reservation_by_constraint(from_data=date_marking, to_data=to_date)
+            all_reservations = BookingServices.get_reservation_by_constraint(from_data=to_date, to_data=date_marking)
             if all_reservations is None:
                 return None
 
@@ -82,7 +83,7 @@ class HealthyServices:
 
                 start = datetime.strptime(reservation["reservation_date"], "%Y-%m-%dT%H:%M:%SZ")
                 end = datetime.strptime(reservation["reservation_end"], "%Y-%m-%dT%H:%M:%SZ")
-
+                current_app.logger.debug("I'm working with reserv from {} to {}".format(start, end))
                 for one_reservation in all_reservations:
                     restaurant_id_contact = one_reservation["table"]["restaurant"]["id"]
                     if restaurant_id_contact != restaurant_id:
@@ -96,8 +97,8 @@ class HealthyServices:
 
                         dayNumber = start.weekday()
                         restaurant_hours = []
-
-                        for opening in openings["openings"]:
+                        current_app.logger.debug("I got openings. Start is {}".format(dayNumber))
+                        for opening in openings:
                             if opening["week_day"] == dayNumber:
                                 restaurant_hours.append(datetime.strptime(opening["open_lunch"], "%H:%M"))
                                 restaurant_hours.append(datetime.strptime(opening["close_lunch"], "%H:%M"))
@@ -160,13 +161,13 @@ class HealthyServices:
         # API: get all reservation of the customer between date_marking and date_marking -14
         date_marking = datetime.strptime(date_marking, "%Y-%m-%d")
         to_date = date_marking - timedelta(days=14)
-        reservations_customer = BookingServices.get_reservation_by_constraint(user_id, from_data=date_marking,
-                                                                              to_data=to_date)
+        reservations_customer = BookingServices.get_reservation_by_constraint(user_id, from_data=to_date,
+                                                                              to_data=date_marking)
 
         if reservations_customer is not None:
 
             # API: get all reservations between date_marking and date_m -14
-            all_reservations = BookingServices.get_reservation_by_constraint(from_data=date_marking, to_data=to_date)
+            all_reservations = BookingServices.get_reservation_by_constraint(from_data=to_date, to_data=date_marking)
             for reservation in reservations_customer:
                 restaurant_id = reservation["table"]["restaurant"]["id"]
                 restaurant = RestaurantServices.get_rest_by_id(restaurant_id)
@@ -196,7 +197,7 @@ class HealthyServices:
 
                     dayNumber = start.weekday()
                     restaurant_hours = []
-                    for opening in openings["openings"]:
+                    for opening in openings:
                         if opening["week_day"] == dayNumber:
                             restaurant_hours.append(datetime.strptime(opening["open_lunch"], "%H:%M"))
                             restaurant_hours.append(datetime.strptime(opening["close_lunch"], "%H:%M"))
@@ -237,7 +238,7 @@ class HealthyServices:
             customer_email = user["email"]
 
         # API booking: get all future booking of the customer
-        future_reservations = BookingServices.get_reservation_by_constraint(user_id, from_data=date_marking, to_data=to_date)
+        future_reservations = BookingServices.get_reservation_by_constraint(user_id, from_data=to_date, to_data=date_marking)
         for future_reservation in future_reservations:
             date = datetime.strptime(reservation["reservation_date"], "%Y-%m-%dT%H:%M:%SZ")
             restaurant_id = future_reservation["table"]["restaurant"]["id"]

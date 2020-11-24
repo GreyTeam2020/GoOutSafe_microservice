@@ -257,7 +257,7 @@ class UserService:
         return user
 
     @staticmethod
-    def delete_user(user_id: int = None, email: str = ""):
+    def delete_user(user_id: int = None):
         try:
             url = "{}/delete/{}".format(USER_MICROSERVICE_URL, str(user_id))
             current_app.logger.debug("Url is: {}".format(url))
@@ -340,10 +340,10 @@ class UserService:
         This method perform the request to user microservices to make the user positive
         """
         current_app.logger.debug("Asking to mark. Called with: {} , {}".format(email, phone))
-        if email is not None and email is not "":
+        if email is not None and len(email) != 0:
             key = "email"
             value = email
-        elif phone is not None and phone is not "":
+        elif phone is not None and len(phone) != 0:
             key = "phone"
             value = phone
         else:
@@ -390,9 +390,9 @@ class UserService:
         """
         Search all possible contact for the user with email of phone
         """
-        if email is not None:
+        if email is not None and len(email) != 0:
             url = USER_MICROSERVICE_URL + "/positiveinfo/email/" + str(email)
-        elif phone is not None:
+        elif phone is not None and len(phone) != 0:
             url = USER_MICROSERVICE_URL + "/positiveinfo/phone/" + str(phone)
         else:
             return None

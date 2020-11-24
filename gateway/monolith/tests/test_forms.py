@@ -791,7 +791,7 @@ class Test_GoOutSafeForm:
         assert response.status_code == 200
 
         mark = SearchUserForm()
-        mark.email.data = user.email
+        mark.email.data = user.email.data
         mark.phone.data = ""
         response = mark_people_for_covid19(client, mark)
         assert response.status_code == 200
@@ -1082,11 +1082,12 @@ class Test_GoOutSafeForm:
         client.get("/user/data")
 
         # POST
+        name = "Stefano"
         response = client.post(
             "/user/data",
             data=dict(
                 email=form.email.data,
-                firstname="Stefano",
+                firstname=name,
                 lastname="Lavori",
                 dateofbirth="22/03/1998",
                 phone = "123434323432",
@@ -1096,15 +1097,25 @@ class Test_GoOutSafeForm:
         )
 
         assert response.status_code == 200
-        assert "Hi Stefano" in response.data.decode("utf-8")
+        user = UserService.user_is_present(form.email.data)
+        assert user.firstname == name
 
     def test_delete_user(self, client):
         """
         test delete user url
         """
-        email = "steve@apple.com"
-        password = "12345678"
-        response = login(client, email, password)
+        form = UserForm()
+        form.firstname.data = "user_{}".format(randrange(10000))
+        form.lastname.data = "user_{}".format(randrange(10000))
+        form.password.data = "pass_{}".format(randrange(10000))
+        form.phone.data = "12345{}".format(randrange(10000))
+        form.dateofbirth.data = "1995-12-12"
+        form.email.data = "alibaba{}@alibaba.com".format(randrange(10000))
+        result = UserService.create_user(form, 2)
+        assert result is True
+        assert result < 300
+
+        response = login(client, form.email.data, form.password.data)
         assert response.status_code == 200
         assert "logged_test" in response.data.decode("utf-8")
 
@@ -1399,38 +1410,36 @@ class Test_GoOutSafeForm:
         """
         # a new owner of a restaurant
 
-        owner = create_user_on_db(787436)
+        owner = create_user_on_db(randrange(1, 900000), role_id=2)
         assert owner is not None
-        restaurant = create_restaurants_on_db("Pepperwood", user_id=owner.id)
+        restaurant = create_restaurants_on_db(user_id=owner.id, user_email=owner.email)
         assert restaurant is not None
 
-        customer1 = create_user_on_db(787437)
+        customer1 = create_user_on_db(randrange(1, 900000))
         assert customer1 is not None
 
-        date_booking_1 = (
-            get_today_midnight()
-            - timedelta(days=datetime.today().weekday())
-            + timedelta(hours=13)
-        )
+        date_booking_1 = datetime(year=datetime.now().year,
+                                  month=datetime.now().month,
+                                  day=datetime.now().day,
+                                  hour=13) + timedelta(days=3)
         books1 = create_random_booking(
             1, restaurant.id, customer1, date_booking_1, "a@aa.com"
         )
 
-        assert len(books1) == 1
+        assert books1 is not None
 
         # a new user that books in the same restaurant of the previous one
-        customer2 = create_user_on_db(787438)
+        customer2 = create_user_on_db(randrange(1, 900000))
         assert customer2 is not None
 
-        date_booking_2 = (
-            get_today_midnight()
-            - timedelta(days=datetime.today().weekday())
-            + timedelta(hours=13)
-        )
+        date_booking_2 = datetime(year=datetime.now().year,
+                                  month=datetime.now().month,
+                                  day=datetime.now().day,
+                                  hour=13) +  timedelta(days=3)
         books2 = create_random_booking(
             1, restaurant.id, customer2, date_booking_2, "b@b.com"
         )
-        assert len(books2) == 1
+        assert books2 is not None
 
         response = login(client, "health_authority@gov.com", "nocovid")
         assert response.status_code == 200
@@ -1438,13 +1447,13 @@ class Test_GoOutSafeForm:
 
         # an user become covid19 positive
         mark = SearchUserForm()
-        mark.email = customer1.email
-        mark.phone = customer1.phone
+        mark.email.data = customer1.email
+        mark.phone.data = customer1.phone
         response = mark_people_for_covid19(client, mark)
         assert response.status_code == 200
         assert "logged_test" in response.data.decode("utf-8")
 
-        user = UserService.user_is_present(customer1.email.data, customer1.phone.data)
+        user = UserService.user_is_present(customer1.email, customer1.phone)
         assert user.is_positive is True
 
         response = search_contact_positive_covid19(client, mark)
@@ -1456,9 +1465,6 @@ class Test_GoOutSafeForm:
         del_user_on_db(customer2.id)
         del_restaurant_on_db(restaurant.id)
         del_user_on_db(owner.id)
-
-        q_restaurant = get_rest_with_name(restaurant.name)
-        assert q_restaurant is None
 
     def test_search_contacts_ok_email(self, client):
         """
@@ -1478,38 +1484,36 @@ class Test_GoOutSafeForm:
         """
         # a new owner of a restaurant
 
-        owner = create_user_on_db(randrange(1, 5000000), role_id=2)
+        owner = create_user_on_db(randrange(1, 900000), role_id=2)
         assert owner is not None
-        restaurant = create_restaurants_on_db("Pepperwood", user_id=owner.id)
+        restaurant = create_restaurants_on_db(user_id=owner.id, user_email=owner.email)
         assert restaurant is not None
 
         customer1 = create_user_on_db(randrange(1, 5000000))
         assert customer1 is not None
 
-        date_booking_1 = (
-            get_today_midnight()
-            - timedelta(days=datetime.today().weekday())
-            + timedelta(hours=13)
-        )
+        date_booking_1 = datetime(year=datetime.now().year,
+                                  month=datetime.now().month,
+                                  day=datetime.now().day,
+                                  hour=13) + timedelta(days=3)
         books1 = create_random_booking(
             1, restaurant.id, customer1, date_booking_1, "a@aa.com"
         )
 
-        assert len(books1) == 1
+        assert books1 is not None
 
         # a new user that books in the same restaurant of the previous one
         customer2 = create_user_on_db(randrange(1, 5000000))
         assert customer2 is not None
 
-        date_booking_2 = (
-            get_today_midnight()
-            - timedelta(days=datetime.today().weekday())
-            + timedelta(hours=13)
-        )
+        date_booking_2 = datetime(year=datetime.now().year,
+                                  month=datetime.now().month,
+                                  day=datetime.now().day,
+                                  hour=13) + timedelta(days=3)
         books2 = create_random_booking(
             1, restaurant.id, customer2, date_booking_2, "b@b.com"
         )
-        assert len(books2) == 1
+        assert books2 is not None
 
         response = login(client, "health_authority@gov.com", "nocovid")
         assert response.status_code == 200
@@ -1523,7 +1527,7 @@ class Test_GoOutSafeForm:
         assert response.status_code == 200
         assert "logged_test" in response.data.decode("utf-8")
 
-        user = UserService.user_is_present(customer1.email.data, customer1.phone.data)
+        user = UserService.user_is_present(customer1.email, customer1.phone)
         assert user.is_positive is True
 
         response = search_contact_positive_covid19(client, mark)
@@ -1562,30 +1566,28 @@ class Test_GoOutSafeForm:
         customer1 = create_user_on_db(randrange(1, 5000000))
         assert customer1 is not None
 
-        date_booking_1 = (
-            get_today_midnight()
-            - timedelta(days=datetime.today().weekday())
-            + timedelta(hours=13)
-        )
+        date_booking_1 = datetime(year=datetime.now().year,
+                                  month=datetime.now().month,
+                                  day=datetime.now().day,
+                                  hour=13) + timedelta(days=3)
         books1 = create_random_booking(
             1, restaurant.id, customer1, date_booking_1, "a@aa.com"
         )
 
-        assert len(books1) == 1
+        assert books1 is not None
 
         # a new user that books in the same restaurant of the previous one
         customer2 = create_user_on_db(randrange(1, 5000000))
         assert customer2 is not None
 
-        date_booking_2 = (
-            get_today_midnight()
-            - timedelta(days=datetime.today().weekday())
-            + timedelta(hours=13)
-        )
+        date_booking_2 = datetime(year=datetime.now().year,
+                                  month=datetime.now().month,
+                                  day=datetime.now().day,
+                                  hour=13) + timedelta(days=3)
         books2 = create_random_booking(
             1, restaurant.id, customer2, date_booking_2, "b@b.com"
         )
-        assert len(books2) == 1
+        assert books2 is not None
 
         response = login(client, "health_authority@gov.com", "nocovid")
         assert response.status_code == 200
@@ -1628,9 +1630,9 @@ class Test_GoOutSafeForm:
         :param client:
         """
         # a new owner of a restaurant
-        owner = create_user_on_db(randrange(1, 50000), role_id=2)
+        owner = create_user_on_db(randrange(1, 900000), role_id=2)
         assert owner is not None
-        restaurant = create_restaurants_on_db(user_id=owner.id)
+        restaurant = create_restaurants_on_db(user_id=owner.id, user_email=owner.email)
         assert restaurant is not None
 
         # a new client
@@ -1638,22 +1640,21 @@ class Test_GoOutSafeForm:
         assert customer1 is not None
 
         # this user books in the restaurant
-        date_booking_1 = (
-            get_today_midnight()
-            - timedelta(days=datetime.today().weekday())
-            + timedelta(hours=13)
-        )
+        date_booking_1 = datetime(year=datetime.now().year,
+                                  month=datetime.now().month,
+                                  day=datetime.now().day,
+                                  hour=13) + timedelta(days=3)
         books1 = create_random_booking(
             1, restaurant.id, customer1, date_booking_1, "b@b.com"
         )
-        assert len(books1) == 1
+        assert books1 is not None
 
         response = login(client, "health_authority@gov.com", "nocovid")
         assert response.status_code == 200
 
         # an user become covid19 positive
         mark = SearchUserForm()
-        mark.email.data = ""
+        mark.email.data = None
         mark.phone.data = customer1.phone
         response = mark_people_for_covid19(client, mark)
         assert response.status_code == 200
@@ -1714,7 +1715,7 @@ class Test_GoOutSafeForm:
         books1 = create_random_booking(
             1, restaurant.id, customer1, date_booking_1, "a@a.com"
         )
-        assert len(books1) == 1
+        assert books1 is not None
         # a new user that books in the same restaurant of the previous one
 
         customer2 = create_user_on_db(randrange(1, 50000))
@@ -1728,7 +1729,7 @@ class Test_GoOutSafeForm:
         books2 = create_random_booking(
             1, restaurant.id, customer2, date_booking_2, "b@b.com"
         )
-        assert len(books2) == 1
+        assert books2 is not None
 
         # a new owner of a restaurant
         owner2 = create_user_on_db(randrange(1, 50000), role_id=2)
@@ -1748,14 +1749,14 @@ class Test_GoOutSafeForm:
         books3 = create_random_booking(
             1, restaurant2.id, customer3, date_booking_3, "c@c.com"
         )
-        assert len(books3) == 1
+        assert books3 is not None
 
         response = login(client, "health_authority@gov.com", "nocovid")
         assert response.status_code == 200
 
         # an user become covid19 positive
         mark = SearchUserForm()
-        mark.email.data = ""
+        mark.email.data = None
         mark.phone.data = customer1.phone
         response = mark_people_for_covid19(client, mark)
         assert response.status_code == 200
