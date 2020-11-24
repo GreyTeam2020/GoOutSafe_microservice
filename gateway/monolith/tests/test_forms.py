@@ -1576,14 +1576,14 @@ class Test_GoOutSafeForm:
         assert restaurant is not None
 
         # a new client
-        customer1 = create_user_on_db(randrange(1, 5000000))
+        customer1 = create_user_on_db(randrange(1, 9000000))
         assert customer1 is not None
 
         # this user books in the restaurant
         date_booking_1 = datetime(year=datetime.now().year,
                                   month=datetime.now().month,
                                   day=datetime.now().day,
-                                  hour=13) - timedelta(days=3)
+                                  hour=13) - timedelta(days=26)
         books1 = create_random_booking(
             1, restaurant.id, customer1, date_booking_1, "b@b.com"
         )
@@ -1594,7 +1594,7 @@ class Test_GoOutSafeForm:
 
         # an user become covid19 positive
         mark = SearchUserForm()
-        mark.email.data = customer1.email
+        mark.email.data = ""
         mark.phone.data = customer1.phone
         response = mark_people_for_covid19(client, mark)
         assert response.status_code == 200
@@ -1603,7 +1603,6 @@ class Test_GoOutSafeForm:
         assert user.is_positive is True
 
         response = search_contact_positive_covid19(client, mark)
-        print(response.data.decode("utf-8"))
         assert response.status_code == 200
         assert "list_page" in response.data.decode("utf-8")
 
