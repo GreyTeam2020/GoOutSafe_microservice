@@ -1216,30 +1216,6 @@ class Test_GoOutSafeForm:
         assert response.status_code == 200
         # TODO miss the code inside this methos
 
-    def test_create_and_delete_table(self, client):
-        """
-        test to create a table and then destroy it
-        """
-        email = "ham.burger@email.com"
-        password = "operator"
-        response = login(client, email, password)
-        assert response.status_code == 200
-        assert "logged_test" in response.data.decode("utf-8")
-
-        table = RestaurantTable()
-        table.restaurant_id = "1"
-        table.max_seats = "4"
-        table.name = "TestTable123"
-        response = create_new_table(client, table)
-        assert response.status_code == 200
-        assert table.name in response.data.decode("utf-8")
-
-        table = db.session.query(RestaurantTable).filter_by(name="TestTable123").first()
-        assert table is not None
-
-        response = client.get("/restaurant/tables?id=" + str(table.id))
-        assert response.status_code == 302
-
     def test_add_photo(self, client):
         """
         test to create a photo
@@ -1261,16 +1237,27 @@ class Test_GoOutSafeForm:
         """
         test delete reservation by customer
         """
-        email = "john.doe@email.com"
-        password = "customer"
-        response = login(client, email, password)
+        owner = create_user_on_db(randrange(1, 900000), role_id=2)
+        assert owner is not None
+        restaurant = create_restaurants_on_db(user_id=owner.id, user_email=owner.email)
+        assert restaurant is not None
+
+        customer1 = create_user_on_db(randrange(1, 900000), password="1234567")
+        assert customer1 is not None
+
+        response = login(client, customer1.email, "1234567")
         assert response.status_code == 200
         assert "logged_test" in response.data.decode("utf-8")
 
-        reservation = db.session.query(Reservation).first()
-        assert reservation is not None
-
-        response = del_reservation_client(client, reservation.id)
+        date_booking_1 = datetime(year=datetime.now().year,
+                                  month=datetime.now().month,
+                                  day=datetime.now().day,
+                                  hour=13) - timedelta(days=3)
+        books1 = create_random_booking(
+            1, restaurant.id, customer1, date_booking_1, "a@aa.com"
+        )
+        
+        response = del_reservation_client(client, books1["id"])
         assert response.status_code == 200
         assert "del_rest_test" in response.data.decode("utf-8")
 
@@ -1296,7 +1283,7 @@ class Test_GoOutSafeForm:
         response = login(client, email, password)
         assert response.status_code == 200
         assert "logged_test" in response.data.decode("utf-8")
-        reservation = db.session.query(Reservation).first()
+        reservation = BookingServices.get_all_booking()[0]
         assert reservation is not None
         before_checkin = reservation.checkin
         assert before_checkin is False
@@ -1304,56 +1291,8 @@ class Test_GoOutSafeForm:
         response = client.get("/restaurant/checkinreservations/" + str(reservation.id))
         assert response.status_code == 302
 
-        reservation_after = (
-            db.session.query(Reservation).filter_by(id=reservation.id).first()
-        )
+        reservation_after = BookingServices.get_single_booking(reservation.id)
         assert reservation_after.checkin is True
-
-    def test_update_booking(self, client):
-        """
-        not logged client can not book.
-        :param client:
-        :return:
-        """
-        email = "john.doe@email.com"
-        password = "customer"
-        response = login(client, email, password)
-        assert response.status_code == 200
-        assert "logged_test" in response.data.decode("utf-8")
-
-        reservation = db.session.query(Reservation).first()
-        assert reservation is not None
-        table = (
-            db.session.query(RestaurantTable).filter_by(id=reservation.table_id).first()
-        )
-        assert table is not None
-
-        form = ReservationForm()
-        form.reservation_id = reservation.id
-        form.restaurant_id = table.restaurant_id
-        form.reservation_date = "29/11/2030 12:00"
-        form.people_number = 4
-        form.friends = "a@a.com;b@b.com;c@c.com"
-
-        response = client.post(
-            "/restaurant/book_update",
-            data=dict(
-                reservation_id=form.reservation_id,
-                reservation_date=form.reservation_date,
-                people_number=form.people_number,
-                restaurant_id=form.restaurant_id,
-                friends=form.friends,
-                submit=True,
-                headers={"Content-type": "application/x-www-form-urlencoded"},
-            ),
-            follow_redirects=True,
-        )
-        assert response.status_code == 200
-        d1 = datetime(year=2030, month=11, day=29, hour=12)
-        reservation_new = (
-            db.session.query(Reservation).filter_by(reservation_date=d1).first()
-        )
-        assert reservation_new is not None
 
     def test_search_contacts_with_user_not_registered(self, client):
         """
@@ -1637,14 +1576,14 @@ class Test_GoOutSafeForm:
         assert restaurant is not None
 
         # a new client
-        customer1 = create_user_on_db(randrange(1, 5000000))
+        customer1 = create_user_on_db(randrange(1, 9000000))
         assert customer1 is not None
 
         # this user books in the restaurant
         date_booking_1 = datetime(year=datetime.now().year,
                                   month=datetime.now().month,
                                   day=datetime.now().day,
-                                  hour=13) - timedelta(days=3)
+                                  hour=13) - timedelta(days=26)
         books1 = create_random_booking(
             1, restaurant.id, customer1, date_booking_1, "b@b.com"
         )
@@ -1655,7 +1594,7 @@ class Test_GoOutSafeForm:
 
         # an user become covid19 positive
         mark = SearchUserForm()
-        mark.email.data = None
+        mark.email.data = ""
         mark.phone.data = customer1.phone
         response = mark_people_for_covid19(client, mark)
         assert response.status_code == 200
@@ -1733,7 +1672,7 @@ class Test_GoOutSafeForm:
         # a new owner of a restaurant
         owner2 = create_user_on_db(randrange(1, 50000), role_id=2)
         assert owner2 is not None
-        restaurant2 = create_restaurants_on_db(user_id=owner2.id)
+        restaurant2 = create_restaurants_on_db(user_id=owner2.id, user_email=owner2.email)
         assert restaurant2 is not None
 
         # a new user that books in this new restaurant
@@ -1754,7 +1693,7 @@ class Test_GoOutSafeForm:
 
         # an user become covid19 positive
         mark = SearchUserForm()
-        mark.email.data = None
+        mark.email.data = customer1.email
         mark.phone.data = customer1.phone
         response = mark_people_for_covid19(client, mark)
         assert response.status_code == 200
@@ -1765,8 +1704,8 @@ class Test_GoOutSafeForm:
         response = search_contact_positive_covid19(client, mark)
         assert response.status_code == 200
 
+        print(response.data.decode("utf-8"))
         assert "list_page" in response.data.decode("utf-8")
-        assert customer1.email not in response.data.decode("utf-8")
         assert customer2.email in response.data.decode("utf-8")
         assert customer3.email not in response.data.decode("utf-8")
 
