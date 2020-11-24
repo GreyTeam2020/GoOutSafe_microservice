@@ -1010,14 +1010,14 @@ class Test_GoOutSafeForm:
 
         form = ReservationForm()
         form.restaurant_id = restaurant.id
-        form.reservation_date = "23/11/2020 10:00"
+        form.reservation_date = "23/11/2021 10:00"
         form.people_number = 2
         form.friends = "a@a.com"
 
         response = create_new_reservation(client, form)
         assert response.status_code == 200
         print(response.data.decode("utf-8"))
-        assert "closed" in response.data.decode("utf-8")
+        assert "Cannot place your booking." in response.data.decode("utf-8")
 
         del_restaurant_on_db(restaurant.id)
 
