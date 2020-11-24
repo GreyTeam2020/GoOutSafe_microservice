@@ -60,8 +60,9 @@ def search_contacts():
                     message="Insert an email or a phone number",
                 )
 
-            user = UserService.user_is_present(email, phone)
-            if user is None:
+            user_email = UserService.user_is_present(email)
+            user_phone = UserService.user_is_present(phone)
+            if user_email is None and user_phone is None:
                 return render_template("/search_contacts.html", form=form, message="User not exist inside the sistem",
                                        _test="search_contact_not_registered")
             contacts = HealthyServices.search_contacts(email, phone)
