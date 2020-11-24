@@ -125,11 +125,13 @@ class UserService:
         :return: use user if exist otherwise, it is return None
         """
         try:
-            url = "{}/user_by_email".format(USER_MICROSERVICE_URL)
+            url = USER_MICROSERVICE_URL
             json = {}
-            if email is not None:
+            if email is not None and len(email) != 0:
+                url = "{}/user_by_email".format(url)
                 json["email"] = email
             else:
+                url = "{}/user_by_phone".format(url)
                 json["phone"] = phone
             current_app.logger.debug("Url is {}".format(url))
             response = requests.post(url=url, json=json)
@@ -341,9 +343,11 @@ class UserService:
         """
         current_app.logger.debug("Asking to mark. Called with: {} , {}".format(email, phone))
         if email is not None and len(email) != 0:
+            current_app.logger.debug("marking with email because email len: {}".format(len(email)))
             key = "email"
             value = email
         elif phone is not None and len(phone) != 0:
+            current_app.logger.debug("marking with phone because phone len: {}".format(len(phone)))
             key = "phone"
             value = phone
         else:

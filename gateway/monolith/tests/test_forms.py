@@ -527,7 +527,7 @@ class Test_GoOutSafeForm:
         assert response.status_code == 200
 
         mark = SearchUserForm()
-        mark.email.data = ""
+        mark.email.data = None
         mark.phone.data = user.phone.data
         response = mark_people_for_covid19(client, mark)
         assert response.status_code == 200
@@ -1594,7 +1594,7 @@ class Test_GoOutSafeForm:
 
         # an user become covid19 positive
         mark = SearchUserForm()
-        mark.email.data = ""
+        mark.email.data = customer1.email
         mark.phone.data = customer1.phone
         response = mark_people_for_covid19(client, mark)
         assert response.status_code == 200
@@ -1603,6 +1603,7 @@ class Test_GoOutSafeForm:
         assert user.is_positive is True
 
         response = search_contact_positive_covid19(client, mark)
+        print(response.data.decode("utf-8"))
         assert response.status_code == 200
         assert "list_page" in response.data.decode("utf-8")
 
