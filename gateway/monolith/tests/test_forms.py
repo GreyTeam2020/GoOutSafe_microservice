@@ -335,23 +335,18 @@ class Test_GoOutSafeForm:
         register_user(client, user)
 
         mark = SearchUserForm()
-        mark.email.data = user.email
-        mark.phone.data = user.phone
+        mark.email.data = user.email.data
+        mark.phone.data = user.phone.data
         response = mark_people_for_covid19(client, mark)
         assert response.status_code == 401
 
-        q_user = get_user_with_email(user.email)
-        q_already_positive = (
-            db.session.query(Positive).filter_by(user_id=q_user.id, marked=True).first()
-        )
-
-        assert q_already_positive is None
-
+        user = UserService.user_is_present(user.email.data, user.phone.data)
+        assert user.is_positive is False
         response = logout(client)
         assert response.status_code == 200
         assert "not_logged_test" not in response.data.decode("utf-8")
 
-        del_user_on_db(q_user.id)
+        del_user_on_db(user.id)
 
     def test_mark_positive_ok(self, client):
         """
@@ -364,34 +359,31 @@ class Test_GoOutSafeForm:
         :param client:
         """
         user = UserForm()
-        user.email = "cr7@gmail.com"
-        user.firstname = "Cristiano"
-        user.lastname = "Ronaldo"
-        user.password = "Siii"
-        user.phone = "1234555"
-        user.dateofbirth = "12/12/1975"
+        user.email.data = "cr7@gmail.com"
+        user.firstname.data = "Cristiano"
+        user.lastname.data = "Ronaldo"
+        user.password.data = "Siiidasdasdasda"
+        user.phone.data = "1234555"
+        user.dateofbirth.data = "12/12/1975"
         register_user(client, user)
 
         response = login(client, "health_authority@gov.com", "nocovid")
         assert response.status_code == 200
 
         mark = SearchUserForm()
-        mark.email = user.email
-        mark.phone = user.phone
+        mark.email.data = user.email.data
+        mark.phone.data = user.phone.data
         response = mark_people_for_covid19(client, mark)
         assert response.status_code == 200
 
-        q_user = get_user_with_email(user.email)
-        q_already_positive = (
-            db.session.query(Positive).filter_by(user_id=q_user.id, marked=True).first()
-        )
-        assert q_already_positive is not None
+        user = UserService.user_is_present(user.email.data)
+        assert user.is_positive is True
 
         response = logout(client)
         assert response.status_code == 200
         assert "not_logged_test" not in response.data.decode("utf-8")
 
-        del_user_on_db(q_user.id)
+        del_user_on_db(user.id)
 
     def test_see_reservation_ok(self, client):
         """
@@ -436,11 +428,11 @@ class Test_GoOutSafeForm:
         assert response.status_code == 200
         assert "logged_test" in response.data.decode("utf-8")
 
-        trial_rest = db.session.query(Restaurant).all()[0]
+        trial_rest = RestaurantServices.get_all_restaurants()[0]
         form = ReviewForm()
-        form.stars = 3
-        form.review = "Good food"
-        response = make_revew(client, trial_rest.id, form)
+        form.stars.data = 3
+        form.review.data = "Good food"
+        response = make_revew(client, trial_rest["id"], form)
         assert response.status_code == 401
 
     def test_make_review_ko_operator(self, client):
@@ -453,11 +445,11 @@ class Test_GoOutSafeForm:
         assert response.status_code == 200
         assert "logged_test" in response.data.decode("utf-8")
 
-        trial_rest = db.session.query(Restaurant).all()[0]
+        trial_rest = RestaurantServices.get_all_restaurants()[0]
         form = ReviewForm()
-        form.stars = 3
-        form.review = "Good food"
-        response = make_revew(client, trial_rest.id, form)
+        form.stars.data = 3
+        form.review.data = "Good food"
+        response = make_revew(client, trial_rest["id"], form)
         assert response.status_code == 401
 
     def test_make_review_ok(self, client):
@@ -470,19 +462,20 @@ class Test_GoOutSafeForm:
         assert response.status_code == 200
         assert "logged_test" in response.data.decode("utf-8")
 
-        trial_rest = db.session.query(Restaurant).all()[0]
+        trial_rest = RestaurantServices.get_all_restaurants()[0]
         form = ReviewForm()
-        form.stars = 3
-        form.review = "Good food"
-        response = make_revew(client, trial_rest.id, form)
+        form.stars.data = 3
+        form.review.data = "Good food"
+        response = make_revew(client, trial_rest["id"], form)
         assert response.status_code == 200
         assert "review_done_test" in response.data.decode("utf-8")
 
         response = logout(client)
         assert response.status_code == 200
         assert "not_logged_test" not in response.data.decode("utf-8")
-        db.session.query(Review).filter_by(review=form.review).delete()
-        db.session.commit()
+        # TODO remove review
+        # db.session.query(Review).filter_by(review=form.review).delete()
+        # db.session.commit()
 
     def test_mark_positive_ok_email(self, client):
         """
@@ -498,7 +491,7 @@ class Test_GoOutSafeForm:
         user.email.data = "cr7@gmail.com"
         user.firstname.data = "Cristiano"
         user.lastname.data = "Ronaldo"
-        user.password.data = "Siii"
+        user.password.data = "Siiidasdasdasda"
         user.phone.data = "1234555"
         user.dateofbirth.data = "12/12/1975"
         register_user(client, user)
@@ -507,18 +500,15 @@ class Test_GoOutSafeForm:
         assert response.status_code == 200
 
         mark = SearchUserForm()
-        mark.email.data = user.email
+        mark.email.data = user.email.data
         mark.phone.data = ""
         response = mark_people_for_covid19(client, mark)
         assert response.status_code == 200
 
-        q_user = get_user_with_email(user.email)
-        q_already_positive = (
-            db.session.query(Positive).filter_by(user_id=q_user.id, marked=True).first()
-        )
-        assert q_already_positive is not None
+        user = UserService.user_is_present(user.email.data, user.phone.data)
+        assert user.is_positive is True
 
-        del_user_on_db(q_user.id)
+        del_user_on_db(user.id)
 
     def test_mark_positive_ok_phone(self, client):
         """
@@ -544,17 +534,14 @@ class Test_GoOutSafeForm:
 
         mark = SearchUserForm()
         mark.email.data = ""
-        mark.phone.data = user.phone
+        mark.phone.data = user.phone.data
         response = mark_people_for_covid19(client, mark)
         assert response.status_code == 200
 
-        q_user = get_user_with_email(user.email)
-        q_already_positive = (
-            db.session.query(Positive).filter_by(user_id=q_user.id, marked=True).first()
-        )
-        assert q_already_positive is not None
+        user = UserService.user_is_present(user.email.data, user.phone.data)
+        assert user.is_positive is True
 
-        del_user_on_db(q_user.id)
+        del_user_on_db(user.id)
 
     def test_mark_positive_ko_user_already_positive(self, client):
         """
@@ -580,10 +567,8 @@ class Test_GoOutSafeForm:
         assert response.status_code == 200
         assert "logged_test" in response.data.decode("utf-8")
 
-        q_already_positive = (
-            db.session.query(Positive).filter_by(user_id=user.id, marked=True).first()
-        )
-        assert q_already_positive is not None
+        user = UserService.user_is_present(user.email.data, user.phone.data)
+        assert user.is_positive is True
 
         response = mark_people_for_covid19(client, mark)
         assert response.status_code == 200
@@ -683,14 +668,10 @@ class Test_GoOutSafeForm:
         assert response.status_code == 200
         assert "unmark_positive_page" in response.data.decode("utf-8")
 
-        q_user = get_user_with_email(user.email)
-        q_already_positive = (
-            db.session.query(Positive).filter_by(user_id=q_user.id, marked=True).first()
-        )
+        user = UserService.user_is_present(user.email.data, user.phone.data)
+        assert user.is_positive is False
 
-        assert q_already_positive is None
-
-        del_user_on_db(q_user.id)
+        del_user_on_db(user.id)
 
     def test_unmark_positive_ko_user_not_registered(self, client):
         """
@@ -737,11 +718,8 @@ class Test_GoOutSafeForm:
         response = mark_people_for_covid19(client, mark)
         assert response.status_code == 200
 
-        q_user = get_user_with_email(user.email)
-        q_already_positive = (
-            db.session.query(Positive).filter_by(user_id=q_user.id, marked=True).first()
-        )
-        assert q_already_positive is not None
+        user = UserService.user_is_present(user.email.data, user.phone.data)
+        assert user.is_positive is True
 
         unmark = SearchUserForm()
         unmark.email.data = ""
@@ -751,13 +729,10 @@ class Test_GoOutSafeForm:
         assert response.status_code == 200
         assert "unmark_positive_page" in response.data.decode("utf-8")
 
-        q_user = get_user_with_email(user.email)
-        q_already_positive = (
-            db.session.query(Positive).filter_by(user_id=q_user.id, marked=True).first()
-        )
-        assert q_already_positive is not None
+        user = UserService.user_is_present(user.email.data, user.phone.data)
+        assert user.is_positive is True
 
-        del_user_on_db(q_user.id)
+        del_user_on_db(user.id)
 
     def test_unmark_positive_ok(self, client):
         """
@@ -787,21 +762,16 @@ class Test_GoOutSafeForm:
         response = mark_people_for_covid19(client, mark)
         assert response.status_code == 200
 
-        q_user = get_user_with_email(user.email)
-        q_already_positive = (
-            db.session.query(Positive).filter_by(user_id=q_user.id, marked=True).first()
-        )
-        assert q_already_positive is not None
+        user = UserService.user_is_present(user.email.data, user.phone.data)
+        assert user.is_positive is True
 
         response = unmark_people_for_covid19(client, mark)
         assert response.status_code == 200
 
-        q_already_positive = (
-            db.session.query(Positive).filter_by(user_id=q_user.id, marked=True).first()
-        )
-        assert q_already_positive is None
+        user = UserService.user_is_present(user.email.data, user.phone.data)
+        assert user.is_positive is False
 
-        del_user_on_db(q_user.id)
+        del_user_on_db(user.id)
 
     def test_unmark_positive_email(self, client):
         """
@@ -832,21 +802,16 @@ class Test_GoOutSafeForm:
         response = mark_people_for_covid19(client, mark)
         assert response.status_code == 200
 
-        q_user = get_user_with_email(user.email)
-        q_already_positive = (
-            db.session.query(Positive).filter_by(user_id=q_user.id, marked=True).first()
-        )
-        assert q_already_positive is not None
+        user = UserService.user_is_present(user.email.data, user.phone.data)
+        assert user.is_positive is True
 
         response = unmark_people_for_covid19(client, mark)
         assert response.status_code == 200
 
-        q_already_positive = (
-            db.session.query(Positive).filter_by(user_id=q_user.id, marked=True).first()
-        )
-        assert q_already_positive is None
+        user = UserService.user_is_present(user.email.data, user.phone.data)
+        assert user.is_positive is False
 
-        del_user_on_db(q_user.id)
+        del_user_on_db(user.id)
 
     def test_unmark_positive_ok_phone(self, client):
         """
@@ -877,21 +842,16 @@ class Test_GoOutSafeForm:
         response = mark_people_for_covid19(client, mark)
         assert response.status_code == 200
 
-        q_user = get_user_with_email(user.email)
-        q_already_positive = (
-            db.session.query(Positive).filter_by(user_id=q_user.id, marked=True).first()
-        )
-        assert q_already_positive is not None
+        user = UserService.user_is_present(user.email.data, user.phone.data)
+        assert user.is_positive is True
 
         response = unmark_people_for_covid19(client, mark)
         assert response.status_code == 200
 
-        q_already_positive = (
-            db.session.query(Positive).filter_by(user_id=q_user.id, marked=True).first()
-        )
-        assert q_already_positive is None
+        user = UserService.user_is_present(user.email.data, user.phone.data)
+        assert user.is_positive is False
 
-        del_user_on_db(q_user.id)
+        del_user_on_db(user.id)
 
     def test_search_contacts_with_positive_ko(self, client):
         """
@@ -1475,12 +1435,8 @@ class Test_GoOutSafeForm:
         assert response.status_code == 200
         assert "logged_test" in response.data.decode("utf-8")
 
-        q_already_positive = (
-            db.session.query(Positive)
-            .filter_by(user_id=customer1.id, marked=True)
-            .first()
-        )
-        assert q_already_positive is not None
+        user = UserService.user_is_present(customer1.email.data, customer1.phone.data)
+        assert user.is_positive is True
 
         response = search_contact_positive_covid19(client, mark)
         assert response.status_code == 200
@@ -1558,12 +1514,8 @@ class Test_GoOutSafeForm:
         assert response.status_code == 200
         assert "logged_test" in response.data.decode("utf-8")
 
-        q_already_positive = (
-            db.session.query(Positive)
-            .filter_by(user_id=customer1.id, marked=True)
-            .first()
-        )
-        assert q_already_positive is not None
+        user = UserService.user_is_present(customer1.email.data, customer1.phone.data)
+        assert user.is_positive is True
 
         response = search_contact_positive_covid19(client, mark)
         assert response.status_code == 200
@@ -1641,12 +1593,8 @@ class Test_GoOutSafeForm:
         assert response.status_code == 200
         assert "logged_test" in response.data.decode("utf-8")
 
-        q_already_positive = (
-            db.session.query(Positive)
-            .filter_by(user_id=customer1.id, marked=True)
-            .first()
-        )
-        assert q_already_positive is not None
+        user = UserService.user_is_present(customer1.email.data, customer1.phone.data)
+        assert user.is_positive is True
 
         response = search_contact_positive_covid19(client, mark)
         assert response.status_code == 200
@@ -1709,12 +1657,8 @@ class Test_GoOutSafeForm:
         response = mark_people_for_covid19(client, mark)
         assert response.status_code == 200
 
-        q_already_positive = (
-            db.session.query(Positive)
-            .filter_by(user_id=customer1.id, marked=True)
-            .first()
-        )
-        assert q_already_positive is not None
+        user = UserService.user_is_present(customer1.email.data, customer1.phone.data)
+        assert user.is_positive is True
 
         response = search_contact_positive_covid19(client, mark)
         assert response.status_code == 200
@@ -1828,12 +1772,8 @@ class Test_GoOutSafeForm:
         response = mark_people_for_covid19(client, mark)
         assert response.status_code == 200
 
-        q_already_positive = (
-            db.session.query(Positive)
-            .filter_by(user_id=customer1.id, marked=True)
-            .first()
-        )
-        assert q_already_positive is not None
+        user = UserService.user_is_present(customer1.email.data, customer1.phone.data)
+        assert user.is_positive is True
 
         response = search_contact_positive_covid19(client, mark)
         assert response.status_code == 200

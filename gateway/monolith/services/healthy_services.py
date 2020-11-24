@@ -26,7 +26,6 @@ class HealthyServices:
             return "Insert an email or a phone number"
         response = UserService.mark_positive(user_email, user_phone)
         if response is not None:
-            # call for API email_microservice
             contacts = HealthyServices.search_contacts_for_email(user_email, user_phone)
             SendEmailService.send_possible_contact(contacts)  ## We assume that is true
             return ""

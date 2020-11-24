@@ -92,8 +92,8 @@ def mark_people_for_covid19(client, form: SearchUserForm):
     return client.post(
         "/mark_positive",
         data=dict(
-            email=form.email,
-            phone=form.phone,
+            email=form.email.data,
+            phone=form.phone.data,
             submit=True,
             headers={"Content-type": "application/x-www-form-urlencoded"},
         ),
@@ -142,8 +142,8 @@ def make_revew(client, restaurant_id: int, form: ReviewForm):
     return client.post(
         "/restaurant/review/{}".format(restaurant_id),
         data=dict(
-            stars=form.stars,
-            review=form.review,
+            stars=form.stars.data,
+            review=form.review.data,
             submit=True,
             headers={"Content-type": "application/x-www-form-urlencoded"},
         ),
