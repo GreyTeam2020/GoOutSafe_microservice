@@ -1140,9 +1140,10 @@ class Test_GoOutSafeForm:
         """
         test to create a restaurant
         """
-        email = "ham.burger@email.com"
-        password = "operator"
-        response = login(client, email, password)
+        owner = create_user_on_db(randrange(1, 900000), role_id=2, password="1234567")
+        assert owner is not None
+
+        response = login(client, owner.email, "1234567")
         assert response.status_code == 200
         assert "logged_test" in response.data.decode("utf-8")
 
@@ -1152,8 +1153,8 @@ class Test_GoOutSafeForm:
 
         # POST
         restaurant = RestaurantForm()
-        restaurant.name = "Krusty Krab"
-        restaurant.phone = "0451245152"
+        restaurant.name = "Krusty Krab"+str(randrange(1, 900000))
+        restaurant.phone = "04512"+str(randrange(1, 900000))
         restaurant.lat = "1"
         restaurant.lon = "1"
         restaurant.n_tables = "1"
@@ -1167,6 +1168,10 @@ class Test_GoOutSafeForm:
         response = create_new_restaurant_with_form(client, restaurant)
         assert response.status_code == 200
         assert "Register your Restaurant" not in response.data.decode("utf-8")
+
+        restaurant = RestaurantServices.get_restaurants_by_keyword(restaurant.name)
+        del_restaurant_on_db(restaurant[0].id)
+        del_user_on_db(owner.id)
 
     def test_create_restaurant_already_form(self, client):
         """
