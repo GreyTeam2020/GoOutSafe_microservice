@@ -1256,43 +1256,73 @@ class Test_GoOutSafeForm:
         books1 = create_random_booking(
             1, restaurant.id, customer1, date_booking_1, "a@aa.com"
         )
-        
+
         response = del_reservation_client(client, books1["id"])
         assert response.status_code == 200
         assert "del_rest_test" in response.data.decode("utf-8")
+
+        del_booking_services(books1["id"], customer1.id)
+        del_user_on_db(customer1.id)
+        del_restaurant_on_db(restaurant.id)
+        del_user_on_db(owner.id)
 
     def test_list_customer_reservations(self, client):
         """
         test list customer reservations
         """
-        email = "john.doe@email.com"
-        password = "customer"
-        response = login(client, email, password)
+        customer1 = create_user_on_db(randrange(1, 900000), password="1234567")
+        assert customer1 is not None
+
+        response = login(client, customer1.email, "1234567")
         assert response.status_code == 200
         assert "logged_test" in response.data.decode("utf-8")
 
         response = get_reservation(client)
         assert response.status_code == 200
 
+        del_user_on_db(customer1.id)
+
     def test_operator_checkin(self, client):
         """
         test checkin
         """
-        email = "ham.burger@email.com"
-        password = "operator"
-        response = login(client, email, password)
+        owner = create_user_on_db(randrange(1, 900000), role_id=2, password="1234567")
+        assert owner is not None
+        restaurant = create_restaurants_on_db(user_id=owner.id, user_email=owner.email)
+        assert restaurant is not None
+
+        customer1 = create_user_on_db(randrange(1, 900000), password="1234567")
+        assert customer1 is not None
+
+        response = login(client, owner.email, "1234567")
+        print(response.data.decode("utf-8"))
         assert response.status_code == 200
         assert "logged_test" in response.data.decode("utf-8")
-        reservation = BookingServices.get_all_booking()[0]
+
+        date_booking_1 = datetime(year=datetime.now().year,
+                                  month=datetime.now().month,
+                                  day=datetime.now().day,
+                                  hour=13) - timedelta(days=3)
+        reservation = create_random_booking(
+            1, restaurant.id, customer1, date_booking_1, "a@aa.com"
+        )
+
+        reservation = BookingServices.get_single_booking(reservation["id"])
+
         assert reservation is not None
-        before_checkin = reservation.checkin
+        before_checkin = reservation["checkin"]
         assert before_checkin is False
 
-        response = client.get("/restaurant/checkinreservations/" + str(reservation.id))
+        response = client.get("/restaurant/checkinreservations/" + str(reservation["id"]))
         assert response.status_code == 302
 
-        reservation_after = BookingServices.get_single_booking(reservation.id)
-        assert reservation_after.checkin is True
+        reservation_after = BookingServices.get_single_booking(reservation["id"])
+        assert reservation_after["checkin"] is True
+
+        del_user_on_db(customer1.id)
+        del_restaurant_on_db(restaurant.id)
+        del_user_on_db(owner.id)
+        del_booking_services(reservation["id"], reservation["customer_id"])
 
     def test_search_contacts_with_user_not_registered(self, client):
         """
