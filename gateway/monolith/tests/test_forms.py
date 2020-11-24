@@ -713,8 +713,8 @@ class Test_GoOutSafeForm:
         assert response.status_code == 200
 
         mark = SearchUserForm()
-        mark.email.data = user.email
-        mark.phone.data = user.phone
+        mark.email.data = user.email.data
+        mark.phone.data = user.phone.data
         response = mark_people_for_covid19(client, mark)
         assert response.status_code == 200
 
@@ -729,7 +729,7 @@ class Test_GoOutSafeForm:
         assert response.status_code == 200
         assert "unmark_positive_page" in response.data.decode("utf-8")
 
-        user = UserService.user_is_present(user.email.data, user.phone.data)
+        user = UserService.user_is_present(user.email, user.phone)
         assert user.is_positive is True
 
         del_user_on_db(user.id)
@@ -757,8 +757,8 @@ class Test_GoOutSafeForm:
         assert response.status_code == 200
 
         mark = SearchUserForm()
-        mark.email.data = user.email
-        mark.phone.data = user.phone
+        mark.email.data = user.email.data
+        mark.phone.data = user.phone.data
         response = mark_people_for_covid19(client, mark)
         assert response.status_code == 200
 
@@ -768,7 +768,7 @@ class Test_GoOutSafeForm:
         response = unmark_people_for_covid19(client, mark)
         assert response.status_code == 200
 
-        user = UserService.user_is_present(user.email.data, user.phone.data)
+        user = UserService.user_is_present(user.email, user.phone)
         assert user.is_positive is False
 
         del_user_on_db(user.id)
@@ -848,7 +848,7 @@ class Test_GoOutSafeForm:
         response = unmark_people_for_covid19(client, mark)
         assert response.status_code == 200
 
-        user = UserService.user_is_present(user.email.data, user.phone.data)
+        user = UserService.user_is_present(user.email, user.phone)
         assert user.is_positive is False
 
         del_user_on_db(user.id)
