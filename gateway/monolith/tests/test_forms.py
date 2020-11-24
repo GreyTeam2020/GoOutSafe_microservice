@@ -1421,11 +1421,10 @@ class Test_GoOutSafeForm:
         date_booking_1 = datetime(year=datetime.now().year,
                                   month=datetime.now().month,
                                   day=datetime.now().day,
-                                  hour=13) + timedelta(days=3)
+                                  hour=13) - timedelta(days=3)
         books1 = create_random_booking(
             1, restaurant.id, customer1, date_booking_1, "a@aa.com"
         )
-
         assert books1 is not None
 
         # a new user that books in the same restaurant of the previous one
@@ -1435,7 +1434,7 @@ class Test_GoOutSafeForm:
         date_booking_2 = datetime(year=datetime.now().year,
                                   month=datetime.now().month,
                                   day=datetime.now().day,
-                                  hour=13) +  timedelta(days=3)
+                                  hour=13) - timedelta(days=3)
         books2 = create_random_booking(
             1, restaurant.id, customer2, date_booking_2, "b@b.com"
         )
@@ -1495,7 +1494,7 @@ class Test_GoOutSafeForm:
         date_booking_1 = datetime(year=datetime.now().year,
                                   month=datetime.now().month,
                                   day=datetime.now().day,
-                                  hour=13) + timedelta(days=3)
+                                  hour=13) - timedelta(days=3)
         books1 = create_random_booking(
             1, restaurant.id, customer1, date_booking_1, "a@aa.com"
         )
@@ -1509,7 +1508,7 @@ class Test_GoOutSafeForm:
         date_booking_2 = datetime(year=datetime.now().year,
                                   month=datetime.now().month,
                                   day=datetime.now().day,
-                                  hour=13) + timedelta(days=3)
+                                  hour=13) - timedelta(days=3)
         books2 = create_random_booking(
             1, restaurant.id, customer2, date_booking_2, "b@b.com"
         )
@@ -1569,7 +1568,7 @@ class Test_GoOutSafeForm:
         date_booking_1 = datetime(year=datetime.now().year,
                                   month=datetime.now().month,
                                   day=datetime.now().day,
-                                  hour=13) + timedelta(days=3)
+                                  hour=13) - timedelta(days=3)
         books1 = create_random_booking(
             1, restaurant.id, customer1, date_booking_1, "a@aa.com"
         )
@@ -1583,7 +1582,7 @@ class Test_GoOutSafeForm:
         date_booking_2 = datetime(year=datetime.now().year,
                                   month=datetime.now().month,
                                   day=datetime.now().day,
-                                  hour=13) + timedelta(days=3)
+                                  hour=13) - timedelta(days=3)
         books2 = create_random_booking(
             1, restaurant.id, customer2, date_booking_2, "b@b.com"
         )
@@ -1643,7 +1642,7 @@ class Test_GoOutSafeForm:
         date_booking_1 = datetime(year=datetime.now().year,
                                   month=datetime.now().month,
                                   day=datetime.now().day,
-                                  hour=13) + timedelta(days=3)
+                                  hour=13) - timedelta(days=3)
         books1 = create_random_booking(
             1, restaurant.id, customer1, date_booking_1, "b@b.com"
         )
@@ -1707,11 +1706,10 @@ class Test_GoOutSafeForm:
 
         # this user books in the restaurant
 
-        date_booking_1 = (
-            get_today_midnight()
-            - timedelta(days=datetime.today().weekday())
-            + timedelta(hours=13)
-        )
+        date_booking_1 = datetime(year=datetime.now().year,
+                                  month=datetime.now().month,
+                                  day=datetime.now().day,
+                                  hour=13) - timedelta(days=3)
         books1 = create_random_booking(
             1, restaurant.id, customer1, date_booking_1, "a@a.com"
         )
@@ -1721,11 +1719,10 @@ class Test_GoOutSafeForm:
         customer2 = create_user_on_db(randrange(1, 50000))
         assert customer2 is not None
 
-        date_booking_2 = (
-            get_today_midnight()
-            - timedelta(days=datetime.today().weekday())
-            + timedelta(hours=13)
-        )
+        date_booking_2 = datetime(year=datetime.now().year,
+                                  month=datetime.now().month,
+                                  day=datetime.now().day,
+                                  hour=13) - timedelta(days=3)
         books2 = create_random_booking(
             1, restaurant.id, customer2, date_booking_2, "b@b.com"
         )
@@ -1741,11 +1738,10 @@ class Test_GoOutSafeForm:
         customer3 = create_user_on_db(randrange(1, 50000), role_id=2)
         assert customer3 is not None
 
-        date_booking_3 = (
-            get_today_midnight()
-            - timedelta(days=datetime.today().weekday())
-            + timedelta(hours=13)
-        )
+        date_booking_3 = datetime(year=datetime.now().year,
+                                  month=datetime.now().month,
+                                  day=datetime.now().day,
+                                  hour=13) - timedelta(days=3)
         books3 = create_random_booking(
             1, restaurant2.id, customer3, date_booking_3, "c@c.com"
         )

@@ -19,7 +19,7 @@ class HttpUtils:
         """
         try:
             current_app.logger.debug("Url is: {}".format(to_url))
-            response = requests.get(to_url)
+            response = requests.get(to_url, timeout=2000)
             current_app.logger.debug(
                 "Header Request: {}".format(response.request.headers)
             )
@@ -49,7 +49,7 @@ class HttpUtils:
         try:
             current_app.logger.debug("Url is: {}".format(to_url))
             current_app.logger.debug("Body request is: {}".format(args))
-            response = requests.post(url=to_url, json=args)
+            response = requests.post(url=to_url, json=args, timeout=2000)
             current_app.logger.debug(
                 "Header Request: {}".format(response.request.headers)
             )
@@ -80,7 +80,7 @@ class HttpUtils:
         try:
             current_app.logger.debug("Url is: {}".format(to_url))
             current_app.logger.debug("Body request is: {}".format(args))
-            response = requests.put(url=to_url, json=args)
+            response = requests.put(url=to_url, json=args, timeout=2000)
             current_app.logger.debug(
                 "Header Request: {}".format(response.request.headers)
             )
@@ -99,6 +99,7 @@ class HttpUtils:
         current_app.logger.debug("Response is: {}".format(json))
         return json, response.status_code
 
+    @staticmethod
     def make_delete_request(to_url: str):
         """
         This method contains the code to make the request
@@ -109,7 +110,7 @@ class HttpUtils:
         try:
             current_app.logger.debug("Url is: {}".format(to_url))
             current_app.logger.debug("Method: DELETE".format(to_url))
-            response = requests.delete(to_url)
+            response = requests.delete(to_url, timeout=2000)
             current_app.logger.debug(
                 "Header Request: {}".format(response.request.headers)
             )
