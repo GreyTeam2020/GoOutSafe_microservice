@@ -1051,10 +1051,11 @@ class Test_GoOutSafeForm:
         user = UserForm()
         user.firstname.data = "Steve"
         user.lastname.data = "Jobs"
-        user.email.data = "steve@apple.com"
+        user.email.data = "steve{}@apple.com".format(randrange(100000))
         response = create_new_user_with_form(client, user, "operator")
 
         assert response.status_code == 200
+        print (response.data.decode("utf-8"))
         assert "logged_test" in response.data.decode("utf-8")
         user = UserService.user_is_present(user.email.data)
         del_user_on_db(user.id)
