@@ -2,7 +2,6 @@ import requests
 from flask import session, current_app, redirect
 from flask_login import current_user, login_user
 
-from monolith.database import db, Positive
 from monolith.forms import UserForm, LoginForm
 from monolith.app_constant import (
     USER_MICROSERVICE_URL,
@@ -10,6 +9,7 @@ from monolith.app_constant import (
     BOOKING_MICROSERVICE_URL,
 )
 from monolith.utils.http_utils import HttpUtils
+from monolith.services.restaurant_services import RestaurantServices
 from monolith.model import RestaurantModel
 from monolith.model import UserModel
 
@@ -236,24 +236,22 @@ class UserService:
 
     @staticmethod
     def delete_user(user_id: int = None):
-        try:
-            url = "{}/delete/{}".format(USER_MICROSERVICE_URL, str(user_id))
-            current_app.logger.debug("Url is: {}".format(url))
-            response = requests.delete(url)
-        except requests.exceptions.ConnectionError as ex:
-            current_app.logger.error(
-                "Error during the microservice call {}".format(str(ex))
-            )
+        user = UserService.get_user_by_id(user_id=user_id)
+        if user is None:
             return False
-        json = response.json()
-        if not response.ok:
-            current_app.logger.error("Error from USER microservice")
-            current_app.logger.error("Error received {}".format(response.reason))
-            current_app.logger.error("Error response received {}".format(json))
+        with current_app.test_request_context():
+            if user.role_id == 2 and "RESTAURANT_ID" in session:
+                restaurant_id = session["RESTAURANT_ID"]
+                response = RestaurantServices.delete_restaurant(restaurant_id=restaurant_id)
+                if response is False:
+                    current_app.logger.debug("Impossible delete restaurant")
+                    return False
+        url = "{}/delete/{}".format(USER_MICROSERVICE_URL, str(user_id))
+        response = HttpUtils.make_delete_request(url)
+        if response is not None:
+            return True
+        else:
             return False
-        current_app.logger.debug("User deleted")
-        current_app.logger.debug("Answer received: {}".format(current_app))
-        return True
 
     @staticmethod
     def is_positive(user_id: int):
