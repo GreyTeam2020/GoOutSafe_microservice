@@ -12,5 +12,6 @@ class TableModel:
         self.max_seats = json_obj["max_seats"]
         self.restaurant_id = json_obj["restaurant_id"]
         self.available = json_obj["available"]
+
     def serialize(self):
         return dict([(k, v) for k, v in self.__dict__.items() if k[0] != "_"])

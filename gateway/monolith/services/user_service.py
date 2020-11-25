@@ -176,25 +176,15 @@ class UserService:
             "firstname": firstname,
             "lastname": lastname,
         }
-        try:
-            if role_id == 3:
-                url = "{}/create_user".format(USER_MICROSERVICE_URL)
-            else:
-                url = "{}/create_operator".format(USER_MICROSERVICE_URL)
-            current_app.logger.debug("Url is: {}".format(url))
-            response = requests.post(url, json=json_request)
-        except requests.exceptions.ConnectionError as ex:
-            current_app.logger.error(
-                "Error during the microservice call {}".format(str(ex))
-            )
+        if role_id == 3:
+            url = "{}/create_user".format(USER_MICROSERVICE_URL)
+        else:
+            url = "{}/create_operator".format(USER_MICROSERVICE_URL)
+        response = HttpUtils.make_post_request(to_url=url, args=json_request)
+        if response[0] is None:
+            current_app.logger.debug("An error with code {} occurs".format(response[1]))
             return False
-        if not response.ok:
-            json = response.json()
-            current_app.logger.error("Error from USER microservice")
-            current_app.logger.error("Error received {}".format(response.reason))
-            current_app.logger.error("Error response received {}".format(json))
-            return False
-        current_app.logger.debug("User created")
+        current_app.logger.debug("User created and the response was {}".format(response[0]))
         return True
 
     @staticmethod
@@ -233,26 +223,12 @@ class UserService:
             "id": user_id,
         }
         current_app.logger.debug("Request body \n{}".format(json_request))
-        try:
-            url = "{}/data/".format(USER_MICROSERVICE_URL)
-            current_app.logger.debug("Url is: {}".format(url))
-            response = requests.put(url, json=json_request)
-            current_app.logger.debug(
-                "Header Request: {}".format(response.request.headers)
-            )
-            current_app.logger.debug("Body Request: {}".format(response.request.body))
-        except requests.exceptions.ConnectionError as ex:
-            current_app.logger.error(
-                "Error during the microservice call {}".format(str(ex))
-            )
+        url = "{}/data/".format(USER_MICROSERVICE_URL)
+        response = HttpUtils.make_put_request(to_url=url, args=json_request)
+        if response[0] is None:
+            current_app.logger.debug("An error with code occurs {}".format(response[1]))
             return None
-
-        if not response.ok:
-            current_app.logger.error("Error from USER microservice")
-            current_app.logger.error("Error received {}".format(response.reason))
-            # current_app.logger.error("Error response received {}".format(json))
-            return None
-        json = response.json()
+        json = response[0]
         current_app.logger.debug("Response: ".format(json))
         user = UserModel()
         user.fill_from_json(json)
@@ -282,11 +258,13 @@ class UserService:
     @staticmethod
     def is_positive(user_id: int):
         """
-        TODO implement it
         Given a userid i return if the user is currently positive
         :param user_id: user id of the user checked
         return: boolean if the user is positive
         """
+        user = UserService.get_user_by_id(user_id=user_id)
+        if user is not None:
+            return user.is_positive
         return False
 
     @staticmethod
@@ -341,13 +319,19 @@ class UserService:
         """
         This method perform the request to user microservices to make the user positive
         """
-        current_app.logger.debug("Asking to mark. Called with: {} , {}".format(email, phone))
+        current_app.logger.debug(
+            "Asking to mark. Called with: {} , {}".format(email, phone)
+        )
         if email is not None and len(email) != 0:
-            current_app.logger.debug("marking with email because email len: {}".format(len(email)))
+            current_app.logger.debug(
+                "marking with email because email len: {}".format(len(email))
+            )
             key = "email"
             value = email
         elif phone is not None and len(phone) != 0:
-            current_app.logger.debug("marking with phone because phone len: {}".format(len(phone)))
+            current_app.logger.debug(
+                "marking with phone because phone len: {}".format(len(phone))
+            )
             key = "phone"
             value = phone
         else:

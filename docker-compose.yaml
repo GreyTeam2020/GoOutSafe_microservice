@@ -13,6 +13,7 @@ services:
                     - user_api
                     - restaurants_api
                     - sendemail_api
+        restart: on-failure
     gooutsafe:
         depends_on:
             - user_api
@@ -25,27 +26,32 @@ services:
             - ./gateway:/code
         ports:
             - 80:5000
+        restart: on-failure
     user_api:
         build: ./users_microservice
         volumes:
             - ./users_microservice:/code
+        restart: on-failure
     restaurants_api:
         build: ./restaurants_microservice
         volumes:
             - ./restaurants_microservice:/code
+        restart: on-failure
     restaurants_api_2:
         depends_on:
             - restaurants_api
         build: ./restaurants_microservice
         volumes:
             - ./restaurants_microservice:/code
+        restart: on-failure
     booking_api:
-        restart: always
         build: ./booking_microservice
         volumes:
             - ./booking_microservice:/code
+        restart: on-failure
     sendemail_api:
         build: ./email_microservice
+        restart: on-failure
     celery:
         depends_on:
             - redis
@@ -55,6 +61,7 @@ services:
             -  redis
         volumes:
             - ./restaurants_microservice:/code/
+        restart: on-failure
     celery_send_email:
         depends_on:
             - redis_email
@@ -62,14 +69,15 @@ services:
         command: celery -A background.celery_app worker --loglevel=DEBUG
         links:
             - redis
+        restart: on-failure
     redis:
         image: "redis:alpine"
         container_name: rd01
-        restart: always
         expose:
             - "6379"
+        restart: on-failure
     redis_email:
         image: "redis:alpine"
-        restart: always
         container_name: rd02
         command: --port 6380
+        restart: on-failure

@@ -4,7 +4,14 @@ from monolith.utils import HttpUtils
 
 class BookingServices:
     @staticmethod
-    def book(restaurant_id, current_user, py_datetime, people_number, raw_friends, is_debug: bool = False):
+    def book(
+        restaurant_id,
+        current_user,
+        py_datetime,
+        people_number,
+        raw_friends,
+        is_debug: bool = False,
+    ):
         json = {
             "restaurant_id": int(restaurant_id),
             "user_id": int(current_user.id),
@@ -60,14 +67,20 @@ class BookingServices:
         return response
 
     @staticmethod
-    def get_reservation_by_constraint(user_id: int = None, from_data=None, to_data=None, restaurant_id: int = None):
+    def get_reservation_by_constraint(
+        user_id: int = None, from_data=None, to_data=None, restaurant_id: int = None
+    ):
         """"""
         url = BOOKING_MICROSERVICE_URL
         # add filters...
         if from_data:
-            url = HttpUtils.append_query(url, "fromDate", from_data.strftime("%Y-%m-%dT%H:%M:%SZ"))
+            url = HttpUtils.append_query(
+                url, "fromDate", from_data.strftime("%Y-%m-%dT%H:%M:%SZ")
+            )
         if to_data:
-            url = HttpUtils.append_query(url, "toDate", to_data.strftime("%Y-%m-%dT%H:%M:%SZ"))
+            url = HttpUtils.append_query(
+                url, "toDate", to_data.strftime("%Y-%m-%dT%H:%M:%SZ")
+            )
         if user_id:
             url = HttpUtils.append_query(url, "user_id", user_id)
         if restaurant_id:

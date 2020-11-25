@@ -1,17 +1,10 @@
-from datetime import datetime, timedelta
 from random import randrange
 
-from monolith.database import db, Positive
-from monolith.services import HealthyServices, UserService
+from monolith.services import HealthyServices
 from monolith.tests.utils import (
     create_user_on_db,
     del_user_on_db,
     positive_with_user_id,
-    get_user_with_email,
-    create_random_booking,
-    create_restaurants_on_db,
-    del_restaurant_on_db,
-    get_today_midnight,
 )
 
 

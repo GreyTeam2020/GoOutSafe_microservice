@@ -134,6 +134,7 @@ def visit_reservation(client, from_date, to_date, email):
         follow_redirects=True,
     )
 
+
 def visit_customer_reservation(client, from_date, to_date):
     """
     This perform the URL to visit the reservatioin of a restaurants
@@ -141,11 +142,10 @@ def visit_customer_reservation(client, from_date, to_date):
     http://localhost:5000/list_reservations?fromDate=2013-10-07&toDate=2014-10-07&email=john.doe@email.com
     """
     return client.get(
-        "/customer/reservations?fromDate={}&toDate={}".format(
-            from_date, to_date
-        ),
+        "/customer/reservations?fromDate={}&toDate={}".format(from_date, to_date),
         follow_redirects=True,
     )
+
 
 def make_revew(client, restaurant_id: int, form: ReviewForm):
     """
@@ -295,7 +295,7 @@ def get_rest_with_name(name):
     return RestaurantServices.get_restaurants_by_keyword(name)[0]
 
 
-def create_user_on_db(ran: int = randrange(100000), role_id: int = 3, password = None):
+def create_user_on_db(ran: int = randrange(100000), role_id: int = 3, password=None):
     form = UserForm()
     form.firstname.data = "User_{}".format(ran)
     form.lastname.data = "user_{}".format(ran)
@@ -393,6 +393,7 @@ def positive_with_user_id(user_id: int = None, marked: bool = True):
         if user.id == user_id and user.is_positive is marked:
             return user
     return None
+
 
 def unmark_people_for_covid19(client, form: SearchUserForm):
     """
@@ -519,8 +520,11 @@ def create_random_booking(num: int, rest_id: int, user: UserModel, date_time, fr
     :return:
     """
     people_number = len(friends.split(";")) + 1
-    reservation = BookingServices.book(rest_id, user, date_time, people_number, friends, True)
+    reservation = BookingServices.book(
+        rest_id, user, date_time, people_number, friends, True
+    )
     return reservation
+
 
 def del_booking(reservation_id, customer_id):
     return BookingServices.delete_book(reservation_id, customer_id)
