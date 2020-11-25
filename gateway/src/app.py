@@ -3,7 +3,7 @@ import logging
 import requests
 from flask import Flask
 import decimal
-from monolith.database import (
+from src.database import (
     db,
     User,
     Restaurant,
@@ -13,8 +13,8 @@ from monolith.database import (
     OpeningHours,
     Review,
 )
-from monolith.views import blueprints
-from monolith.auth import login_manager
+from src.views import blueprints
+from src.auth import login_manager
 import datetime
 
 logging.getLogger("urllib3").setLevel(logging.WARNING)

@@ -22,7 +22,7 @@ services:
             - restaurants_api_2
         build: ./gateway
         volumes:
-            - ./gateway/db:/code/monolith/db
+            - ./gateway/db:/code/src/db
             - ./gateway:/code
         ports:
             - 80:5000

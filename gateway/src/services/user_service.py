@@ -2,16 +2,16 @@ import requests
 from flask import session, current_app, redirect
 from flask_login import current_user, login_user
 
-from monolith.forms import UserForm, LoginForm
-from monolith.app_constant import (
+from src.forms import UserForm, LoginForm
+from src.app_constant import (
     USER_MICROSERVICE_URL,
     RESTAURANTS_MICROSERVICE_URL,
     BOOKING_MICROSERVICE_URL,
 )
-from monolith.utils.http_utils import HttpUtils
-from monolith.services.restaurant_services import RestaurantServices
-from monolith.model import RestaurantModel
-from monolith.model import UserModel
+from src.utils.http_utils import HttpUtils
+from src.services.restaurant_services import RestaurantServices
+from src.model import RestaurantModel
+from src.model import UserModel
 
 
 class UserService:

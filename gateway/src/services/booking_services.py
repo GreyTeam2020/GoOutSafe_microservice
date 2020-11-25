@@ -1,5 +1,5 @@
-from monolith.app_constant import BOOKING_MICROSERVICE_URL
-from monolith.utils import HttpUtils
+from src.app_constant import BOOKING_MICROSERVICE_URL
+from src.utils import HttpUtils
 
 
 class BookingServices:

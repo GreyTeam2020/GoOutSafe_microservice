@@ -1,8 +1,8 @@
 from datetime import time, timedelta, datetime
 from random import randrange
 
-from monolith.database import *
-from monolith.forms import (
+from src.database import *
+from src.forms import (
     RestaurantForm,
     SearchUserForm,
     ReviewForm,
@@ -11,9 +11,9 @@ from monolith.forms import (
     PhotoGalleryForm,
     UserForm,
 )
-from monolith.model import UserModel
-from monolith.services import *
-from monolith.services.booking_services import BookingServices
+from src.model import UserModel
+from src.services import *
+from src.services.booking_services import BookingServices
 
 
 def login(client, username, password):

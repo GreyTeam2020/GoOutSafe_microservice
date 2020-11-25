@@ -3,7 +3,7 @@ TODO
 """
 import pytest
 
-from monolith.app import create_app
+from src.app import create_app
 
 
 @pytest.fixture(autouse=True)

@@ -1,14 +1,14 @@
 from random import random, randrange
 
-from monolith.database import db, User, Restaurant, Review, MenuDish, Reservation
-from monolith.forms import RestaurantForm
-from monolith.services.restaurant_services import RestaurantServices
+from src.database import db, User, Restaurant, Review, MenuDish, Reservation
+from src.forms import RestaurantForm
+from src.services.restaurant_services import RestaurantServices
 from datetime import datetime
-from monolith.services.booking_services import BookingServices
-from monolith.model.dish_model import DishModel
-from monolith.model.table_model import TableModel
+from src.services.booking_services import BookingServices
+from src.model.dish_model import DishModel
+from src.model.table_model import TableModel
 
-from monolith.tests.utils import (
+from src.tests.utils import (
     get_user_with_email,
     create_restaurants_on_db,
     del_restaurant_on_db,

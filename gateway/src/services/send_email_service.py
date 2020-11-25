@@ -1,7 +1,7 @@
 import requests
 from flask import current_app
-from monolith.app_constant import EMAIL_MICROSERVICE_URL
-from monolith.utils.http_utils import HttpUtils
+from src.app_constant import EMAIL_MICROSERVICE_URL
+from src.utils.http_utils import HttpUtils
 
 
 class SendEmailService:

@@ -1,10 +1,10 @@
 from flask import Blueprint, redirect, render_template, request
 
-from monolith.auth import roles_allowed
-from monolith.services import UserService
-from monolith.forms import SearchUserForm
+from src.auth import roles_allowed
+from src.services import UserService
+from src.forms import SearchUserForm
 
-from monolith.services import HealthyServices
+from src.services import HealthyServices
 
 health = Blueprint("health", __name__)
 

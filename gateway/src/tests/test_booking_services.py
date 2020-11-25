@@ -1,9 +1,9 @@
 from random import randrange
 
 import datetime
-from monolith.database import db, User, Restaurant, Reservation, Positive
-from monolith.services import BookingServices
-from monolith.tests.utils import (
+from src.database import db, User, Restaurant, Reservation, Positive
+from src.services import BookingServices
+from src.tests.utils import (
     get_user_with_email,
     create_restaurants_on_db,
     create_user_on_db,

@@ -1,7 +1,7 @@
 from random import randrange
 
-from monolith.services import HealthyServices
-from monolith.tests.utils import (
+from src.services import HealthyServices
+from src.tests.utils import (
     create_user_on_db,
     del_user_on_db,
     positive_with_user_id,

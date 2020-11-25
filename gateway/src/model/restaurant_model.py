@@ -1,7 +1,7 @@
-from monolith.model.menu_model import MenuModel
-from monolith.model.dish_model import DishModel
-from monolith.model.photo_model import PhotoModel
-from monolith.model.opening_hours_model import OpeningHoursModel
+from src.model.menu_model import MenuModel
+from src.model.dish_model import DishModel
+from src.model.photo_model import PhotoModel
+from src.model.opening_hours_model import OpeningHoursModel
 
 
 class RestaurantModel:

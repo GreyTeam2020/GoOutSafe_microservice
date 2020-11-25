@@ -6,16 +6,16 @@ from flask import (
     session,
     current_app,
 )
-from monolith.forms import PhotoGalleryForm, ReviewForm, ReservationForm, DishForm
-from monolith.services import RestaurantServices
-from monolith.auth import roles_allowed
+from src.forms import PhotoGalleryForm, ReviewForm, ReservationForm, DishForm
+from src.services import RestaurantServices
+from src.auth import roles_allowed
 from flask_login import current_user, login_required
-from monolith.forms import RestaurantForm, RestaurantTableForm
-from monolith.utils.formatter import my_date_formatter_iso
-from monolith.services.user_service import UserService
-from monolith.model.dish_model import DishModel
-from monolith.model.table_model import TableModel
-from monolith.model.photo_model import PhotoModel
+from src.forms import RestaurantForm, RestaurantTableForm
+from src.utils.formatter import my_date_formatter_iso
+from src.services.user_service import UserService
+from src.model.dish_model import DishModel
+from src.model.table_model import TableModel
+from src.model.photo_model import PhotoModel
 
 restaurants = Blueprint("restaurants", __name__)
 

@@ -1,15 +1,15 @@
 from flask import Blueprint, render_template, request, current_app
-from monolith.forms import ReservationForm
-from monolith.auth import current_user
-from monolith.services.user_service import UserService
-from monolith.utils.formatter import my_date_formatter_iso
+from src.forms import ReservationForm
+from src.auth import current_user
+from src.services.user_service import UserService
+from src.utils.formatter import my_date_formatter_iso
 import datetime
 
 from flask_login import login_required
 
-from monolith.auth import roles_allowed
+from src.auth import roles_allowed
 
-from monolith.services import BookingServices
+from src.services import BookingServices
 
 book = Blueprint("book", __name__)
 
