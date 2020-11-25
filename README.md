@@ -1,7 +1,7 @@
 # GoOutSafe with microservices
 
 ![GitHub Workflow Status](https://img.shields.io/github/workflow/status/GreyTeam2020/GoOutSafe_microservice/docker-compose-actions-workflow?style=for-the-badge)
-
+![Codecov](https://img.shields.io/codecov/c/github/GreyTeam2020/GoOutSafe_microservice?style=for-the-badge)
 ## Table of Content
 
 - [How Build and run with Docker](#)
