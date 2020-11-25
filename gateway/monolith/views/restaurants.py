@@ -5,17 +5,6 @@ from flask import (
     request,
     session,
     current_app,
-    abort,
-)
-from monolith.database import (
-    db,
-    Restaurant,
-    User,
-    RestaurantTable,
-    OpeningHours,
-    Menu,
-    PhotoGallery,
-    MenuDish,
 )
 from monolith.forms import PhotoGalleryForm, ReviewForm, ReservationForm, DishForm
 from monolith.services import RestaurantServices
@@ -23,7 +12,6 @@ from monolith.auth import roles_allowed
 from flask_login import current_user, login_required
 from monolith.forms import RestaurantForm, RestaurantTableForm
 from monolith.utils.formatter import my_date_formatter_iso
-from monolith.app_constant import CALCULATE_RATING_RESTAURANT
 from monolith.services.user_service import UserService
 from monolith.model.dish_model import DishModel
 from monolith.model.table_model import TableModel
@@ -33,13 +21,8 @@ restaurants = Blueprint("restaurants", __name__)
 
 _max_seats = 6
 
-
 @restaurants.route("/restaurant/<restaurant_id>")
 def restaurant_sheet(restaurant_id):
-    """
-    Missing refactoring to services
-    :param restaurant_id:
-    """
     weekDaysLabel = [
         "Monday",
         "Tuesday",
@@ -49,18 +32,13 @@ def restaurant_sheet(restaurant_id):
         "Saturday",
         "Sunday",
     ]
-    # record = db.session.query(Restaurant).filter_by(id=int(restaurant_id)).all()
-    # if record is not None:
-    #    record = record[0]
 
     model = RestaurantServices.get_all_restaurants_info(restaurant_id)
     if model is None:
-        render_template("generic_error.html","An error occurred processing your request. Please try again later.")
-
-    # q_hours = db.session.query(OpeningHours).filter_by(restaurant_id=int(restaurant_id)).all()
-    # q_cuisine = db.session.query(Menu).filter_by(restaurant_id=int(restaurant_id)).all()
-    # photos = PhotoGallery.query.filter_by(restaurant_id=int(restaurant_id)).all()
-    # dishes = db.session.query(MenuDish).filter_by(restaurant_id=restaurant_id).all()
+        render_template(
+            "generic_error.html",
+            "An error occurred processing your request. Please try again later.",
+        )
 
     review_form = ReviewForm()
     book_form = ReservationForm()
@@ -138,18 +116,16 @@ def my_reservations():
     owner_id = current_user.id
     restaurant_id = session["RESTAURANT_ID"]
 
-
     # filter params
     fromDate = request.args.get("fromDate", type=str)
     toDate = request.args.get("toDate", type=str)
     email = request.args.get("email", type=str)
 
-
     reservations_as_list = RestaurantServices.get_reservation_rest(
         restaurant_id, fromDate, toDate
     )
     if reservations_as_list is None:
-        reservations_as_list =[]
+        reservations_as_list = []
 
     return render_template(
         "reservations.html",
@@ -165,8 +141,7 @@ def my_reservations():
 @roles_allowed(roles=["OPERATOR"])
 def my_data():
     """
-    TODO(vincenzopalazzo) add information
-    This API call give the possibility to the user TODO
+    This API call give the possibility to the user modify the restaurants
     """
     message = None
     if request.method == "POST":
@@ -184,7 +159,7 @@ def my_data():
         else:
             message = "Restaurant data has been modified."
 
-    # get the resturant info and fill the form
+    # get the restaurants info and fill the form
     # this part is both for POST and GET requests
     restaurant = RestaurantServices.get_rest_by_id(session["RESTAURANT_ID"])
     if restaurant is not None:
@@ -215,14 +190,20 @@ def my_tables():
         table.max_seats = int(request.form.get("capacity"))
         table.name = request.form.get("name")
         if RestaurantServices.add_table(table) is None:
-            return render_template("generic_error.html", "An error occured while inserting the table. Please try again later.")
+            return render_template(
+                "generic_error.html",
+                "An error occured while inserting the table. Please try again later.",
+            )
         ##
         return redirect("/restaurant/data")
 
     elif request.method == "GET":
         # delete the table specified by the get request
         if RestaurantServices.delete_table(request.args.get("id")) is None:
-            return render_template("generic_error.html", "An error occured while deleting the table. Please try again later.")
+            return render_template(
+                "generic_error.html",
+                "An error occured while deleting the table. Please try again later.",
+            )
 
         return redirect("/restaurant/data")
 
@@ -232,13 +213,14 @@ def my_tables():
 @roles_allowed(roles=["OPERATOR"])
 def my_menu():
     if "RESTAURANT_ID" in session:
-        #get all dishes
-        #dishes = MenuDish.query.filter_by(restaurant_id=session["RESTAURANT_ID"]).all()
+        # get all dishes
+        # dishes = MenuDish.query.filter_by(restaurant_id=session["RESTAURANT_ID"]).all()
         dishes = RestaurantServices.get_dishes_restaurant(session["RESTAURANT_ID"])
         if dishes is None:
-            return render_template("generic_error.html",
-                                   message="An error occured accessing data. Please try again later.")
-
+            return render_template(
+                "generic_error.html",
+                message="An error occured accessing data. Please try again later.",
+            )
     else:
         dishes = []
     _test = "menu_view_test"
@@ -287,7 +269,10 @@ def my_menu():
 def delete_dish(dish_id):
     result = RestaurantServices.delete_dish(dish_id)
     if result is None:
-        return render_template("generic_error.html", message = "An error occured deleting your dish. Please try again later.")
+        return render_template(
+            "generic_error.html",
+            message="An error occured deleting your dish. Please try again later.",
+        )
     return redirect("/restaurant/menu")
 
 
@@ -305,14 +290,20 @@ def my_photogallery():
             photo.restaurant_id = session["RESTAURANT_ID"]
             photo = RestaurantServices.add_photo(photo)
             if photo is None:
-                return render_template("generic_error.html", message="An error occured inserting your photo. PLease try again later.")
+                return render_template(
+                    "generic_error.html",
+                    message="An error occured inserting your photo. PLease try again later.",
+                )
 
         return redirect("/restaurant/photogallery")
     else:
-        #get all photos
+        # get all photos
         photos = RestaurantServices.get_photos_restaurants(session["RESTAURANT_ID"])
         if photos is None:
-            return render_template("generic_error.html", "An error occurred getting all photos. Please try again later.")
+            return render_template(
+                "generic_error.html",
+                "An error occurred getting all photos. Please try again later.",
+            )
         form = PhotoGalleryForm()
         return render_template("photogallery.html", form=form, photos=photos)
 

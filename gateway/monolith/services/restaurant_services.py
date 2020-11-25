@@ -241,7 +241,6 @@ class RestaurantServices:
             return None
         return True
 
-
     @staticmethod
     def get_photos_restaurants(restaurant_id: int):
         """
@@ -408,15 +407,15 @@ class RestaurantServices:
         photos = RestaurantServices.get_photos_restaurants(restaurant_id)
         if photos is None:
             return None
-        #it's already a model now
-        #model.bind_photo(photos)
+        # it's already a model now
+        # model.bind_photo(photos)
         model.photos = photos
 
         dishes = RestaurantServices.get_dishes_restaurant(restaurant_id)
         if dishes is None:
             return None
-        #it's already a model now
-        #model.bind_dish(dishes)
+        # it's already a model now
+        # model.bind_dish(dishes)
         model.dishes = dishes
 
         q_hours = RestaurantServices.get_opening_hours_restaurant(restaurant_id)
@@ -448,11 +447,12 @@ class RestaurantServices:
         :param dish: DishModel of the dish
         """
         url = "{}/{}/dishes".format(RESTAURANTS_MICROSERVICE_URL, dish.restaurant_id)
-        response, code =  HttpUtils.make_post_request(url, dish.serialize())
+        response, code = HttpUtils.make_post_request(url, dish.serialize())
         if response is None:
             return None
         else:
             return response
+
     @staticmethod
     def delete_restaurant(restaurant_id: int) -> bool:
         """

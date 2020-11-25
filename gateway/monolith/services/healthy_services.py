@@ -70,40 +70,66 @@ class HealthyServices:
         # API: get all reservation of the customer between date_marking and date_marking -14
         date_marking = datetime.strptime(date_marking, "%Y-%m-%d")
         to_date = date_marking - timedelta(days=14)
-        reservations_customer = BookingServices.get_reservation_by_constraint(user_id, from_data=to_date, to_data=date_marking)
+        reservations_customer = BookingServices.get_reservation_by_constraint(
+            user_id, from_data=to_date, to_data=date_marking
+        )
 
         i = 1
         if reservations_customer is not None:
-            all_reservations = BookingServices.get_reservation_by_constraint(from_data=to_date, to_data=date_marking)
+            all_reservations = BookingServices.get_reservation_by_constraint(
+                from_data=to_date, to_data=date_marking
+            )
             if all_reservations is None:
                 return None
 
             for reservation in reservations_customer:
                 restaurant_id = reservation["table"]["restaurant"]["id"]
 
-                start = datetime.strptime(reservation["reservation_date"], "%Y-%m-%dT%H:%M:%SZ")
-                end = datetime.strptime(reservation["reservation_end"], "%Y-%m-%dT%H:%M:%SZ")
-                current_app.logger.debug("I'm working with reserv from {} to {}".format(start, end))
+                start = datetime.strptime(
+                    reservation["reservation_date"], "%Y-%m-%dT%H:%M:%SZ"
+                )
+                end = datetime.strptime(
+                    reservation["reservation_end"], "%Y-%m-%dT%H:%M:%SZ"
+                )
+                current_app.logger.debug(
+                    "I'm working with reserv from {} to {}".format(start, end)
+                )
                 for one_reservation in all_reservations:
                     restaurant_id_contact = one_reservation["table"]["restaurant"]["id"]
                     if restaurant_id_contact != restaurant_id:
                         continue
-                    start_contact = datetime.strptime(one_reservation["reservation_date"], "%Y-%m-%dT%H:%M:%SZ")
-                    end_contact = datetime.strptime(one_reservation["reservation_end"], "%Y-%m-%dT%H:%M:%SZ")
+                    start_contact = datetime.strptime(
+                        one_reservation["reservation_date"], "%Y-%m-%dT%H:%M:%SZ"
+                    )
+                    end_contact = datetime.strptime(
+                        one_reservation["reservation_end"], "%Y-%m-%dT%H:%M:%SZ"
+                    )
 
                     # if people are in the same restaurant in the same day
                     if start.date() == start_contact.date():
-                        openings = RestaurantServices.get_opening_hours_restaurant(restaurant_id)
+                        openings = RestaurantServices.get_opening_hours_restaurant(
+                            restaurant_id
+                        )
 
                         dayNumber = start.weekday()
                         restaurant_hours = []
-                        current_app.logger.debug("I got openings. Start is {}".format(dayNumber))
+                        current_app.logger.debug(
+                            "I got openings. Start is {}".format(dayNumber)
+                        )
                         for opening in openings:
                             if opening["week_day"] == dayNumber:
-                                restaurant_hours.append(datetime.strptime(opening["open_lunch"], "%H:%M"))
-                                restaurant_hours.append(datetime.strptime(opening["close_lunch"], "%H:%M"))
-                                restaurant_hours.append(datetime.strptime(opening["open_dinner"], "%H:%M"))
-                                restaurant_hours.append(datetime.strptime(opening["close_dinner"], "%H:%M"))
+                                restaurant_hours.append(
+                                    datetime.strptime(opening["open_lunch"], "%H:%M")
+                                )
+                                restaurant_hours.append(
+                                    datetime.strptime(opening["close_lunch"], "%H:%M")
+                                )
+                                restaurant_hours.append(
+                                    datetime.strptime(opening["open_dinner"], "%H:%M")
+                                )
+                                restaurant_hours.append(
+                                    datetime.strptime(opening["close_dinner"], "%H:%M")
+                                )
 
                         # if people are in the restaurant at lunch or dinner
                         if (
@@ -118,7 +144,9 @@ class HealthyServices:
                             if (end_contact < start or start_contact > end) is False:
                                 # they are contacts!
                                 # API: get user email and name of the contact
-                                user = UserService.get_user_by_id(one_reservation["customer_id"])
+                                user = UserService.get_user_by_id(
+                                    one_reservation["customer_id"]
+                                )
                                 if user is not None:
                                     contact_users_GUI.append(
                                         [
@@ -162,48 +190,69 @@ class HealthyServices:
         # API: get all reservation of the customer between date_marking and date_marking -14
         date_marking = datetime.strptime(date_marking, "%Y-%m-%d")
         to_date = date_marking - timedelta(days=14)
-        reservations_customer = BookingServices.get_reservation_by_constraint(user_id, from_data=to_date,
-                                                                              to_data=date_marking)
+        reservations_customer = BookingServices.get_reservation_by_constraint(
+            user_id, from_data=to_date, to_data=date_marking
+        )
 
         if reservations_customer is not None:
 
             # API: get all reservations between date_marking and date_m -14
-            all_reservations = BookingServices.get_reservation_by_constraint(from_data=to_date, to_data=date_marking)
+            all_reservations = BookingServices.get_reservation_by_constraint(
+                from_data=to_date, to_data=date_marking
+            )
             for reservation in reservations_customer:
                 restaurant_id = reservation["table"]["restaurant"]["id"]
                 restaurant = RestaurantServices.get_rest_by_id(restaurant_id)
                 if restaurant is None:
                     continue
                 friends = friends + reservation["people"]
-                start = datetime.strptime(reservation["reservation_date"], "%Y-%m-%dT%H:%M:%SZ")
-                end = datetime.strptime(reservation["reservation_end"], "%Y-%m-%dT%H:%M:%SZ")
+                start = datetime.strptime(
+                    reservation["reservation_date"], "%Y-%m-%dT%H:%M:%SZ"
+                )
+                end = datetime.strptime(
+                    reservation["reservation_end"], "%Y-%m-%dT%H:%M:%SZ"
+                )
                 past_restaurants.append(
-                        {
-                            "email": restaurant.owner_email,
-                            "name": restaurant.name,
-                            "date": start.strftime("%Y-%m-%dT%H:%M:%SZ"),
-                        }
+                    {
+                        "email": restaurant.owner_email,
+                        "name": restaurant.name,
+                        "date": start.strftime("%Y-%m-%dT%H:%M:%SZ"),
+                    }
                 )
                 for one_reservation in all_reservations:
                     restaurant_id_contact = one_reservation["table"]["restaurant"]["id"]
                     if restaurant_id_contact != restaurant_id:
                         continue
 
-                    start_contact = datetime.strptime(one_reservation["reservation_date"], "%Y-%m-%dT%H:%M:%SZ")
-                    end_contact = datetime.strptime(one_reservation["reservation_end"], "%Y-%m-%dT%H:%M:%SZ")
+                    start_contact = datetime.strptime(
+                        one_reservation["reservation_date"], "%Y-%m-%dT%H:%M:%SZ"
+                    )
+                    end_contact = datetime.strptime(
+                        one_reservation["reservation_end"], "%Y-%m-%dT%H:%M:%SZ"
+                    )
                     # if people are in the same restaurant in the same day
                     if start.date() != start_contact.date():
                         continue
-                    openings = RestaurantServices.get_opening_hours_restaurant(restaurant_id)
+                    openings = RestaurantServices.get_opening_hours_restaurant(
+                        restaurant_id
+                    )
 
                     dayNumber = start.weekday()
                     restaurant_hours = []
                     for opening in openings:
                         if opening["week_day"] == dayNumber:
-                            restaurant_hours.append(datetime.strptime(opening["open_lunch"], "%H:%M"))
-                            restaurant_hours.append(datetime.strptime(opening["close_lunch"], "%H:%M"))
-                            restaurant_hours.append(datetime.strptime(opening["open_dinner"], "%H:%M"))
-                            restaurant_hours.append(datetime.strptime(opening["close_dinner"], "%H:%M"))
+                            restaurant_hours.append(
+                                datetime.strptime(opening["open_lunch"], "%H:%M")
+                            )
+                            restaurant_hours.append(
+                                datetime.strptime(opening["close_lunch"], "%H:%M")
+                            )
+                            restaurant_hours.append(
+                                datetime.strptime(opening["open_dinner"], "%H:%M")
+                            )
+                            restaurant_hours.append(
+                                datetime.strptime(opening["close_dinner"], "%H:%M")
+                            )
 
                     # if people are in the restaurant at lunch or dinner
                     if (
@@ -215,13 +264,12 @@ class HealthyServices:
                     ):
                         # people are in the same restaurant at lunch
                         # if they are in the same time
-                        if not (
-                            (end_contact < start)
-                            or (start_contact > end)
-                        ):
+                        if not ((end_contact < start) or (start_contact > end)):
                             # they are contacts!
                             # API: get user email and name of the contact
-                            user = UserService.get_user_by_id(one_reservation["customer_id"])
+                            user = UserService.get_user_by_id(
+                                one_reservation["customer_id"]
+                            )
                             if user is not None:
                                 contacts.append(
                                     {
@@ -240,9 +288,13 @@ class HealthyServices:
             customer_email = user["email"]
 
         # API booking: get all future booking of the customer
-        future_reservations = BookingServices.get_reservation_by_constraint(user_id, from_data=to_date, to_data=date_marking)
+        future_reservations = BookingServices.get_reservation_by_constraint(
+            user_id, from_data=to_date, to_data=date_marking
+        )
         for future_reservation in future_reservations:
-            date = datetime.strptime(reservation["reservation_date"], "%Y-%m-%dT%H:%M:%SZ")
+            date = datetime.strptime(
+                reservation["reservation_date"], "%Y-%m-%dT%H:%M:%SZ"
+            )
             restaurant_id = future_reservation["table"]["restaurant"]["id"]
             restaurant = RestaurantServices.get_rest_by_id(restaurant_id)
             if restaurant is not None:

@@ -20,15 +20,15 @@ git clone --recurse-submodules https://github.com/GreyTeam2020/GoOutSafe_microse
 
 ## How Build and run with Docker
 
-Nothing at the moment
+Clone the repository with the command above and run in the root folder the command
+`docker-compose up`
+This will make docker downloads all the file needed and start building the containers. 
+After that, you can browse to http://localhost/ to use the app.
 
 ## Run test on the host machine
 
-Nothing at the moment
-
-## Additional information
-
-Nothing at the moment
+You can't without docker this time, to run it on the host machine without docker you can run the monolith version
+available [here](https://github.com/GreyTeam2020/GoOutSafe_Primer2020)
 
 ## Developing
 

@@ -77,12 +77,9 @@ def index():
 def update_book():
     if current_user is not None and hasattr(current_user, "id"):
         # the date and time come as string, so I have to parse them and transform them in python datetime
-        #
         reservation_date = request.form.get("reservation_date")
         py_datetime = datetime.datetime.strptime(reservation_date, "%d/%m/%Y %H:%M")
-        #
         people_number = int(request.form.get("people_number"))
-        #
         reservation_id = int(request.form.get("reservation_id"))
         restaurant_id = int(request.form.get("restaurant_id"))
 
