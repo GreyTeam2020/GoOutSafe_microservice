@@ -372,6 +372,18 @@ class UserService:
         return list_user
 
     @staticmethod
+    def get_count_of_positive_user():
+        """
+        This method perform the request to get all positive user inside the database
+        """
+        url = "{}/report_positive".format(USER_MICROSERVICE_URL)
+        response = HttpUtils.make_get_request(url)
+        if response is None or len(response) == 0:
+            return []
+        users = response["users"]
+        return len(users)
+
+    @staticmethod
     def search_possible_contacts(email: str = None, phone: str = None):
         """
         Search all possible contact for the user with email of phone

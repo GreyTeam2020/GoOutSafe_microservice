@@ -23,18 +23,12 @@ def index():
         _test = "logged_test"
     if "ROLE" in session:
         if session["ROLE"] == "HEALTH":
-            n_positive = db.session.query(Positive).filter_by(marked=True).count()
-            n_healed = (
-                db.session.query(Positive)
-                .filter_by(marked=False)
-                .distinct(Positive.user_id)
-                .count()
-            )
+            positives = UserService.get_count_of_positive_user()
+
             return render_template(
                 "index_health.html",
                 _test=_test,
-                n_positive=n_positive,
-                n_healed=n_healed,
+                n_positive=positives
             )
         elif session["ROLE"] == "OPERATOR":
             if "RESTAURANT_ID" in session:
