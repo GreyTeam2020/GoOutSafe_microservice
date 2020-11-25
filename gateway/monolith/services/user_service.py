@@ -2,7 +2,6 @@ import requests
 from flask import session, current_app, redirect
 from flask_login import current_user, login_user
 
-from monolith.database import db, Positive
 from monolith.forms import UserForm, LoginForm
 from monolith.app_constant import (
     USER_MICROSERVICE_URL,
@@ -10,6 +9,7 @@ from monolith.app_constant import (
     BOOKING_MICROSERVICE_URL,
 )
 from monolith.utils.http_utils import HttpUtils
+from monolith.services.restaurant_services import RestaurantServices
 from monolith.model import RestaurantModel
 from monolith.model import UserModel
 
@@ -236,25 +236,16 @@ class UserService:
 
     @staticmethod
     def delete_user(user_id: int = None):
-        #check the type of the user
-        url = "{}/{}".format(USER_MICROSERVICE_URL, str(user_id))
-        response = HttpUtils.make_get_request(url)
-        if response is None:
+        user = UserService.get_user_by_id(user_id=user_id)
+        if user is None:
             return False
-        user_email = response["email"]
-        if response["role_id"] == 2:
-            #get the id of the restaurant
-            url = "{}/id/{}".format(RESTAURANTS_MICROSERVICE_URL, user_email)
-            response = HttpUtils.make_get_request(url)
-            if response is None:
-                return True
-            restaurant_id = response["id"]
-            #delete the restaurant
-            url = "{}/{}".format(RESTAURANTS_MICROSERVICE_URL, restaurant_id)
-            response = HttpUtils.make_delete_request(url)
-            if response is None:
-                return False
-        #delete the user
+        with current_app.test_request_context():
+            if user.role_id == 2 and "RESTAURANT_ID" in session:
+                restaurant_id = session["RESTAURANT_ID"]
+                response = RestaurantServices.delete_restaurant(restaurant_id=restaurant_id)
+                if response is False:
+                    current_app.logger.debug("Impossible delete restaurant")
+                    return False
         url = "{}/delete/{}".format(USER_MICROSERVICE_URL, str(user_id))
         response = HttpUtils.make_delete_request(url)
         if response is not None:
