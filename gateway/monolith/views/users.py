@@ -116,8 +116,11 @@ def user_data():
 @users.route("/user/delete")
 @login_required
 def user_delete():
-    UserService.delete_user(current_user.id)
-    return redirect("/logout")
+    operation = UserService.delete_user(current_user.id)
+    if operation:
+        return redirect("/logout")
+    else:
+        return render_template("generic_error.html", message="An error occurred while deleting user.Please try again later.")
 
 
 @users.route("/customer/reservations", methods=["GET"])
