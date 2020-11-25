@@ -247,7 +247,7 @@ class UserService:
             url = "{}/id/{}".format(RESTAURANTS_MICROSERVICE_URL, user_email)
             response = HttpUtils.make_get_request(url)
             if response is None:
-                return False
+                return True
             restaurant_id = response["id"]
             #delete the restaurant
             url = "{}/{}".format(RESTAURANTS_MICROSERVICE_URL, restaurant_id)
