@@ -86,7 +86,10 @@ class Test_RestaurantServices:
         def_rest = RestaurantServices.get_all_restaurants()[0]
         assert def_rest is not None
         all_reservation = BookingServices.get_reservation_by_constraint(
-            user.id, from_date, to_date, def_rest["id"],
+            user.id,
+            from_date,
+            to_date,
+            def_rest["id"],
         )
         assert len(all_reservation) == 0
 
@@ -104,7 +107,9 @@ class Test_RestaurantServices:
         rest = create_restaurants_on_db(user_id=owner.id, user_email=owner.email)
         assert rest is not None
 
-        user = create_user_on_db(randrange(1, 500000), )
+        user = create_user_on_db(
+            randrange(1, 500000),
+        )
         assert user is not None
 
         date_time = datetime(2022, 10, 28, 21, 30)
@@ -115,14 +120,13 @@ class Test_RestaurantServices:
         from_date = datetime(2022, 9, 28)
         to_date = datetime(2022, 11, 28)
 
-        print (BookingServices.get_all_booking())
+        print(BookingServices.get_all_booking())
 
         search_reservation = BookingServices.get_reservation_by_constraint(
             user.id, from_date, to_date, rest.id
         )
         print(search_reservation)
         assert len(search_reservation) != 0
-
 
         del_booking(reservation["id"], user.id)
         del_user_on_db(user.id)
@@ -342,7 +346,7 @@ class Test_RestaurantServices:
         assert dish is not None
 
         response = RestaurantServices.delete_dish(dish["id"])
-        print (response)
+        print(response)
         assert response is not None
 
     def test_checkin_reservation(self):
@@ -386,7 +390,9 @@ class Test_RestaurantServices:
         owner_one = create_user_on_db(randrange(10, 50000), role_id=2)
         assert owner_one is not None
 
-        restaurant_one = create_restaurants_on_db(name="First", user_id=owner_one.id, user_email=owner_one.email)
+        restaurant_one = create_restaurants_on_db(
+            name="First", user_id=owner_one.id, user_email=owner_one.email
+        )
         assert restaurant_one is not None
 
         all_people = RestaurantServices.get_restaurant_people(restaurant_one.id)
@@ -400,7 +406,13 @@ class Test_RestaurantServices:
 
     def test_create_table_model(self):
         table = TableModel()
-        json = {"id": 45, "name": "Table45", "max_seats": 6, "restaurant_id": 1, "available": True}
+        json = {
+            "id": 45,
+            "name": "Table45",
+            "max_seats": 6,
+            "restaurant_id": 1,
+            "available": True,
+        }
         table.fill_from_json(json)
 
         assert json["name"] == (table.serialize())["name"]

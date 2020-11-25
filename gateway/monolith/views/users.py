@@ -127,7 +127,6 @@ def user_delete():
 @login_required
 @roles_allowed(roles=["CUSTOMER"])
 def myreservation():
-
     # filter params
     fromDate = request.args.get("fromDate", type=str)
     toDate = request.args.get("toDate", type=str)
