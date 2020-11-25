@@ -1,12 +1,7 @@
 from flask import Blueprint, render_template, session, abort
 from flask_login import current_user
-from monolith.database import (
-    db,
-    Restaurant,
-    Positive,
-)
-from monolith.forms import ReservationForm
-from monolith.services import (
+from src.forms import ReservationForm
+from src.services import (
     UserService,
     RestaurantServices,
 )

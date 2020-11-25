@@ -1,13 +1,7 @@
-import os
-from datetime import datetime
 from random import randrange
 
-import pytest
-from monolith.database import db, User, Reservation
-from monolith.forms import UserForm
-from monolith.services.user_service import UserService
-from monolith.tests.utils import get_user_with_email, login
-
+from src.forms import UserForm
+from src.services.user_service import UserService
 
 class Test_UserServices:
     """

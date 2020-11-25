@@ -12,10 +12,10 @@ from flask import (
 )
 from flask_login import login_user, logout_user
 
-from monolith.forms import LoginForm
-from monolith.model import UserModel
-from monolith.services import UserService
-from monolith.app_constant import USER_MICROSERVICE_URL
+from src.forms import LoginForm
+from src.model import UserModel
+from src.services import UserService
+from src.app_constant import USER_MICROSERVICE_URL
 
 auth = Blueprint("auth", __name__)
 

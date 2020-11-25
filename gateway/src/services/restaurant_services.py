@@ -1,29 +1,17 @@
-from datetime import datetime
-from decimal import Decimal
-
 from flask import current_app
 from flask_login import current_user
 
-from monolith.database import (
-    Restaurant,
-    OpeningHours,
-    RestaurantTable,
-    Review,
-    Reservation,
-)
-from monolith.forms import RestaurantForm
-from monolith.database import db
-from sqlalchemy.sql.expression import func, extract
-from monolith.model.restaurant_model import RestaurantModel
-from monolith.model.table_model import TableModel
-from monolith.model.dish_model import DishModel
-from monolith.model.photo_model import PhotoModel
-from monolith.app_constant import RESTAURANTS_MICROSERVICE_URL
-from monolith.utils.http_utils import HttpUtils
+from src.forms import RestaurantForm
+from src.model.restaurant_model import RestaurantModel
+from src.model.table_model import TableModel
+from src.model.dish_model import DishModel
+from src.model.photo_model import PhotoModel
+from src.app_constant import RESTAURANTS_MICROSERVICE_URL
+from src.utils.http_utils import HttpUtils
 
-from monolith.model.review_model import ReviewModel
+from src.model.review_model import ReviewModel
 
-from monolith.app_constant import BOOKING_MICROSERVICE_URL
+from src.app_constant import BOOKING_MICROSERVICE_URL
 
 
 class RestaurantServices:

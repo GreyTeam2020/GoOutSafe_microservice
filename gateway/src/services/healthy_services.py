@@ -1,11 +1,11 @@
 from flask import current_app
-from monolith.utils.http_utils import HttpUtils
+from src.utils.http_utils import HttpUtils
 from datetime import datetime, timedelta
-from monolith.services import UserService
-from monolith.services.send_email_service import SendEmailService
-from monolith.services.booking_services import BookingServices
-from monolith.services.restaurant_services import RestaurantServices
-from monolith.app_constant import *
+from src.services import UserService
+from src.services.send_email_service import SendEmailService
+from src.services.booking_services import BookingServices
+from src.services.restaurant_services import RestaurantServices
+from src.app_constant import *
 
 
 class HealthyServices:

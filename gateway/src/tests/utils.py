@@ -1,8 +1,7 @@
-from datetime import time, timedelta, datetime
+from datetime import time, datetime
 from random import randrange
 
-from monolith.database import *
-from monolith.forms import (
+from src.forms import (
     RestaurantForm,
     SearchUserForm,
     ReviewForm,
@@ -11,9 +10,10 @@ from monolith.forms import (
     PhotoGalleryForm,
     UserForm,
 )
-from monolith.model import UserModel
-from monolith.services import *
-from monolith.services.booking_services import BookingServices
+from src.model import UserModel
+from src.services import *
+from src.services.booking_services import BookingServices
+from src.model.review_model import ReviewModel
 
 
 def login(client, username, password):
@@ -279,10 +279,10 @@ def get_rest_with_name_and_phone(name, phone):
     :param name: the email that we want use to query the user
     :return: return the user if exist otherwise None
     """
-    q = db.session.query(Restaurant).filter_by(name=name, phone=phone)
-    q_rest = q.first()
-    if q_rest is not None:
-        return q_rest
+    reservations = BookingServices.get_all_booking()
+    for res in reservations:
+        if res["name"] == name and res["phone"] == phone:
+            return res
     return None
 
 
@@ -343,13 +343,6 @@ def del_user_on_db(id):
 def del_restaurant_on_db(id):
     RestaurantServices.delete_restaurant(id)
 
-
-def del_time_for_rest(id):
-    q = db.session.query(OpeningHours).filter_by(restaurant_id=id).delete()
-    db.session.commit()
-    return q
-
-
 def del_friends_of_reservation(id):
     """
     q = db.session.query(Friend).filter_by(reservation_id=id).delete()
@@ -364,24 +357,6 @@ def del_booking_services(id: int, user_id: int):
     :return:
     """
     BookingServices.delete_book(id, user_id)
-
-
-def get_last_booking():
-    """
-    return the Reservation with greater id
-    :param :
-    :return Reservation:
-    """
-    return db.session.query(Reservation).order_by(Reservation.id.desc()).first()
-
-
-def get_user_with_id(user_id: int = None):
-    """
-    return the User with given id
-    :param :
-    :return User:
-    """
-    return db.session.query(User).filter_by(id=user_id).first()
 
 
 def positive_with_user_id(user_id: int = None, marked: bool = True):
@@ -442,26 +417,6 @@ def create_new_reservation(client, form: ReservationForm):
             people_number=form.people_number,
             restaurant_id=form.restaurant_id,
             friends=form.friends,
-            submit=True,
-            headers={"Content-type": "application/x-www-form-urlencoded"},
-        ),
-        follow_redirects=True,
-    )
-
-
-def create_new_table(client, form: RestaurantTable):
-    """
-    This util have the code to perform the request with flask client
-    and make a new table
-    :param form:
-    :return:
-    """
-    return client.post(
-        "/restaurant/tables",
-        data=dict(
-            restaurant_id=form.restaurant_id,
-            max_seats=form.max_seats,
-            name=form.name,
             submit=True,
             headers={"Content-type": "application/x-www-form-urlencoded"},
         ),
@@ -530,17 +485,12 @@ def del_booking(reservation_id, customer_id):
     return BookingServices.delete_book(reservation_id, customer_id)
 
 
-def del_booking_with_user_id(user_id):
-    db.session.query(Reservation).filter_by(customer_id=user_id).delete()
-    db.session.commit()
-
-
 def create_review_for_restaurants(
     starts: float,
     rest_id: int,
     reviewer_email: str,
     comment: str = "random_coment{}".format(randrange(100000)),
-) -> Review:
+) -> ReviewModel:
     """
     This method contains the code to add a new review inside the db
     for the restaurant with id
@@ -556,13 +506,3 @@ def create_review_for_restaurants(
         review=comment,
     )
     return review
-
-
-def del_all_review_for_rest(rest_id: int):
-    """
-    This method contains the code to remove all review inside the db
-    about the restaurant with id
-    :param rest_id: restaurants id
-    """
-    db.session.query(Review).filter_by(restaurant_id=rest_id).delete()
-    db.session.commit()

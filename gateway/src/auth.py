@@ -2,7 +2,7 @@ import functools
 
 from flask_login import current_user, LoginManager
 from flask import session
-from monolith.model import UserModel
+from src.model import UserModel
 
 login_manager = LoginManager()
 

@@ -7,13 +7,13 @@ from flask import (
     session,
     jsonify,
 )
-from monolith.forms import UserForm, UserEditForm
-from monolith.forms import ReservationForm
-from monolith.services import UserService, SendEmailService
-from monolith.services.booking_services import BookingServices
-from monolith.auth import roles_allowed
-from monolith.utils.formatter import my_date_formatter_iso
-from monolith.model.user_model import UserModel
+from src.forms import UserForm, UserEditForm
+from src.forms import ReservationForm
+from src.services import UserService, SendEmailService
+from src.services.booking_services import BookingServices
+from src.auth import roles_allowed
+from src.utils.formatter import my_date_formatter_iso
+from src.model.user_model import UserModel
 from flask_login import current_user, login_user, login_required
 
 users = Blueprint("users", __name__)
