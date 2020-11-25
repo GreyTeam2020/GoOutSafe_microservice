@@ -1,20 +1,15 @@
 from random import randrange
 
 import datetime
-from src.database import db, User, Restaurant, Reservation, Positive
 from src.services import BookingServices
 from src.tests.utils import (
-    get_user_with_email,
     create_restaurants_on_db,
     create_user_on_db,
     del_restaurant_on_db,
     del_user_on_db,
-    get_last_booking,
     del_friends_of_reservation,
-    del_time_for_rest,
     del_booking_services,
 )
-from sqlalchemy import func
 
 
 class Test_BookServices:
@@ -68,14 +63,6 @@ class Test_BookServices:
         assert book2["restaurant_name"] == restaurant.name
 
         # delete friends
-        """ 
-        del_friends_of_reservation(book[0].id)
-        del_friends_of_reservation(book2[0].id)
-
-        # delete reservations
-        del_booking_services(book[0].id)
-        del_booking_services(book2[0].id)
-        """
         del_booking_services(book["id"], user.id)
         del_booking_services(book2["id"], user.id)
         # delete restaurants (so also tables)
@@ -84,10 +71,6 @@ class Test_BookServices:
         # delete users
         del_user_on_db(user.id)
         del_user_on_db(rest_owner.id)
-
-        # AT THE END THERE MUST TO BE ONLY ONE RESERVATION
-        q = db.session.query(func.count(Reservation.id)).scalar()
-        assert q == 1
 
     def test_new_booking_notables(self):
         """
@@ -163,9 +146,6 @@ class Test_BookServices:
         del_user_on_db(user.id)
         del_user_on_db(rest_owner.id)
 
-        # AT THE END THERE MUST TO BE ONLY ONE RESERVATION
-        q = db.session.query(func.count(Reservation.id)).scalar()
-        assert q == 1
 
     def test_new_booking_overlaps(self):
         """
@@ -213,9 +193,6 @@ class Test_BookServices:
         del_user_on_db(user.id)
         del_user_on_db(rest_owner.id)
 
-        # AT THE END THERE MUST TO BE ONLY ONE RESERVATION
-        q = db.session.query(func.count(Reservation.id)).scalar()
-        assert q == 1
 
     def test_booking_in_past(self):
         """
@@ -249,9 +226,6 @@ class Test_BookServices:
         del_user_on_db(user.id)
         del_user_on_db(rest_owner.id)
 
-        # AT THE END THERE MUST TO BE ONLY ONE RESERVATION
-        q = db.session.query(func.count(Reservation.id)).scalar()
-        assert q == 1
 
     def test_delete_booking(self):
         """
@@ -279,9 +253,6 @@ class Test_BookServices:
 
         # delete the reservation
         BookingServices.delete_book(book["id"], user.id)
-        # check how many reservations
-        q = db.session.query(func.count(Reservation.id)).scalar()
-        assert q == 1
 
         # delete restaurants (so also tables)
         del_restaurant_on_db(restaurant.id)
@@ -336,7 +307,3 @@ class Test_BookServices:
         # delete users
         del_user_on_db(user.id)
         del_user_on_db(rest_owner.id)
-
-        # AT THE END THERE MUST TO BE ONLY ONE RESERVATION
-        q = db.session.query(func.count(Reservation.id)).scalar()
-        assert q == 1

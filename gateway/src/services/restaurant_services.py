@@ -1,19 +1,7 @@
-from datetime import datetime
-from decimal import Decimal
-
 from flask import current_app
 from flask_login import current_user
 
-from src.database import (
-    Restaurant,
-    OpeningHours,
-    RestaurantTable,
-    Review,
-    Reservation,
-)
 from src.forms import RestaurantForm
-from src.database import db
-from sqlalchemy.sql.expression import func, extract
 from src.model.restaurant_model import RestaurantModel
 from src.model.table_model import TableModel
 from src.model.dish_model import DishModel

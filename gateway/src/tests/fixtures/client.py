@@ -1,6 +1,3 @@
-"""
-TODO
-"""
 import pytest
 
 from src.app import create_app

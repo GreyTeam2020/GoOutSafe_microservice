@@ -1,7 +1,6 @@
 """
 This test case covered all simple action that we can do from the UI
 """
-from src.database import Review
 from src.tests.utils import *
 from datetime import datetime, timedelta
 
@@ -142,11 +141,6 @@ class Test_GoOutSafeForm:
         assert response.status_code == 200  ## Regirect to /
         # assert restaurant_form.name in response.data.decode("utf-8")
         assert "logged_test" in response.data.decode("utf-8")
-        # test if the db is clean
-        list_rest = db.session.query(Restaurant).all()
-        assert len(list_rest) == 1
-        # assert response.status_code == 200
-        # assert "create_rest_test" not in response.data.decode("utf-8")
 
         rest = RestaurantServices.get_restaurants_by_keyword(restaurant_form.name.data)
         assert rest is not None
@@ -950,12 +944,12 @@ class Test_GoOutSafeForm:
         :param client:
         :return:
         """
-        rest = db.session.query(Restaurant).all()[0]
+        rest = RestaurantServices.get_all_restaurants()[0]
         form = DishForm()
         form.name = "Pasta"
         form.price = 14
         with client.session_transaction() as session:
-            session["RESTAURANT_ID"] = rest.id
+            session["RESTAURANT_ID"] = rest["id"]
         response = create_new_menu(client, form)
         assert response.status_code is not 403
 
@@ -973,22 +967,15 @@ class Test_GoOutSafeForm:
         assert response.status_code == 200
         assert "logged_test" in response.data.decode("utf-8")
 
-        restaurant = (
-            db.session.query(Restaurant).filter_by(name="Trial Restaurant").first()
-        )
+        restaurant = RestaurantServices.get_restaurants_by_keyword("Trial Restaurant")
         form = ReservationForm()
-        form.restaurant_id = restaurant.id
+        form.restaurant_id = restaurant[0].id
         form.reservation_date = "25/11/2120 12:00"
         form.people_number = 2
         form.friends = "aa@aa.com"
 
         response = create_new_reservation(client, form)
         assert response.status_code == 200
-
-        # delete data from db
-        d1 = datetime(year=2120, month=11, day=25, hour=12)
-        db.session.query(Reservation).filter_by(reservation_date=d1).delete()
-        db.session.commit()
 
     def test_create_new_reservation_ko(self, client):
         """
@@ -1016,7 +1003,6 @@ class Test_GoOutSafeForm:
 
         response = create_new_reservation(client, form)
         assert response.status_code == 200
-        print(response.data.decode("utf-8"))
         assert "Cannot place your booking." in response.data.decode("utf-8")
 
         del_restaurant_on_db(restaurant.id)
@@ -1028,11 +1014,9 @@ class Test_GoOutSafeForm:
         :return:
         """
 
-        restaurant = (
-            db.session.query(Restaurant).filter_by(name="Trial Restaurant").first()
-        )
+        restaurant = RestaurantServices.get_restaurants_by_keyword("Trial Restaurant")
         form = ReservationForm()
-        form.restaurant_id = restaurant.id
+        form.restaurant_id = restaurant[0].id
         form.reservation_date = "23/11/2020 12:00"
         form.people_number = 2
         form.friends = "aa@aa.com;bb@bb.com"

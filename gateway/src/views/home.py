@@ -1,10 +1,5 @@
 from flask import Blueprint, render_template, session, abort
 from flask_login import current_user
-from src.database import (
-    db,
-    Restaurant,
-    Positive,
-)
 from src.forms import ReservationForm
 from src.services import (
     UserService,

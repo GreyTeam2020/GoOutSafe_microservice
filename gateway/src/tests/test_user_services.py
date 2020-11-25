@@ -1,13 +1,7 @@
-import os
-from datetime import datetime
 from random import randrange
 
-import pytest
-from src.database import db, User, Reservation
 from src.forms import UserForm
 from src.services.user_service import UserService
-from src.tests.utils import get_user_with_email, login
-
 
 class Test_UserServices:
     """
