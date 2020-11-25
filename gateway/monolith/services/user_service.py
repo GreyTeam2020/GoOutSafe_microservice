@@ -236,24 +236,31 @@ class UserService:
 
     @staticmethod
     def delete_user(user_id: int = None):
-        try:
-            url = "{}/delete/{}".format(USER_MICROSERVICE_URL, str(user_id))
-            current_app.logger.debug("Url is: {}".format(url))
-            response = requests.delete(url)
-        except requests.exceptions.ConnectionError as ex:
-            current_app.logger.error(
-                "Error during the microservice call {}".format(str(ex))
-            )
+        #check the type of the user
+        url = "{}/{}".format(USER_MICROSERVICE_URL, str(user_id))
+        response = HttpUtils.make_get_request(url)
+        if response is None:
             return False
-        json = response.json()
-        if not response.ok:
-            current_app.logger.error("Error from USER microservice")
-            current_app.logger.error("Error received {}".format(response.reason))
-            current_app.logger.error("Error response received {}".format(json))
+        user_email = response["email"]
+        if response["role_id"] == 2:
+            #get the id of the restaurant
+            url = "{}/id/{}".format(RESTAURANTS_MICROSERVICE_URL, user_email)
+            response = HttpUtils.make_get_request(url)
+            if response is None:
+                return False
+            restaurant_id = response["id"]
+            #delete the restaurant
+            url = "{}/{}".format(RESTAURANTS_MICROSERVICE_URL, restaurant_id)
+            response = HttpUtils.make_delete_request(url)
+            if response is None:
+                return False
+        #delete the user
+        url = "{}/delete/{}".format(USER_MICROSERVICE_URL, str(user_id))
+        response = HttpUtils.make_delete_request(url)
+        if response is not None:
+            return True
+        else:
             return False
-        current_app.logger.debug("User deleted")
-        current_app.logger.debug("Answer received: {}".format(current_app))
-        return True
 
     @staticmethod
     def is_positive(user_id: int):
