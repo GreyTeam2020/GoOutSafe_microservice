@@ -2,11 +2,18 @@
 
 ![GitHub Workflow Status](https://img.shields.io/github/workflow/status/GreyTeam2020/GoOutSafe_microservice/docker-compose-actions-workflow?style=for-the-badge)
 ![Codecov](https://img.shields.io/codecov/c/github/GreyTeam2020/GoOutSafe_microservice?style=for-the-badge)
+
 ## Table of Content
 
-- [How Build and run with Docker](#)
-- [Developing](#)
-- [Additional information](#)
+- [App Architecture](#)
+- [How Build and run with Docker](https://greyteam2020.github.io/GoOutSafe_microservice/run-test-on-the-host-machine)
+- [Developing](https://greyteam2020.github.io/GoOutSafe_microservice/GoOutSafe_microservice#developing)
+- [Additional information](https://greyteam2020.github.io/GoOutSafe_microservice/additional-information)
+
+## App Architecture
+
+![](https://i.ibb.co/8mg1Cys/Selection-045.png)
+
 
 ## How clone it
 
