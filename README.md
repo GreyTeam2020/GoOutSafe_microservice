@@ -12,8 +12,9 @@
 
 ## App Architecture
 
-![](https://i.ibb.co/8mg1Cys/Selection-045.png)
+![](https://i.ibb.co/hc3V1mk/photo-2020-11-26-10-09-58.jpg)
 
+![](https://i.ibb.co/CHRR11W/Selection-046.png)
 
 ## How clone it
 
@@ -24,6 +25,13 @@ git clone --recurse-submodules https://github.com/GreyTeam2020/GoOutSafe_microse
 ```
 
 [Source](https://stackoverflow.com/a/3797061/7290562)
+
+The submodules are the microservices with the following proprieties:
+
+- [Email Microservices](https://github.com/GreyTeam2020/email_microservice): Running on port 5001 and include some [celery](https://docs.celeryproject.org/en/stable/getting-started/introduction.html) tasks.
+- [User Microservices](https://github.com/GreyTeam2020/users_microservice): Running on port 5002;
+- [Restaurants Microservice](https://github.com/GreyTeam2020/restaurants_microservice): Running on port 5003;
+- [Booking Microservice](https://github.com/GreyTeam2020/booking_microservice): Running on port 5004
 
 ## How Build and run with Docker
 
