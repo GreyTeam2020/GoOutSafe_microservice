@@ -30,7 +30,7 @@ The submodules are the microservices with the following proprieties:
 
 - [Email Microservices](https://github.com/GreyTeam2020/email_microservice): Running on port 5001 and include some [celery](https://docs.celeryproject.org/en/stable/getting-started/introduction.html) tasks.
 - [User Microservices](https://github.com/GreyTeam2020/users_microservice): Running on port 5002;
-- [Restaurants Microservice](https://github.com/GreyTeam2020/restaurants_microservice): Running on port 5003;
+- [Restaurants Microservice](https://github.com/GreyTeam2020/restaurants_microservice): Running on port 5003 and include some [celery](https://docs.celeryproject.org/en/stable/getting-started/introduction.html) background tasks.;
 - [Booking Microservice](https://github.com/GreyTeam2020/booking_microservice): Running on port 5004
 
 ## How Build and run with Docker
